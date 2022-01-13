@@ -8,6 +8,10 @@ plugins {
 android {
     compileSdk 31
 
+    buildFeatures {
+        viewBinding true
+    }
+
     defaultConfig {
         applicationId "com.c3ai.sourcingoptimization"
         minSdk 21
