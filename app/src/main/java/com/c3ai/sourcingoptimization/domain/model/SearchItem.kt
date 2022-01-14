@@ -1,4 +1,4 @@
-package com.c3ai.sourcingoptimization.feature_home.domain.model
+package com.c3ai.sourcingoptimization.domain.model
 
 data class SearchItem(
     val id: String,

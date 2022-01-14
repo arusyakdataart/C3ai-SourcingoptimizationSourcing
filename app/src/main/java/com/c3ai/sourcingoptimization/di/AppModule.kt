@@ -1,9 +1,9 @@
 package com.c3ai.sourcingoptimization.di
 
 import com.c3ai.sourcingoptimization.common.Constants
-import com.c3ai.sourcingoptimization.feature_home.data.remote.C3Api
-import com.c3ai.sourcingoptimization.feature_home.data.repository.C3RepositoryImpl
-import com.c3ai.sourcingoptimization.feature_home.domain.repository.C3Repository
+import com.c3ai.sourcingoptimization.data.remote.C3Api
+import com.c3ai.sourcingoptimization.data.repository.C3RepositoryImpl
+import com.c3ai.sourcingoptimization.domain.repository.C3Repository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

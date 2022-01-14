@@ -1,6 +1,6 @@
-package com.c3ai.sourcingoptimization.feature_home.data.remote
+package com.c3ai.sourcingoptimization.data.remote
 
-import com.c3ai.sourcingoptimization.feature_home.domain.model.SearchItem
+import com.c3ai.sourcingoptimization.domain.model.SearchItem
 import retrofit2.http.GET
 import retrofit2.http.Path
 

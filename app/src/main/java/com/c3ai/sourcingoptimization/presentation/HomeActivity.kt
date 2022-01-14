@@ -1,4 +1,4 @@
-package com.c3ai.sourcingoptimization.feature_home.presentation
+package com.c3ai.sourcingoptimization.presentation
 
 import android.os.Bundle
 import com.c3ai.sourcingoptimization.common.BaseActivity

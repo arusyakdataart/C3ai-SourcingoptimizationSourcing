@@ -1,8 +1,8 @@
-package com.c3ai.sourcingoptimization.feature_home.domain.use_case.get_search_results
+package com.c3ai.sourcingoptimization.domain.use_case.get_search_results
 
 import com.c3ai.sourcingoptimization.common.Resource
-import com.c3ai.sourcingoptimization.feature_home.domain.model.SearchItem
-import com.c3ai.sourcingoptimization.feature_home.domain.repository.C3Repository
+import com.c3ai.sourcingoptimization.domain.model.SearchItem
+import com.c3ai.sourcingoptimization.domain.repository.C3Repository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import retrofit2.HttpException
