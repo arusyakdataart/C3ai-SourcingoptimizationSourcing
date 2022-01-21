@@ -1,258 +1,517 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
-    android:paddingVertical="@dimen/margin_24dp"
-    android:paddingHorizontal="@dimen/margin_16dp">
+    android:layout_height="match_parent">
 
-    <com.google.android.material.card.MaterialCardView
+    <androidx.appcompat.widget.LinearLayoutCompat
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardCornerRadius="@dimen/card_corner_radius"
-        app:cardBackgroundColor="@color/card_background">
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:orientation="vertical"
+        android:paddingVertical="@dimen/margin_24dp"
+        android:paddingHorizontal="@dimen/margin_16dp">
 
-        <androidx.appcompat.widget.LinearLayoutCompat
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            app:cardCornerRadius="@dimen/card_corner_radius"
+            app:cardBackgroundColor="@color/card_background"
+            android:layout_marginBottom="@dimen/margin_16dp">
 
             <androidx.appcompat.widget.LinearLayoutCompat
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <androidx.appcompat.widget.LinearLayoutCompat
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:padding="@dimen/margin_16dp">
+
+                    <com.c3ai.sourcingoptimization.common.InterTextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:maxLines="3"
+                        android:textColor="@color/grey"
+                        android:textSize="@dimen/text_16"
+                        android:text="Steel, 3 feet if long description goes here"/>
+
+                    <FrameLayout
+                        style="?attr/actionButtonStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:clipToPadding="false"
+                        android:focusable="true"
+                        android:clickable="true"
+                        android:layout_marginStart="@dimen/margin_16dp">
+
+                        <androidx.appcompat.widget.AppCompatImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:src="@drawable/alert"/>
+
+                        <com.c3ai.sourcingoptimization.common.InterTextView
+                            android:id="@+id/notification_badge"
+                            android:layout_width="12dp"
+                            android:layout_height="13dp"
+                            android:layout_gravity="right|end|top"
+                            android:layout_marginTop="10dp"
+                            android:background="@drawable/badge_background"
+                            android:gravity="center"
+                            android:text="1"
+                            android:textSize="10sp"
+                            android:textColor="@color/white"/>
+
+                    </FrameLayout>
+
+                </androidx.appcompat.widget.LinearLayoutCompat>
+
+                <androidx.appcompat.widget.LinearLayoutCompat
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="@dimen/margin_16dp">
+
+                    <androidx.appcompat.widget.LinearLayoutCompat
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:layout_marginBottom="@dimen/margin_16dp">
+
+                        <com.c3ai.sourcingoptimization.common.InterTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Saving Opportunity"
+                            android:layout_marginBottom="@dimen/margin_4dp"
+                            android:textColor="@color/grey"
+                            android:textSize="@dimen/text_12"/>
+
+                        <com.c3ai.sourcingoptimization.common.InterTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/savingPrice"
+                            android:textColor="@color/grey_2"
+                            android:text="$30,480"
+                            android:textSize="@dimen/text_12"
+                            android:layout_marginBottom="@dimen/margin_4dp"/>
+
+                        <com.github.aachartmodel.aainfographics.aachartcreator.AAChartView
+                            android:layout_width="match_parent"
+                            android:layout_height="50dp"
+                            android:id="@+id/graph1"
+                            android:layout_marginEnd="@dimen/margin_16dp"
+                            android:visibility="gone"/>
+
+                    </androidx.appcompat.widget.LinearLayoutCompat>
+
+                    <androidx.appcompat.widget.LinearLayoutCompat
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <com.c3ai.sourcingoptimization.common.InterTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Suppliers\nwith contract"
+                            android:textColor="@color/grey"
+                            android:textSize="@dimen/text_12"
+                            android:layout_marginBottom="@dimen/margin_4dp"/>
+
+                        <com.c3ai.sourcingoptimization.common.InterTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/suppliers"
+                            android:textColor="@color/grey_2"
+                            android:textSize="@dimen/text_12"
+                            android:text="3"/>
+
+                    </androidx.appcompat.widget.LinearLayoutCompat>
+
+                </androidx.appcompat.widget.LinearLayoutCompat>
+
+                <include layout="@layout/divider"
+                    android:layout_height="1dp"
+                    android:layout_width="match_parent"
+                    android:layout_marginHorizontal="@dimen/margin_16dp"/>
+
+                <androidx.appcompat.widget.LinearLayoutCompat
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/margin_16dp">
+
+                    <androidx.appcompat.widget.LinearLayoutCompat
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <com.c3ai.sourcingoptimization.common.InterTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Closed POL\nValue"
+                            android:textSize="@dimen/text_12"
+                            android:textColor="@color/grey"
+                            android:layout_marginBottom="@dimen/margin_4dp"/>
+
+                        <com.c3ai.sourcingoptimization.common.InterTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/closedValue"
+                            android:text="$275,200"
+                            android:textSize="@dimen/text_12"
+                            android:textColor="@color/grey_2"
+                            android:layout_marginBottom="@dimen/margin_16dp"/>
+
+                        <com.c3ai.sourcingoptimization.common.InterTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Last Price"
+                            android:textSize="@dimen/text_12"
+                            android:textColor="@color/grey"
+                            android:layout_marginBottom="@dimen/margin_4dp"/>
+
+                        <com.c3ai.sourcingoptimization.common.InterTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/lastPrice"
+                            android:text="$348"
+                            android:textSize="@dimen/text_12"
+                            android:textColor="@color/grey_2"/>
+
+                    </androidx.appcompat.widget.LinearLayoutCompat>
+
+                    <androidx.appcompat.widget.LinearLayoutCompat
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <com.c3ai.sourcingoptimization.common.InterTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Open POL\nValue"
+                            android:textSize="@dimen/text_12"
+                            android:textColor="@color/grey"
+                            android:layout_marginBottom="@dimen/margin_4dp"/>
+
+                        <com.c3ai.sourcingoptimization.common.InterTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/openValue"
+                            android:text="$2,475,200"
+                            android:textSize="@dimen/text_12"
+                            android:textColor="@color/grey_2"
+                            android:layout_marginBottom="@dimen/margin_16dp"/>
+
+                        <com.c3ai.sourcingoptimization.common.InterTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Avg. Price"
+                            android:textSize="@dimen/text_12"
+                            android:textColor="@color/grey"
+                            android:layout_marginBottom="@dimen/margin_4dp"/>
+
+                        <com.c3ai.sourcingoptimization.common.InterTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/avgPrice"
+                            android:text="$348"
+                            android:textSize="@dimen/text_12"
+                            android:textColor="@color/grey_2"/>
+
+                        <com.c3ai.sourcingoptimization.common.InterTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Last 12 mos"
+                            android:textSize="@dimen/text_10"
+                            android:textColor="@color/grey"/>
+
+                    </androidx.appcompat.widget.LinearLayoutCompat>
+
+                    <androidx.appcompat.widget.LinearLayoutCompat
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <com.c3ai.sourcingoptimization.common.InterTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Inventory\n"
+                            android:textSize="@dimen/text_12"
+                            android:textColor="@color/grey"
+                            android:layout_marginBottom="@dimen/margin_4dp"/>
+
+                        <com.c3ai.sourcingoptimization.common.InterTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/inventory"
+                            android:text="143 Cases"
+                            android:textSize="@dimen/text_12"
+                            android:textColor="@color/grey_2"
+                            android:layout_marginBottom="@dimen/margin_16dp"/>
+
+                        <com.c3ai.sourcingoptimization.common.InterTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Lowest Price"
+                            android:textSize="@dimen/text_12"
+                            android:textColor="@color/grey"
+                            android:layout_marginBottom="@dimen/margin_4dp"/>
+
+                        <com.c3ai.sourcingoptimization.common.InterTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/lowestPrice"
+                            android:text="$348"
+                            android:textSize="@dimen/text_12"
+                            android:textColor="@color/grey_2"/>
+
+                        <com.c3ai.sourcingoptimization.common.InterTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Last 12 mos"
+                            android:textSize="@dimen/text_10"
+                            android:textColor="@color/grey"/>
+
+                    </androidx.appcompat.widget.LinearLayoutCompat>
+
+                </androidx.appcompat.widget.LinearLayoutCompat>
+
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="@dimen/card_corner_radius"
+            app:cardBackgroundColor="@color/card_background">
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
                 android:padding="@dimen/margin_16dp">
 
-                <androidx.appcompat.widget.AppCompatTextView
-                    android:layout_width="0dp"
+                <com.c3ai.sourcingoptimization.common.InterTextView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:maxLines="3"
+                    android:text="Sourcing Analysis"
                     android:textColor="@color/grey"
-                    android:textSize="@dimen/text_16"
-                    android:text="Steel, 3 feet if long description goes here"/>
+                    android:textSize="@dimen/text_16"/>
 
-                <androidx.appcompat.widget.AppCompatImageView
+                <androidx.appcompat.widget.LinearLayoutCompat
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingVertical="@dimen/margin_16dp">
+
+                    <com.c3ai.sourcingoptimization.common.InterTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/totalSpent"
+                        android:text="Total Spent (S)"
+                        android:textSize="@dimen/text_14"
+                        android:textColor="@color/black_text"
+                        android:paddingHorizontal="@dimen/margin_12dp"
+                        android:paddingVertical="@dimen/margin_8dp"
+                        android:layout_marginEnd="@dimen/margin_8dp"
+                        android:background="@drawable/rounded_grey_view_20"/>
+
+                    <com.c3ai.sourcingoptimization.common.InterTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/share"
+                        android:text="Share (%)"
+                        android:textSize="@dimen/text_14"
+                        android:textColor="@color/grey_3"
+                        android:paddingHorizontal="@dimen/margin_12dp"
+                        android:paddingVertical="@dimen/margin_8dp"
+                        android:background="@drawable/outlined_view_20"/>
+
+                </androidx.appcompat.widget.LinearLayoutCompat>
+
+                <com.github.aachartmodel.aainfographics.aachartcreator.AAChartView
+                    android:id="@+id/barChartView"
+                    android:layout_width="match_parent"
+                    android:layout_height="100dp"
+                    android:layout_marginBottom="@dimen/margin_16dp"/>
+
+<!--                <com.github.mikephil.charting.charts.BarChart-->
+<!--                    android:id="@+id/barChartView"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="100dp"-->
+<!--                    android:layout_marginBottom="@dimen/margin_16dp"/>-->
+
+                <include layout="@layout/divider"/>
+
+                <androidx.appcompat.widget.LinearLayoutCompat
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margin_16dp"
+                    android:layout_marginBottom="@dimen/margin_4dp">
+
+                    <com.c3ai.sourcingoptimization.common.InterTextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Supplier"
+                        android:textColor="@color/grey"
+                        android:textSize="@dimen/text_16"/>
+
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:srcCompat="@drawable/settings"/>
+
+                </androidx.appcompat.widget.LinearLayoutCompat>
+
+                <com.c3ai.sourcingoptimization.common.InterTextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/alert"
-                    app:srcCompat="@drawable/alert"
-                    android:layout_marginStart="@dimen/margin_16dp"/>
-
-            </androidx.appcompat.widget.LinearLayoutCompat>
-
-            <androidx.appcompat.widget.LinearLayoutCompat
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingHorizontal="@dimen/margin_16dp">
+                    android:text="Aug 2021"
+                    android:textColor="@color/grey"
+                    android:textSize="@dimen/text_12"
+                    android:layout_marginBottom="@dimen/margin_4dp"/>
 
                 <androidx.appcompat.widget.LinearLayoutCompat
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:layout_marginBottom="@dimen/margin_16dp">
+                    android:weightSum="5"
+                    android:paddingVertical="@dimen/margin_16dp" >
 
-                    <androidx.appcompat.widget.AppCompatTextView
-                        android:layout_width="wrap_content"
+                    <androidx.appcompat.widget.LinearLayoutCompat
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="Saving Opportunity"
-                        android:layout_marginBottom="@dimen/margin_4dp"
-                        android:textColor="@color/grey"
-                        android:textSize="@dimen/text_12"/>
+                        android:layout_weight="1"
+                        android:orientation="vertical">
 
-                    <androidx.appcompat.widget.AppCompatTextView
-                        android:layout_width="wrap_content"
+                        <com.c3ai.sourcingoptimization.common.InterTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="@dimen/text_12"
+                            android:text="IJK"
+                            android:textColor="@color/grey_2"/>
+
+                        <com.c3ai.sourcingoptimization.common.InterTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="@dimen/text_12"
+                            android:text="$32"
+                            android:textColor="@color/grey"
+                            android:layout_marginBottom="@dimen/margin_4dp"/>
+
+                    </androidx.appcompat.widget.LinearLayoutCompat>
+
+                    <androidx.appcompat.widget.LinearLayoutCompat
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:id="@+id/savingPrice"
-                        android:textColor="@color/grey_2"
-                        android:text="$30,480"
-                        android:layout_marginBottom="@dimen/margin_4dp"/>
+                        android:layout_weight="1"
+                        android:orientation="vertical">
 
-                    <View
-                        android:layout_width="wrap_content"
-                        android:layout_height="50dp"
-                        android:id="@+id/graph"
-                        android:visibility="gone"/>
+                        <com.c3ai.sourcingoptimization.common.InterTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="@dimen/text_12"
+                            android:text="ETW"
+                            android:textColor="@color/grey_2"/>
+
+                        <com.c3ai.sourcingoptimization.common.InterTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="@dimen/text_12"
+                            android:text="$32"
+                            android:textColor="@color/grey"
+                            android:layout_marginBottom="@dimen/margin_4dp"/>
+
+                    </androidx.appcompat.widget.LinearLayoutCompat>
+
+                    <androidx.appcompat.widget.LinearLayoutCompat
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <com.c3ai.sourcingoptimization.common.InterTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="@dimen/text_12"
+                            android:text="ABC"
+                            android:textColor="@color/grey_2"/>
+
+                        <com.c3ai.sourcingoptimization.common.InterTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="@dimen/text_12"
+                            android:text="$32"
+                            android:textColor="@color/grey"
+                            android:layout_marginBottom="@dimen/margin_4dp"/>
+
+                    </androidx.appcompat.widget.LinearLayoutCompat>
 
                 </androidx.appcompat.widget.LinearLayoutCompat>
 
+                <include layout="@layout/divider"/>
+
                 <androidx.appcompat.widget.LinearLayoutCompat
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margin_16dp"
+                    android:layout_marginBottom="@dimen/margin_4dp">
+
+                    <com.c3ai.sourcingoptimization.common.InterTextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Index"
+                        android:textColor="@color/grey"
+                        android:textSize="@dimen/text_16"/>
+
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:srcCompat="@drawable/settings"/>
+
+                </androidx.appcompat.widget.LinearLayoutCompat>
+
+                <com.c3ai.sourcingoptimization.common.InterTextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:text="Aug 2021"
+                    android:textColor="@color/grey"
+                    android:textSize="@dimen/text_12"
+                    android:layout_marginBottom="@dimen/margin_8dp"/>
 
-                    <androidx.appcompat.widget.AppCompatTextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Suppliers/nwith contract"
-                        android:textColor="@color/grey"
-                        android:textSize="@dimen/text_12"
-                        android:layout_marginBottom="@dimen/margin_4dp"/>
+                <com.c3ai.sourcingoptimization.common.InterTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Steel"
+                    android:textColor="@color/grey"
+                    android:textSize="@dimen/text_12"
+                    android:layout_marginBottom="@dimen/margin_8dp"/>
 
-                    <androidx.appcompat.widget.AppCompatTextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/suppliers"
-                        android:textColor="@color/grey_2"
-                        android:text="3"/>
+                <com.c3ai.sourcingoptimization.common.InterTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="$32"
+                    android:textColor="@color/grey_2"
+                    android:textSize="@dimen/text_12"
+                    android:layout_marginBottom="@dimen/margin_16dp"/>
 
-                </androidx.appcompat.widget.LinearLayoutCompat>
+                <include layout="@layout/divider"/>
+
+                <com.github.aachartmodel.aainfographics.aachartcreator.AAChartView
+                    android:id="@+id/lineChartView"
+                    android:layout_width="match_parent"
+                    android:layout_height="156dp"
+                    android:layout_marginBottom="@dimen/margin_16dp"/>
 
             </androidx.appcompat.widget.LinearLayoutCompat>
 
-            <include layout="@layout/divider"
-                android:layout_height="1dp"
-                android:layout_width="match_parent"
-                android:layout_marginHorizontal="@dimen/margin_16dp"/>
+        </com.google.android.material.card.MaterialCardView>
 
-            <androidx.appcompat.widget.LinearLayoutCompat
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="@dimen/margin_16dp">
+    </androidx.appcompat.widget.LinearLayoutCompat>
 
-                <androidx.appcompat.widget.LinearLayoutCompat
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <androidx.appcompat.widget.AppCompatTextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Closed POL\nValue"
-                        android:textSize="@dimen/text_12"
-                        android:textColor="@color/grey"
-                        android:layout_marginBottom="@dimen/margin_4dp"/>
-
-                    <androidx.appcompat.widget.AppCompatTextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/closedValue"
-                        android:text="$275,200"
-                        android:textSize="@dimen/text_12"
-                        android:textColor="@color/grey_2"
-                        android:layout_marginBottom="@dimen/margin_16dp"/>
-
-                    <androidx.appcompat.widget.AppCompatTextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Last Price"
-                        android:textSize="@dimen/text_12"
-                        android:textColor="@color/grey"
-                        android:layout_marginBottom="@dimen/margin_4dp"/>
-
-                    <androidx.appcompat.widget.AppCompatTextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/lastPrice"
-                        android:text="$348"
-                        android:textSize="@dimen/text_12"
-                        android:textColor="@color/grey_2"/>
-
-                </androidx.appcompat.widget.LinearLayoutCompat>
-
-                <androidx.appcompat.widget.LinearLayoutCompat
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <androidx.appcompat.widget.AppCompatTextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Open POL\nValue"
-                        android:textSize="@dimen/text_12"
-                        android:textColor="@color/grey"
-                        android:layout_marginBottom="@dimen/margin_4dp"/>
-
-                    <androidx.appcompat.widget.AppCompatTextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/openValue"
-                        android:text="$2,475,200"
-                        android:textSize="@dimen/text_12"
-                        android:textColor="@color/grey_2"
-                        android:layout_marginBottom="@dimen/margin_16dp"/>
-
-                    <androidx.appcompat.widget.AppCompatTextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Avg. Price"
-                        android:textSize="@dimen/text_12"
-                        android:textColor="@color/grey"
-                        android:layout_marginBottom="@dimen/margin_4dp"/>
-
-                    <androidx.appcompat.widget.AppCompatTextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/avgPrice"
-                        android:text="$348"
-                        android:textSize="@dimen/text_12"
-                        android:textColor="@color/grey_2"/>
-
-                    <androidx.appcompat.widget.AppCompatTextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Last 12 mos"
-                        android:textSize="@dimen/text_10"
-                        android:textColor="@color/grey"/>
-
-                </androidx.appcompat.widget.LinearLayoutCompat>
-
-                <androidx.appcompat.widget.LinearLayoutCompat
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <androidx.appcompat.widget.AppCompatTextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Inventory\n"
-                        android:textSize="@dimen/text_12"
-                        android:textColor="@color/grey"
-                        android:layout_marginBottom="@dimen/margin_4dp"/>
-
-                    <androidx.appcompat.widget.AppCompatTextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/inventory"
-                        android:text="143 Cases"
-                        android:textSize="@dimen/text_12"
-                        android:textColor="@color/grey_2"
-                        android:layout_marginBottom="@dimen/margin_16dp"/>
-
-                    <androidx.appcompat.widget.AppCompatTextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Lowest Price"
-                        android:textSize="@dimen/text_12"
-                        android:textColor="@color/grey"
-                        android:layout_marginBottom="@dimen/margin_4dp"/>
-
-                    <androidx.appcompat.widget.AppCompatTextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/lowestPrice"
-                        android:text="$348"
-                        android:textSize="@dimen/text_12"
-                        android:textColor="@color/grey_2"/>
-
-                    <androidx.appcompat.widget.AppCompatTextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Last 12 mos"
-                        android:textSize="@dimen/text_10"
-                        android:textColor="@color/grey"/>
-
-                </androidx.appcompat.widget.LinearLayoutCompat>
-
-
-            </androidx.appcompat.widget.LinearLayoutCompat>
-
-        </androidx.appcompat.widget.LinearLayoutCompat>
-
-    </com.google.android.material.card.MaterialCardView>
-
-</androidx.appcompat.widget.LinearLayoutCompat>
+</ScrollView>

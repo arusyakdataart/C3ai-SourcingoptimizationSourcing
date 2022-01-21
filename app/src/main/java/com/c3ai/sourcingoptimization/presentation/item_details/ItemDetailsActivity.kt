@@ -10,6 +10,5 @@ class ItemDetailsActivity : BaseActivity<ActivityItemDetailsBinding>(ActivityIte
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         supportActionBar?.title = "Item ID453425"
-        //supportActionBar?.setDisplayShowTitleEnabled(false)
     }
 }
