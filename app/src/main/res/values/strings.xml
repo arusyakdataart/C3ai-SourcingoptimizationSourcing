@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">C3 AI Sourcing</string>
+    <string name="c3_ai_sourcing">C3 AI Sourcing Optimization</string>
+    <string name="username">Username</string>
+    <string name="login">Login</string>
+    <string name="password">Password</string>
+    <string name="search_supplier_item_po">Search Supplier, Item, PO, POL, Alert</string>
 </resources>
