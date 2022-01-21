@@ -1,34 +1,38 @@
 package com.c3ai.sourcingoptimization.di
 
-import com.c3ai.sourcingoptimization.common.Constants
-import com.c3ai.sourcingoptimization.data.remote.C3Api
+import com.c3ai.sourcingoptimization.data.network.C3ApiService
 import com.c3ai.sourcingoptimization.data.repository.C3RepositoryImpl
-import com.c3ai.sourcingoptimization.domain.repository.C3Repository
+import com.c3ai.sourcingoptimization.data.repository.C3Repository
+import com.c3ai.sourcingoptimization.domain.use_case.Search
+import com.c3ai.sourcingoptimization.domain.use_case.SearchUseCases
+import com.c3ai.sourcingoptimization.utilities.AuthInterceptorOkHttpClient
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import okhttp3.OkHttpClient
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
 
-    @Provides
     @Singleton
-    fun provideC3Api() : C3Api {
-        return Retrofit.Builder()
-            .baseUrl(Constants.BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-            .create(C3Api::class.java)
+    @Provides
+    fun provideC3ApiService(@AuthInterceptorOkHttpClient okHttpClient: OkHttpClient): C3ApiService {
+        return C3ApiService.create(okHttpClient)
     }
 
     @Provides
     @Singleton
-    fun provideC3Repository(api: C3Api) : C3Repository {
+    fun provideC3Repository(api: C3ApiService): C3Repository {
         return C3RepositoryImpl(api)
+    }
+
+    @Provides
+    fun provideSearchUseCases(service: C3ApiService): SearchUseCases {
+        return SearchUseCases(
+            Search(service)
+        )
     }
 }
