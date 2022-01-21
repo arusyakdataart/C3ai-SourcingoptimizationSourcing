@@ -294,19 +294,21 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="@dimen/margin_16dp">
+                android:paddingVertical="@dimen/margin_16dp">
 
                 <com.c3ai.sourcingoptimization.common.InterTextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Sourcing Analysis"
                     android:textColor="@color/grey"
-                    android:textSize="@dimen/text_16"/>
+                    android:textSize="@dimen/text_16"
+                    android:layout_marginHorizontal="@dimen/margin_16dp"/>
 
                 <androidx.appcompat.widget.LinearLayoutCompat
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingVertical="@dimen/margin_16dp">
+                    android:paddingVertical="@dimen/margin_16dp"
+                    android:layout_marginHorizontal="@dimen/margin_16dp">
 
                     <com.c3ai.sourcingoptimization.common.InterTextView
                         android:layout_width="wrap_content"
@@ -337,7 +339,8 @@
                     android:id="@+id/barChartView"
                     android:layout_width="match_parent"
                     android:layout_height="100dp"
-                    android:layout_marginBottom="@dimen/margin_16dp"/>
+                    android:layout_marginBottom="@dimen/margin_16dp"
+                    android:layout_marginHorizontal="@dimen/margin_16dp"/>
 
 <!--                <com.github.mikephil.charting.charts.BarChart-->
 <!--                    android:id="@+id/barChartView"-->
@@ -345,13 +348,17 @@
 <!--                    android:layout_height="100dp"-->
 <!--                    android:layout_marginBottom="@dimen/margin_16dp"/>-->
 
-                <include layout="@layout/divider"/>
+                <include layout="@layout/divider"
+                    android:layout_marginHorizontal="@dimen/margin_16dp"
+                    android:layout_height="1dp"
+                    android:layout_width="match_parent"/>
 
                 <androidx.appcompat.widget.LinearLayoutCompat
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/margin_16dp"
-                    android:layout_marginBottom="@dimen/margin_4dp">
+                    android:layout_marginBottom="@dimen/margin_4dp"
+                    android:layout_marginHorizontal="@dimen/margin_16dp">
 
                     <com.c3ai.sourcingoptimization.common.InterTextView
                         android:layout_width="0dp"
@@ -374,13 +381,15 @@
                     android:text="Aug 2021"
                     android:textColor="@color/grey"
                     android:textSize="@dimen/text_12"
-                    android:layout_marginBottom="@dimen/margin_4dp"/>
+                    android:layout_marginBottom="@dimen/margin_4dp"
+                    android:layout_marginHorizontal="@dimen/margin_16dp"/>
 
                 <androidx.appcompat.widget.LinearLayoutCompat
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:weightSum="5"
-                    android:paddingVertical="@dimen/margin_16dp" >
+                    android:paddingVertical="@dimen/margin_16dp"
+                    android:layout_marginHorizontal="@dimen/margin_16dp">
 
                     <androidx.appcompat.widget.LinearLayoutCompat
                         android:layout_width="0dp"
@@ -453,13 +462,17 @@
 
                 </androidx.appcompat.widget.LinearLayoutCompat>
 
-                <include layout="@layout/divider"/>
+                <include layout="@layout/divider"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginHorizontal="@dimen/margin_16dp"/>
 
                 <androidx.appcompat.widget.LinearLayoutCompat
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/margin_16dp"
-                    android:layout_marginBottom="@dimen/margin_4dp">
+                    android:layout_marginBottom="@dimen/margin_4dp"
+                    android:layout_marginHorizontal="@dimen/margin_16dp">
 
                     <com.c3ai.sourcingoptimization.common.InterTextView
                         android:layout_width="0dp"
@@ -482,7 +495,8 @@
                     android:text="Aug 2021"
                     android:textColor="@color/grey"
                     android:textSize="@dimen/text_12"
-                    android:layout_marginBottom="@dimen/margin_8dp"/>
+                    android:layout_marginBottom="@dimen/margin_8dp"
+                    android:layout_marginHorizontal="@dimen/margin_16dp"/>
 
                 <com.c3ai.sourcingoptimization.common.InterTextView
                     android:layout_width="wrap_content"
@@ -490,7 +504,8 @@
                     android:text="Steel"
                     android:textColor="@color/grey"
                     android:textSize="@dimen/text_12"
-                    android:layout_marginBottom="@dimen/margin_8dp"/>
+                    android:layout_marginBottom="@dimen/margin_8dp"
+                    android:layout_marginHorizontal="@dimen/margin_16dp"/>
 
                 <com.c3ai.sourcingoptimization.common.InterTextView
                     android:layout_width="wrap_content"
@@ -498,15 +513,28 @@
                     android:text="$32"
                     android:textColor="@color/grey_2"
                     android:textSize="@dimen/text_12"
-                    android:layout_marginBottom="@dimen/margin_16dp"/>
+                    android:layout_marginBottom="@dimen/margin_16dp"
+                    android:layout_marginHorizontal="@dimen/margin_16dp"/>
 
-                <include layout="@layout/divider"/>
+                <include layout="@layout/divider"
+                    android:layout_marginHorizontal="@dimen/margin_16dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginBottom="@dimen/margin_16dp"/>
 
                 <com.github.aachartmodel.aainfographics.aachartcreator.AAChartView
                     android:id="@+id/lineChartView"
                     android:layout_width="match_parent"
                     android:layout_height="156dp"
-                    android:layout_marginBottom="@dimen/margin_16dp"/>
+                    android:layout_marginBottom="@dimen/margin_16dp"
+                    android:layout_marginEnd="@dimen/margin_16dp"/>
+
+                <com.github.aachartmodel.aainfographics.aachartcreator.AAChartView
+                    android:id="@+id/dashedLineChartView"
+                    android:layout_width="match_parent"
+                    android:layout_height="156dp"
+                    android:layout_marginBottom="@dimen/margin_16dp"
+                    android:layout_marginEnd="@dimen/margin_16dp"/>
 
             </androidx.appcompat.widget.LinearLayoutCompat>
 
