@@ -8,6 +8,8 @@ import com.c3ai.sourcingoptimization.databinding.FragmentItemDetailsOverviewBind
 import com.c3ai.sourcingoptimization.presentation.item_details.BaseFragment
 import com.github.aachartmodel.aainfographics.aachartcreator.*
 import com.github.aachartmodel.aainfographics.aaoptionsmodel.*
+import com.github.aachartmodel.aainfographics.aatools.AAGradientColor
+import com.github.aachartmodel.aainfographics.aatools.AALinearGradientDirection
 
 class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBinding>(
     FragmentItemDetailsOverviewBinding::inflate)  {
@@ -28,6 +30,10 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
         val aaDashedLineChartModel = configureDahsedLineChartAndSplineChartStyle()
         val dashedLineChart = binding.dashedLineChartView
         dashedLineChart.aa_drawChartWithChartModel(aaDashedLineChartModel)
+
+        val aaGradientChartModel = configureGradientColorAreasplineChart()
+        val gradientChartChart = binding.gradientChart
+        gradientChartChart.aa_drawChartWithChartModel(aaGradientChartModel)
     }
 
     private fun setSwitchToButtons() {
@@ -184,5 +190,50 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
             .animationType(AAChartAnimationType.SwingFromTo)
             .series(arrayOf(element))
         return aaChartModel
+    }
+
+    fun configureGradientColorAreasplineChart(): AAChartModel {
+        val stopsArr:Array<Any> = arrayOf(
+            arrayOf(0, "rgba(86,179,95,1)"),
+            arrayOf(1, "rgba(86,179,95,0.5)")
+        )
+
+        val linearGradientColor = AAGradientColor.linearGradient(
+            AALinearGradientDirection.ToBottom,
+            stopsArr
+        )
+
+        return AAChartModel()
+            .chartType(AAChartType.Areaspline)
+            .title("")
+            .subtitle("")
+            .backgroundColor("rgba(0,0,0,0)")
+            .categories(arrayOf("一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"))
+            .yAxisTitle("")
+            .markerRadius(8f)
+            .markerSymbolStyle(AAChartSymbolStyleType.InnerBlank)
+            .markerSymbol(AAChartSymbolType.Circle)
+            .yAxisLineWidth(0f)
+            .yAxisGridLineWidth(0f)
+            .legendEnabled(false)
+            .xAxisVisible(false)
+            .xAxisLabelsEnabled(false)
+            .yAxisLineWidth(0f)
+            .yAxisTitle("")
+            .yAxisVisible(false)
+            .markerRadius(0f)
+            .tooltipEnabled(false)
+//            .setYAxisLabelsEnabled(false)
+            //.setTooltipEnabled(false)
+            //.setTooltipValueSuffix("")
+            .dataLabelsEnabled(false)
+            .touchEventEnabled(true)
+            .series(arrayOf(
+                AASeriesElement()
+                    .name("Tokyo Hot")
+                    .lineWidth(5.0f)
+                    .color("rgba(86,179,95, 1)")
+                    .fillColor(linearGradientColor)
+                    .data(arrayOf(7.0, 6.9, 2.5, 14.5, 18.2, 21.5, 5.2, 26.5, 23.3, 45.3, 13.9, 9.6))))
     }
 }
