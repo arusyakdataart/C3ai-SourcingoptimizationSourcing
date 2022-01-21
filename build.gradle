@@ -38,6 +38,7 @@ buildscript {
         viewPagerVersion = '1.0.0'
         workVersion = '2.7.1'
         compose_version = '1.1.0-rc01'
+        accompanist_version = '0.22.0-rc'
     }
     repositories {
         google()
