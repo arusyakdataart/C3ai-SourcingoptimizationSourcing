@@ -62,7 +62,7 @@ fun SearchScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 16.dp),
-            text = "ItemDetails",
+            text = "Item Details",
             onClick = {
                 context.startActivity(Intent(context, ItemDetailsActivity::class.java))
                 (context as? Activity)?.finish()

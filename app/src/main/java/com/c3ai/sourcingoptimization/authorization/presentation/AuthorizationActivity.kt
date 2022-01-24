@@ -1,6 +1,5 @@
 package com.c3ai.sourcingoptimization.authorization.presentation
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -13,7 +12,6 @@ import androidx.compose.material.Surface
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.c3ai.sourcingoptimization.authorization.presentation.signin.SignInScreen
-import com.c3ai.sourcingoptimization.presentation.MainActivity
 
 @ExperimentalAnimationApi
 @AndroidEntryPoint
@@ -38,9 +36,5 @@ class AuthorizationActivity: ComponentActivity() {
                 }
             }
         }
-
-
-        startActivity(Intent(this, MainActivity::class.java))
-        finish()
     }
 }
