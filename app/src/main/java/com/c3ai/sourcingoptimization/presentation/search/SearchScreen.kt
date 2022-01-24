@@ -19,6 +19,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
@@ -47,6 +48,8 @@ import androidx.navigation.NavController
 import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.common.components.JetnewsSnackbarHost
 import com.c3ai.sourcingoptimization.common.components.MButton
+import com.c3ai.sourcingoptimization.domain.model.Alert
+import com.c3ai.sourcingoptimization.modifiers.interceptKey
 import com.c3ai.sourcingoptimization.presentation.MainActivity
 import com.google.accompanist.insets.imePadding
 import com.google.accompanist.swiperefresh.SwipeRefresh
@@ -73,24 +76,6 @@ fun SearchScreen(
             painter = painterResource(id = R.drawable.ic_app_logo),
             contentDescription = null
         )
-        OutlinedTextField(
-            value = "",
-            onValueChange = {},
-            placeholder = {
-                Text(
-                    text = stringResource(R.string.search_supplier_item_po),
-                    color = MaterialTheme.colors.secondary
-                )
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 40.dp),
-            singleLine = true,
-            textStyle = TextStyle(fontSize = 16.sp),
-            colors = TextFieldDefaults.outlinedTextFieldColors(
-                unfocusedBorderColor = MaterialTheme.colors.secondary
-            )
-        )
         MButton(
             modifier = Modifier
                 .fillMaxWidth()
@@ -112,7 +97,7 @@ fun SearchScreen(
 fun SearchWithAlertsScreen(
     uiState: SearchUiState,
     viewModel: SearchViewModel,
-    onRefreshPosts: () -> Unit,
+    onRefresh: () -> Unit,
     onErrorDismiss: (Long) -> Unit,
     openDrawer: () -> Unit,
     homeListLazyListState: LazyListState,
@@ -122,8 +107,7 @@ fun SearchWithAlertsScreen(
 ) {
     HomeScreenWithList(
         uiState = uiState,
-        showTopAppBar = showTopAppBar,
-        onRefreshPosts = onRefreshPosts,
+        onRefresh = onRefresh,
         onErrorDismiss = onErrorDismiss,
         openDrawer = openDrawer,
         homeListLazyListState = homeListLazyListState,
@@ -207,7 +191,7 @@ private fun Modifier.notifyInput(block: () -> Unit): Modifier =
  */
 @Composable
 fun HomeFeedScreen(
-    uiState: HomeUiState,
+    uiState: SearchUiState,
     showTopAppBar: Boolean,
     onToggleFavorite: (String) -> Unit,
     onSelectPost: (String) -> Unit,
@@ -260,15 +244,14 @@ fun HomeFeedScreen(
 private fun HomeScreenWithList(
     uiState: SearchUiState,
     viewModel: SearchViewModel,
-    showTopAppBar: Boolean,
-    onRefreshPosts: () -> Unit,
+    onRefresh: () -> Unit,
     onErrorDismiss: (Long) -> Unit,
     openDrawer: () -> Unit,
     homeListLazyListState: LazyListState,
     scaffoldState: ScaffoldState,
     modifier: Modifier = Modifier,
     hasPostsContent: @Composable (
-        uiState: HomeUiState.HasPosts,
+        uiState: SearchUiState.HasAlerts,
         modifier: Modifier
     ) -> Unit
 ) {
@@ -415,7 +398,6 @@ private fun AlertList(
                 )
             }
         }
-        item { PostListTopSection(postsFeed.highlightedPost, onArticleTapped) }
         if (postsFeed.recommendedPosts.isNotEmpty()) {
             item {
                 PostListSimpleSection(
@@ -450,37 +432,16 @@ private fun FullScreenLoading() {
 }
 
 /**
- * Top section of [PostList]
- *
- * @param post (state) highlighted post to display
- * @param navigateToArticle (event) request navigation to Article screen
- */
-@Composable
-private fun PostListTopSection(post: Post, navigateToArticle: (String) -> Unit) {
-    Text(
-        modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp),
-        text = stringResource(id = R.string.home_top_section_title),
-        style = MaterialTheme.typography.subtitle1
-    )
-    PostCardTop(
-        post = post,
-        modifier = Modifier.clickable(onClick = { navigateToArticle(post.id) })
-    )
-    PostListDivider()
-}
-
-/**
  * Full-width list items for [PostList]
  *
  * @param posts (state) to display
  * @param navigateToArticle (event) request navigation to Article screen
  */
 @Composable
-private fun PostListSimpleSection(
-    posts: List<Post>,
-    navigateToArticle: (String) -> Unit,
-    favorites: Set<String>,
-    onToggleFavorite: (String) -> Unit
+private fun AlertsListSimpleSection(
+    posts: List<Alert>,
+    navigateToAlert: (String) -> Unit,
+    onToggleAlert: (String) -> Unit
 ) {
     Column {
         posts.forEach { post ->
@@ -490,7 +451,7 @@ private fun PostListSimpleSection(
                 isFavorite = favorites.contains(post.id),
                 onToggleFavorite = { onToggleFavorite(post.id) }
             )
-            PostListDivider()
+            ListDivider()
         }
     }
 }
@@ -501,30 +462,30 @@ private fun PostListSimpleSection(
  * @param posts (state) to display
  * @param navigateToArticle (event) request navigation to Article screen
  */
-@Composable
-private fun PostListPopularSection(
-    posts: List<Post>,
-    navigateToArticle: (String) -> Unit
-) {
-    Column {
-        Text(
-            modifier = Modifier.padding(16.dp),
-            text = stringResource(id = R.string.home_popular_section_title),
-            style = MaterialTheme.typography.subtitle1
-        )
-
-        LazyRow(modifier = Modifier.padding(end = 16.dp)) {
-            items(posts) { post ->
-                PostCardPopular(
-                    post,
-                    navigateToArticle,
-                    Modifier.padding(start = 16.dp, bottom = 16.dp)
-                )
-            }
-        }
-        PostListDivider()
-    }
-}
+//@Composable
+//private fun PostListPopularSection(
+//    posts: List<Post>,
+//    navigateToArticle: (String) -> Unit
+//) {
+//    Column {
+//        Text(
+//            modifier = Modifier.padding(16.dp),
+//            text = stringResource(id = R.string.home_popular_section_title),
+//            style = MaterialTheme.typography.subtitle1
+//        )
+//
+//        LazyRow(modifier = Modifier.padding(end = 16.dp)) {
+//            items(posts) { post ->
+//                PostCardPopular(
+//                    post,
+//                    navigateToArticle,
+//                    Modifier.padding(start = 16.dp, bottom = 16.dp)
+//                )
+//            }
+//        }
+//        PostListDivider()
+//    }
+//}
 
 /**
  * Full-width list items that display "based on your history" for [PostList]
@@ -532,18 +493,18 @@ private fun PostListPopularSection(
  * @param posts (state) to display
  * @param navigateToArticle (event) request navigation to Article screen
  */
-@Composable
-private fun PostListHistorySection(
-    posts: List<Post>,
-    navigateToArticle: (String) -> Unit
-) {
-    Column {
-        posts.forEach { post ->
-            PostCardHistory(post, navigateToArticle)
-            PostListDivider()
-        }
-    }
-}
+//@Composable
+//private fun ListHistorySection(
+//    posts: List<Post>,
+//    navigateToArticle: (String) -> Unit
+//) {
+//    Column {
+//        posts.forEach { post ->
+//            PostCardHistory(post, navigateToArticle)
+//            PostListDivider()
+//        }
+//    }
+//}
 
 /**
  * Full-width divider with padding
@@ -587,15 +548,23 @@ private fun HomeSearch(
                 val context = LocalContext.current
                 val focusManager = LocalFocusManager.current
                 val keyboardController = LocalSoftwareKeyboardController.current
-                TextField(
+                OutlinedTextField(
                     value = searchInput,
                     onValueChange = { onSearchInputChanged(it) },
-                    placeholder = { Text(stringResource(R.string.home_search)) },
-                    colors = TextFieldDefaults.textFieldColors(
-                        backgroundColor = Color.Transparent,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent
-                    ), // keyboardOptions change the newline key to a search key on the soft keyboard
+                    placeholder = {
+                        Text(
+                            text = stringResource(R.string.search_supplier_item_po),
+                            color = MaterialTheme.colors.secondary
+                        )
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 40.dp),
+                    singleLine = true,
+                    textStyle = TextStyle(fontSize = 16.sp),
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        unfocusedBorderColor = MaterialTheme.colors.secondary
+                    ),
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                     // keyboardActions submits the search query when the search key is pressed
                     keyboardActions = KeyboardActions(
@@ -615,7 +584,7 @@ private fun HomeSearch(
                 Spacer(modifier = Modifier.weight(1f))
                 IconButton(onClick = { /* Functionality not supported yet */ }) {
                     Icon(
-                        imageVector = Icons.Filled.MoreVert,
+                        imageVector = Icons.Filled.Clear,
                         contentDescription = stringResource(R.string.cd_more_actions)
                     )
                 }

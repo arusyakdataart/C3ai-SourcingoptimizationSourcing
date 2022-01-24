@@ -10,4 +10,5 @@
     <string name="cd_open_navigation_drawer">Open side menu</string>
     <string name="Search" />
     <string name="cd_search">Search</string>
+    <string name="cd_more_actions">Clear</string>
 </resources>
