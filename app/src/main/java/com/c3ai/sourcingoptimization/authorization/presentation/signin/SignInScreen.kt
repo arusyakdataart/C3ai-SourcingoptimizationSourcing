@@ -2,10 +2,13 @@ package com.c3ai.sourcingoptimization.authorization.presentation.signin
 
 import android.app.Activity
 import android.content.Intent
+import android.util.Log
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.material.Icon
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -20,10 +23,12 @@ import androidx.navigation.NavController
 import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.authorization.presentation.AuthEvent
 import com.c3ai.sourcingoptimization.authorization.presentation.AuthViewModel
+import com.c3ai.sourcingoptimization.authorization.presentation.AuthViewModel.UiEvent
 import com.c3ai.sourcingoptimization.authorization.presentation.components.LabeledTextField
 import com.c3ai.sourcingoptimization.common.components.MButton
+import com.c3ai.sourcingoptimization.common.components.SharedPrefsToggle
 import com.c3ai.sourcingoptimization.presentation.MainActivity
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.collectLatest
 
 @ExperimentalAnimationApi
 @Composable
@@ -35,8 +40,20 @@ fun SignInScreen(
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
+    LaunchedEffect(true) {
+        viewModel.eventFlow.collectLatest { event ->
+            when (event) {
+                is UiEvent.OnAuthorized -> {
+                    context.startActivity(Intent(context, MainActivity::class.java))
+                    (context as? Activity)?.finish()
+                }
+            }
+        }
+    }
+
     val username = stringResource(R.string.username)
     val password = stringResource(R.string.password)
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -70,19 +87,18 @@ fun SignInScreen(
             value = state.password,
             onValueChange = { text -> viewModel.onEvent(AuthEvent.PasswordChanged(text)) }
         )
+        SharedPrefsToggle(
+            text = stringResource(R.string.remember_me),
+            value = false,
+            onValueChanged = {}
+        )
         MButton(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 40.dp),
             enabled = state.isLoginEnabled,
             text = stringResource(R.string.login),
-            onClick = {
-                scope.launch {
-//                    viewModel.authorize()
-                    context.startActivity(Intent(context, MainActivity::class.java))
-                    (context as? Activity)?.finish()
-                }
-            }
+            onClick = { viewModel.authorize() }
         )
     }
 }
