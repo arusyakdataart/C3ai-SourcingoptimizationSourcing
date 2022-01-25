@@ -1,16 +1,18 @@
 package com.c3ai.sourcingoptimization.presentation.search
 
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.c3ai.sourcingoptimization.domain.model.Alert
 import com.c3ai.sourcingoptimization.domain.use_case.SearchUseCases
 import com.c3ai.sourcingoptimization.utilities.ErrorMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
 /**
  * UI state for the Search route.
  *
@@ -22,6 +24,7 @@ sealed interface SearchUiState {
     val isLoading: Boolean
     val errorMessages: List<ErrorMessage>
     val searchInput: String
+    val selectedAlert: Alert?
 
     /**
      * There are no alerts to render.
@@ -32,7 +35,8 @@ sealed interface SearchUiState {
     data class NoAlerts(
         override val isLoading: Boolean,
         override val errorMessages: List<ErrorMessage>,
-        override val searchInput: String
+        override val searchInput: String,
+        override val selectedAlert: Alert?
     ) : SearchUiState
 
     /**
@@ -43,7 +47,8 @@ sealed interface SearchUiState {
         val alerts: List<Alert>,
         override val isLoading: Boolean,
         override val errorMessages: List<ErrorMessage>,
-        override val searchInput: String
+        override val searchInput: String,
+        override val selectedAlert: Alert?
     ) : SearchUiState
 }
 
@@ -66,14 +71,16 @@ private data class SearchViewModelState(
             SearchUiState.NoAlerts(
                 isLoading = isLoading,
                 errorMessages = errorMessages,
-                searchInput = searchInput
+                searchInput = searchInput,
+                selectedAlert = null,
             )
         } else {
             SearchUiState.HasAlerts(
                 alerts = alerts,
                 isLoading = isLoading,
                 errorMessages = errorMessages,
-                searchInput = searchInput
+                searchInput = searchInput,
+                selectedAlert = null,
             )
         }
 }

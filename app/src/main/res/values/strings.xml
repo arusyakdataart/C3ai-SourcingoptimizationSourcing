@@ -11,4 +11,5 @@
     <string name="Search" />
     <string name="cd_search">Search</string>
     <string name="cd_more_actions">Clear</string>
+    <string name="retry">Retry</string>
 </resources>

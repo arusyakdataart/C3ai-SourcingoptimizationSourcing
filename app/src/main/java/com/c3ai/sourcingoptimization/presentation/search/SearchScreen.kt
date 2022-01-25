@@ -51,6 +51,8 @@ import com.c3ai.sourcingoptimization.common.components.MButton
 import com.c3ai.sourcingoptimization.domain.model.Alert
 import com.c3ai.sourcingoptimization.modifiers.interceptKey
 import com.c3ai.sourcingoptimization.presentation.MainActivity
+import com.c3ai.sourcingoptimization.presentation.alerts.AlertCardSimple
+import com.c3ai.sourcingoptimization.presentation.rememberContentPaddingForScreen
 import com.google.accompanist.insets.imePadding
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
@@ -97,16 +99,20 @@ fun SearchScreen(
 fun SearchWithAlertsScreen(
     uiState: SearchUiState,
     viewModel: SearchViewModel,
+    showTopAppBar: Boolean,
     onRefresh: () -> Unit,
     onErrorDismiss: (Long) -> Unit,
     openDrawer: () -> Unit,
     homeListLazyListState: LazyListState,
-    articleDetailLazyListStates: Map<String, LazyListState>,
+    alertDetailLazyListStates: Map<String, LazyListState>,
     scaffoldState: ScaffoldState,
     modifier: Modifier = Modifier,
+    onSearchInputChanged: (String) -> Unit,
 ) {
     HomeScreenWithList(
         uiState = uiState,
+        viewModel = viewModel,
+        showTopAppBar = showTopAppBar,
         onRefresh = onRefresh,
         onErrorDismiss = onErrorDismiss,
         openDrawer = openDrawer,
@@ -116,56 +122,55 @@ fun SearchWithAlertsScreen(
     ) { hasPostsUiState, contentModifier ->
         val contentPadding = rememberContentPaddingForScreen(additionalTop = 8.dp)
         Row(contentModifier) {
-            PostList(
-                postsFeed = hasPostsUiState.postsFeed,
-                favorites = hasPostsUiState.favorites,
+            AlertList(
+                alerts = emptyList(),
                 showExpandedSearch = !showTopAppBar,
-                onArticleTapped = onSelectPost,
-                onToggleFavorite = onToggleFavorite,
+                onAlertTapped = {},
+                onToggleAlert = {},
                 contentPadding = contentPadding,
                 modifier = Modifier
                     .width(334.dp)
-                    .notifyInput(onInteractWithList)
+                    .notifyInput({})
                     .imePadding(), // add padding for the on-screen keyboard
                 state = homeListLazyListState,
                 searchInput = hasPostsUiState.searchInput,
                 onSearchInputChanged = onSearchInputChanged,
             )
             // Crossfade between different detail posts
-            Crossfade(targetState = hasPostsUiState.selectedPost) { detailPost ->
-                // Get the lazy list state for this detail view
-                val detailLazyListState by derivedStateOf {
-                    articleDetailLazyListStates.getValue(detailPost.id)
-                }
-
-                // Key against the post id to avoid sharing any state between different posts
-                key(detailPost.id) {
-                    LazyColumn(
-                        state = detailLazyListState,
-                        contentPadding = contentPadding,
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp)
-                            .fillMaxSize()
-                            .notifyInput {
-                                onInteractWithDetail(detailPost.id)
-                            }
-                            .imePadding() // add padding for the on-screen keyboard
-                    ) {
-                        stickyHeader {
-                            val context = LocalContext.current
-                            PostTopBar(
-                                isFavorite = hasPostsUiState.favorites.contains(detailPost.id),
-                                onToggleFavorite = { onToggleFavorite(detailPost.id) },
-                                onSharePost = { sharePost(detailPost, context) },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .wrapContentWidth(Alignment.End)
-                            )
-                        }
-                        postContentItems(detailPost)
-                    }
-                }
-            }
+//            Crossfade(targetState = hasPostsUiState.selectedAlert) { detailAlert ->
+//                // Get the lazy list state for this detail view
+//                val detailLazyListState by derivedStateOf {
+//                    alertDetailLazyListStates.getValue(detailAlert?.id)
+//                }
+//
+//                // Key against the post id to avoid sharing any state between different posts
+//                key(detailPost.id) {
+//                    LazyColumn(
+//                        state = detailLazyListState,
+//                        contentPadding = contentPadding,
+//                        modifier = Modifier
+//                            .padding(horizontal = 16.dp)
+//                            .fillMaxSize()
+//                            .notifyInput {
+//                                onInteractWithDetail(detailPost.id)
+//                            }
+//                            .imePadding() // add padding for the on-screen keyboard
+//                    ) {
+//                        stickyHeader {
+//                            val context = LocalContext.current
+//                            PostTopBar(
+//                                isFavorite = hasPostsUiState.favorites.contains(detailPost.id),
+//                                onToggleFavorite = { onToggleFavorite(detailPost.id) },
+//                                onSharePost = { sharePost(detailPost, context) },
+//                                modifier = Modifier
+//                                    .fillMaxWidth()
+//                                    .wrapContentWidth(Alignment.End)
+//                            )
+//                        }
+//                        postContentItems(detailPost)
+//                    }
+//                }
+//            }
         }
     }
 }
@@ -187,63 +192,19 @@ private fun Modifier.notifyInput(block: () -> Unit): Modifier =
     }
 
 /**
- * The home screen displaying just the article feed.
- */
-@Composable
-fun HomeFeedScreen(
-    uiState: SearchUiState,
-    showTopAppBar: Boolean,
-    onToggleFavorite: (String) -> Unit,
-    onSelectPost: (String) -> Unit,
-    onRefreshPosts: () -> Unit,
-    onErrorDismiss: (Long) -> Unit,
-    openDrawer: () -> Unit,
-    homeListLazyListState: LazyListState,
-    scaffoldState: ScaffoldState,
-    modifier: Modifier = Modifier,
-    searchInput: String = "",
-    onSearchInputChanged: (String) -> Unit,
-) {
-    HomeScreenWithList(
-        uiState = uiState,
-        showTopAppBar = showTopAppBar,
-        onRefreshPosts = onRefreshPosts,
-        onErrorDismiss = onErrorDismiss,
-        openDrawer = openDrawer,
-        homeListLazyListState = homeListLazyListState,
-        scaffoldState = scaffoldState,
-        modifier = modifier
-    ) { hasPostsUiState, contentModifier ->
-        PostList(
-            postsFeed = hasPostsUiState.postsFeed,
-            favorites = hasPostsUiState.favorites,
-            showExpandedSearch = !showTopAppBar,
-            onArticleTapped = onSelectPost,
-            onToggleFavorite = onToggleFavorite,
-            contentPadding = rememberContentPaddingForScreen(
-                additionalTop = if (showTopAppBar) 0.dp else 8.dp
-            ),
-            modifier = contentModifier,
-            state = homeListLazyListState,
-            searchInput = searchInput,
-            onSearchInputChanged = onSearchInputChanged
-        )
-    }
-}
-
-/**
  * A display of the home screen that has the list.
  *
  * This sets up the scaffold with the top app bar, and surrounds the [hasPostsContent] with refresh,
  * loading and error handling.
  *
- * This helper functions exists because [HomeFeedWithArticleDetailsScreen] and [HomeFeedScreen] are
+ * This helper functions exists because [HomeScreenWithList] and [HomeFeedScreen] are
  * extremely similar, except for the rendered content when there are posts to display.
  */
 @Composable
 private fun HomeScreenWithList(
     uiState: SearchUiState,
     viewModel: SearchViewModel,
+    showTopAppBar: Boolean,
     onRefresh: () -> Unit,
     onErrorDismiss: (Long) -> Unit,
     openDrawer: () -> Unit,
@@ -259,48 +220,48 @@ private fun HomeScreenWithList(
         scaffoldState = scaffoldState,
         snackbarHost = { JetnewsSnackbarHost(hostState = it) },
         topBar = {
-            if (showTopAppBar) {
-                SearchTopAppBar(
-                    openDrawer = openDrawer,
-                    elevation = if (!homeListLazyListState.isScrolled) 0.dp else 4.dp
-                )
-            }
+//            if (showTopAppBar) {
+//                SearchTopAppBar(
+//                    openDrawer = openDrawer,
+//                    elevation = if (!homeListLazyListState.isScrolled) 0.dp else 4.dp
+//                )
+//            }
         },
         modifier = modifier
     ) { innerPadding ->
         val contentModifier = Modifier.padding(innerPadding)
 
-        LoadingContent(
-            empty = when (uiState) {
-                is HomeUiState.HasPosts -> false
-                is HomeUiState.NoPosts -> uiState.isLoading
-            },
-            emptyContent = { FullScreenLoading() },
-            loading = uiState.isLoading,
-            onRefresh = onRefreshPosts,
-            content = {
-                when (uiState) {
-                    is HomeUiState.HasPosts -> hasPostsContent(uiState, contentModifier)
-                    is HomeUiState.NoPosts -> {
-                        if (uiState.errorMessages.isEmpty()) {
-                            // if there are no posts, and no error, let the user refresh manually
-                            TextButton(
-                                onClick = onRefreshPosts,
-                                modifier.fillMaxSize()
-                            ) {
-                                Text(
-                                    stringResource(id = R.string.home_tap_to_load_content),
-                                    textAlign = TextAlign.Center
-                                )
-                            }
-                        } else {
-                            // there's currently an error showing, don't show any content
-                            Box(contentModifier.fillMaxSize()) { /* empty screen */ }
-                        }
-                    }
-                }
-            }
-        )
+//        LoadingContent(
+//            empty = when (uiState) {
+//                is HomeUiState.HasPosts -> false
+//                is HomeUiState.NoPosts -> uiState.isLoading
+//            },
+//            emptyContent = { FullScreenLoading() },
+//            loading = uiState.isLoading,
+//            onRefresh = onRefreshPosts,
+//            content = {
+//                when (uiState) {
+//                    is HomeUiState.HasPosts -> hasPostsContent(uiState, contentModifier)
+//                    is HomeUiState.NoPosts -> {
+//                        if (uiState.errorMessages.isEmpty()) {
+//                            // if there are no posts, and no error, let the user refresh manually
+//                            TextButton(
+//                                onClick = onRefreshPosts,
+//                                modifier.fillMaxSize()
+//                            ) {
+//                                Text(
+//                                    stringResource(id = R.string.home_tap_to_load_content),
+//                                    textAlign = TextAlign.Center
+//                                )
+//                            }
+//                        } else {
+//                            // there's currently an error showing, don't show any content
+//                            Box(contentModifier.fillMaxSize()) { /* empty screen */ }
+//                        }
+//                    }
+//                }
+//            }
+//        )
     }
 
     // Process one error message at a time and show them as Snackbars in the UI
@@ -310,11 +271,11 @@ private fun HomeScreenWithList(
 
         // Get the text to show on the message from resources
         val errorMessageText: String = stringResource(errorMessage.messageId)
-        val retryMessageText = stringResource(id = R.string.retry)
+        val retryMessageText = stringResource(R.string.retry)
 
         // If onRefreshPosts or onErrorDismiss change while the LaunchedEffect is running,
         // don't restart the effect and use the latest lambda values.
-        val onRefreshPostsState by rememberUpdatedState(onRefreshPosts)
+        val onRefreshPostsState by rememberUpdatedState(onRefresh)
         val onErrorDismissState by rememberUpdatedState(onErrorDismiss)
 
         // Effect running in a coroutine that displays the Snackbar on the screen
@@ -363,21 +324,20 @@ private fun LoadingContent(
 }
 
 /**
- * Display a feed of posts.
+ * Display a feed of alerts.
  *
- * When a post is clicked on, [onArticleTapped] will be called.
+ * When a alert is clicked on, [onAlertTapped] will be called.
  *
- * @param postsFeed (state) the feed to display
- * @param onArticleTapped (event) request navigation to Article screen
+ * @param alerts (state) the feed to display
+ * @param onAlertTapped (event) request navigation to Alert screen
  * @param modifier modifier for the root element
  */
 @Composable
 private fun AlertList(
     alerts: List<Alert>,
-    favorites: Set<String>,
     showExpandedSearch: Boolean,
-    onArticleTapped: (postId: String) -> Unit,
-    onToggleFavorite: (String) -> Unit,
+    onAlertTapped: (postId: String) -> Unit,
+    onToggleAlert: (String) -> Unit,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     state: LazyListState = rememberLazyListState(),
@@ -398,21 +358,12 @@ private fun AlertList(
                 )
             }
         }
-        if (postsFeed.recommendedPosts.isNotEmpty()) {
-            item {
-                PostListSimpleSection(
-                    postsFeed.recommendedPosts,
-                    onArticleTapped,
-                    favorites,
-                    onToggleFavorite
-                )
-            }
-        }
-        if (postsFeed.popularPosts.isNotEmpty()) {
-            item { PostListPopularSection(postsFeed.popularPosts, onArticleTapped) }
-        }
-        if (postsFeed.recentPosts.isNotEmpty()) {
-            item { PostListHistorySection(postsFeed.recentPosts, onArticleTapped) }
+        item {
+            AlertsListSimpleSection(
+                alerts,
+                onAlertTapped,
+                onToggleAlert
+            )
         }
     }
 }
@@ -432,24 +383,23 @@ private fun FullScreenLoading() {
 }
 
 /**
- * Full-width list items for [PostList]
+ * Full-width list items for [AlertList]
  *
- * @param posts (state) to display
- * @param navigateToArticle (event) request navigation to Article screen
+ * @param alerts (state) to display
+ * @param navigateToAlert (event) request navigation to Alerts screen
  */
 @Composable
 private fun AlertsListSimpleSection(
-    posts: List<Alert>,
+    alerts: List<Alert>,
     navigateToAlert: (String) -> Unit,
     onToggleAlert: (String) -> Unit
 ) {
     Column {
-        posts.forEach { post ->
-            PostCardSimple(
-                post = post,
-                navigateToArticle = navigateToArticle,
-                isFavorite = favorites.contains(post.id),
-                onToggleFavorite = { onToggleFavorite(post.id) }
+        alerts.forEach { alert ->
+            AlertCardSimple(
+                alert = alert,
+                navigateTo = navigateToAlert,
+                onToggleFavorite = { onToggleAlert(alert.id) }
             )
             ListDivider()
         }
@@ -557,9 +507,6 @@ private fun HomeSearch(
                             color = MaterialTheme.colors.secondary
                         )
                     },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 40.dp),
                     singleLine = true,
                     textStyle = TextStyle(fontSize = 16.sp),
                     colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -574,6 +521,7 @@ private fun HomeSearch(
                         }
                     ),
                     modifier = Modifier
+                        .fillMaxWidth()
                         .interceptKey(Key.Enter) { // submit a search query when Enter is pressed
                             submitSearch(onSearchInputChanged, context)
                         }
