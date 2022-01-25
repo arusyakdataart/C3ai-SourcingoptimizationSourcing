@@ -10,7 +10,7 @@ class C3SessionProvider constructor(private val session: C3Session): Interceptor
         val request: Request = chain.request().newBuilder()
             .addHeader("Content-type", "application/json")
             .addHeader("Accept", "application/json")
-            .addHeader("Cookie", session.token)
+            .addHeader("Cookie", session.token ?: "")
             .build()
 
         return chain.proceed(request)

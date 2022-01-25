@@ -19,6 +19,11 @@ class AuthInterceptor constructor(private val session: C3Session): Interceptor {
             .addHeader("Authorization", "Basic $base64String",)
             .build()
 
-        return chain.proceed(request)
+        val response = chain.proceed(request)
+        session.token = response.headers.find {
+                (key, value) -> key == "Set-Cookie" && value.contains("c3auth")
+        }?.second
+        session.save()
+        return response
     }
 }

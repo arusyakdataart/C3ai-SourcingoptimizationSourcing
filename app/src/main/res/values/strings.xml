@@ -5,4 +5,5 @@
     <string name="login">Login</string>
     <string name="password">Password</string>
     <string name="search_supplier_item_po">Search Supplier, Item, PO, POL, Alert</string>
+    <string name="remember_me">Remember me?</string>
 </resources>
