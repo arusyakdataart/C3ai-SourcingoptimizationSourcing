@@ -364,7 +364,7 @@
                 <androidx.appcompat.widget.AppCompatImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    app:srcCompat="@drawable/settings"/>
+                    app:srcCompat="@drawable/edit"/>
 
             </androidx.appcompat.widget.LinearLayoutCompat>
 
@@ -478,7 +478,7 @@
                 <androidx.appcompat.widget.AppCompatImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    app:srcCompat="@drawable/settings"/>
+                    app:srcCompat="@drawable/edit"/>
 
             </androidx.appcompat.widget.LinearLayoutCompat>
 
@@ -519,7 +519,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="@dimen/margin_4dp">
+                android:padding="@dimen/margin_4dp"
+                android:background="@drawable/graph_background"
+                android:layout_marginHorizontal="@dimen/margin_16dp">
 
                 <com.github.aachartmodel.aainfographics.aachartcreator.AAChartView
                     android:id="@+id/lineChartView"
@@ -528,11 +530,13 @@
                     android:layout_marginBottom="@dimen/margin_16dp"
                     android:layout_marginEnd="@dimen/margin_16dp"/>
 
+                <include layout="@layout/divider"/>
+
                 <com.github.aachartmodel.aainfographics.aachartcreator.AAChartView
                     android:id="@+id/dashedLineChartView"
                     android:layout_width="match_parent"
                     android:layout_height="156dp"
-                    android:layout_marginBottom="@dimen/margin_16dp"
+                    android:layout_marginVertical="@dimen/margin_16dp"
                     android:layout_marginEnd="@dimen/margin_16dp"/>
 
             </androidx.appcompat.widget.LinearLayoutCompat>
