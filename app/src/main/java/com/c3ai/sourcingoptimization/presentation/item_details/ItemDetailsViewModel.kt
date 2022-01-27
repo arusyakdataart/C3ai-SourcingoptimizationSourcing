@@ -121,7 +121,7 @@ class ItemDetailsViewModel @AssistedInject constructor(
         private val assistedFactory: ItemDetailsViewModelAssistedFactory,
         private val itemId: String,
     ) : ViewModelProvider.Factory {
-        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return assistedFactory.create(itemId) as T
         }
     }
