@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:padding="@dimen/margin_16dp">
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="@dimen/margin_16dp"
+        android:background="@drawable/card_background">
+
+        <com.c3ai.sourcingoptimization.common.InterTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="PO Line 453425"
+            android:textSize="@dimen/text_12"
+            android:textColor="@color/grey"
+            android:layout_marginBottom="@dimen/margin_8dp"/>
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/margin_16dp">
+
+            <com.c3ai.sourcingoptimization.common.InterTextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="$ 8,000"
+                android:textSize="@dimen/text_16"
+                android:textColor="@color/white"/>
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:srcCompat="@drawable/alert_white"/>
+
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+        <include layout="@layout/divider"/>
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingVertical="@dimen/margin_8dp">
+
+            <com.c3ai.sourcingoptimization.common.InterTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Open"
+                android:textColor="@color/green_1"
+                android:textSize="@dimen/text_14"/>
+
+            <com.c3ai.sourcingoptimization.common.InterTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=" \u2022 Unit Price $33.5"
+                android:textColor="@color/grey_2"
+                android:textSize="@dimen/text_14"/>
+
+            <com.c3ai.sourcingoptimization.common.InterTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=" \u2022 Quantity 238"
+                android:textColor="@color/grey_2"
+                android:textSize="@dimen/text_14"/>
+
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+        <include layout="@layout/divider"/>
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/margin_8dp"
+            android:weightSum="3">
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <com.c3ai.sourcingoptimization.common.InterTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Item 352352"
+                    android:textSize="@dimen/text_12"
+                    android:textColor="@color/grey"
+                    android:layout_marginBottom="@dimen/margin_4dp"/>
+
+                <com.c3ai.sourcingoptimization.common.InterTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="01/04/2021"
+                    android:textSize="@dimen/text_12"
+                    android:textColor="@color/grey_2"
+                    android:layout_marginBottom="@dimen/margin_8dp"/>
+
+                <com.c3ai.sourcingoptimization.common.InterTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Lead Time"
+                    android:textSize="@dimen/text_12"
+                    android:textColor="@color/grey"
+                    android:layout_marginBottom="@dimen/margin_4dp"/>
+
+                <com.c3ai.sourcingoptimization.common.InterTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-(Act.)"
+                    android:textSize="@dimen/text_12"
+                    android:textColor="@color/grey_2"
+                    android:layout_marginBottom="@dimen/margin_4dp"/>
+
+                <com.c3ai.sourcingoptimization.common.InterTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="21 days (Plan)"
+                    android:textSize="@dimen/text_12"
+                    android:textColor="@color/grey"/>
+
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <com.c3ai.sourcingoptimization.common.InterTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Opened Date"
+                    android:textSize="@dimen/text_12"
+                    android:textColor="@color/grey"
+                    android:layout_marginBottom="@dimen/margin_4dp"/>
+
+                <com.c3ai.sourcingoptimization.common.InterTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-"
+                    android:textSize="@dimen/text_12"
+                    android:textColor="@color/grey_2"
+                    android:layout_marginBottom="@dimen/margin_8dp"/>
+
+                <com.c3ai.sourcingoptimization.common.InterTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Requested\nDelivery Date"
+                    android:textSize="@dimen/text_12"
+                    android:textColor="@color/grey"
+                    android:layout_marginBottom="@dimen/margin_4dp"/>
+
+                <com.c3ai.sourcingoptimization.common.InterTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="05/1/2021"
+                    android:textSize="@dimen/text_12"
+                    android:textColor="@color/grey_2"/>
+
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+</FrameLayout>
