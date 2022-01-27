@@ -5,6 +5,7 @@ import com.c3ai.sourcingoptimization.data.network.C3Session
 import com.c3ai.sourcingoptimization.data.network.C3SessionProvider
 import com.c3ai.sourcingoptimization.utilities.AuthInterceptorOkHttpClient
 import com.c3ai.sourcingoptimization.utilities.DefaultInterceptorOkHttpClient
+import com.facebook.stetho.okhttp3.StethoInterceptor
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -25,6 +26,7 @@ object NetworkModule {
         return OkHttpClient.Builder()
             .addInterceptor(logger)
             .addInterceptor(C3SessionProvider(session))
+            .addNetworkInterceptor(StethoInterceptor())
             .build()
     }
 
@@ -34,6 +36,7 @@ object NetworkModule {
         val logger = HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY }
         return OkHttpClient.Builder()
             .addInterceptor(logger)
+            .addNetworkInterceptor(StethoInterceptor())
             .build()
     }
 

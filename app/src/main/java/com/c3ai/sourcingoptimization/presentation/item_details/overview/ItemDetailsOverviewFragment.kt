@@ -1,21 +1,39 @@
 package com.c3ai.sourcingoptimization.presentation.item_details.overview
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.viewModels
 import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.databinding.FragmentItemDetailsOverviewBinding
 import com.c3ai.sourcingoptimization.presentation.item_details.BaseFragment
+import com.c3ai.sourcingoptimization.presentation.item_details.ItemDetailsViewModel
+import com.c3ai.sourcingoptimization.presentation.item_details.ItemDetailsViewModelAssistedFactory
 import com.github.aachartmodel.aainfographics.aachartcreator.*
 import com.github.aachartmodel.aainfographics.aaoptionsmodel.*
 import com.github.aachartmodel.aainfographics.aatools.AAGradientColor
 import com.github.aachartmodel.aainfographics.aatools.AALinearGradientDirection
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBinding>(
     FragmentItemDetailsOverviewBinding::inflate)  {
 
+    @Inject
+    lateinit var assistedFactory: ItemDetailsViewModelAssistedFactory
+
+    private val viewModel: ItemDetailsViewModel by viewModels {
+        ItemDetailsViewModel.Factory(assistedFactory, "item0")
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        binding.apply {
+            viewModel.uiState
+        }
 
         setSwitchToButtons()
 
