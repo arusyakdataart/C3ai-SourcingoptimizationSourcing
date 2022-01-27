@@ -19,6 +19,7 @@ import androidx.navigation.NavController
 import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.common.components.MButton
 import com.c3ai.sourcingoptimization.presentation.MainActivity
+import com.c3ai.sourcingoptimization.presentation.item_details.ItemDetailsActivity
 
 @ExperimentalAnimationApi
 @Composable
@@ -61,9 +62,9 @@ fun SearchScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 16.dp),
-            text = "ItemDetails",
+            text = "Item Details",
             onClick = {
-                context.startActivity(Intent(context, MainActivity::class.java))
+                context.startActivity(Intent(context, ItemDetailsActivity::class.java))
                 (context as? Activity)?.finish()
             }
         )
