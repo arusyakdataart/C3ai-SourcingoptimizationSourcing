@@ -1,7 +1,6 @@
 package com.c3ai.sourcingoptimization.authorization.domain
 
 import android.util.Base64
-import android.util.Log
 import com.c3ai.sourcingoptimization.data.network.C3Session
 import okhttp3.Interceptor
 import okhttp3.Request
@@ -14,15 +13,17 @@ class AuthInterceptor constructor(private val session: C3Session): Interceptor {
             "${session.login}:${session.password}".toByteArray(Charsets.UTF_8),
             Base64.NO_WRAP
         )
-        Log.e("base64String", base64String)
         val request: Request = chain.request().newBuilder()
-            .addHeader("Authorization", "Basic $base64String",)
+            .addHeader("Content-type", "application/json")
+            .addHeader("Accept", "application/json")
+            .addHeader("Authorization", "Basic $base64String")
             .build()
 
         val response = chain.proceed(request)
-        session.token = response.headers.find {
-                (key, value) -> key == "Set-Cookie" && value.contains("c3auth")
-        }?.second
+        session.cookie = response.headers
+            .filter { (key, _) -> key == "Set-Cookie" }
+            .joinToString("; ") { (_, value) -> value.split(";")[0] }
+
         session.save()
         return response
     }

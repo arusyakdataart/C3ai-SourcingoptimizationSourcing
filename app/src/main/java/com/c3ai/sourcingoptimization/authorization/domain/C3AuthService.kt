@@ -3,6 +3,7 @@ package com.c3ai.sourcingoptimization.authorization.domain
 import com.c3ai.sourcingoptimization.data.network.C3Session
 import com.c3ai.sourcingoptimization.utilities.API_DOMAIN
 import com.c3ai.sourcingoptimization.utilities.SCHEMA
+import com.facebook.stetho.okhttp3.StethoInterceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -23,6 +24,7 @@ interface C3AuthService {
             val client = OkHttpClient.Builder()
                 .addInterceptor(logger)
                 .addInterceptor(AuthInterceptor(session))
+                .addNetworkInterceptor(StethoInterceptor())
                 .build()
 
             return Retrofit.Builder()
