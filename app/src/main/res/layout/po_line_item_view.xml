@@ -164,10 +164,235 @@
 
             </androidx.appcompat.widget.LinearLayoutCompat>
 
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginBottom="@dimen/margin_4dp">
+
+                <com.c3ai.sourcingoptimization.common.InterTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Closed Date"
+                    android:textSize="@dimen/text_12"
+                    android:textColor="@color/grey"
+                    android:layout_marginBottom="@dimen/margin_4dp"/>
+
+                <com.c3ai.sourcingoptimization.common.InterTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-"
+                    android:textSize="@dimen/text_12"
+                    android:textColor="@color/grey_2"
+                    android:layout_marginBottom="@dimen/margin_8dp"/>
+
+                <com.c3ai.sourcingoptimization.common.InterTextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Promised\nDelivery Date"
+                    android:textSize="@dimen/text_12"
+                    android:gravity="end"
+                    android:textColor="@color/grey"
+                    android:layout_marginBottom="@dimen/margin_4dp"/>
+
+                <com.c3ai.sourcingoptimization.common.InterTextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="12/20/2021"
+                    android:gravity="end"
+                    android:textSize="@dimen/text_12"
+                    android:textColor="@color/grey_2"/>
+
+            </androidx.appcompat.widget.LinearLayoutCompat>
 
         </androidx.appcompat.widget.LinearLayoutCompat>
 
+        <include layout="@layout/divider"/>
 
+        <com.c3ai.sourcingoptimization.common.InterTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="DELIVERY FACILITY"
+            android:textColor="@color/grey"
+            android:textSize="@dimen/text_12"
+            android:layout_marginVertical="@dimen/margin_16dp"/>
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/margin_16dp">
+
+            <com.c3ai.sourcingoptimization.common.InterTextView
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:text="DF"
+                android:gravity="center"
+                android:background="@drawable/round_grey_background"
+                android:textColor="@color/grey_2"
+                android:textSize="@dimen/text_20"
+                android:layout_marginEnd="@dimen/margin_16dp"/>
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="vertical">
+
+                <com.c3ai.sourcingoptimization.common.InterTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Facility Name"
+                    android:textColor="@color/grey_2"
+                    android:textSize="@dimen/text_16"/>
+
+                <com.c3ai.sourcingoptimization.common.InterTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="123 Main St. San Francisco, US"
+                    android:textSize="@dimen/text_14"
+                    android:textColor="@color/grey"/>
+
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+        <com.c3ai.sourcingoptimization.common.InterTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/expendCollapse"
+            android:text="Collapse"
+            android:textColor="@color/blue_1"
+            android:textSize="@dimen/text_16"
+            android:drawableEnd="@drawable/ic_baseline_keyboard_arrow_up_24"
+            android:paddingVertical="@dimen/margin_8dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground"/>
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/expandableContent"
+            android:orientation="vertical">
+
+            <com.c3ai.sourcingoptimization.common.InterTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="BUYER B351245"
+                android:textColor="@color/grey"
+                android:textSize="@dimen/text_12"/>
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingVertical="@dimen/margin_16dp">
+
+                <com.c3ai.sourcingoptimization.common.InterTextView
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:text="WD"
+                    android:gravity="center"
+                    android:background="@drawable/round_grey_background"
+                    android:textColor="@color/grey_2"
+                    android:textSize="@dimen/text_20"
+                    android:layout_marginEnd="@dimen/margin_16dp"/>
+
+                <androidx.appcompat.widget.LinearLayoutCompat
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:orientation="vertical">
+
+                    <com.c3ai.sourcingoptimization.common.InterTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Facility Name"
+                        android:textColor="@color/grey_2"
+                        android:textSize="@dimen/text_16"/>
+
+                    <com.c3ai.sourcingoptimization.common.InterTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="123 Main St. San Francisco, US"
+                        android:textSize="@dimen/text_14"
+                        android:textColor="@color/grey"/>
+
+                </androidx.appcompat.widget.LinearLayoutCompat>
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:srcCompat="@drawable/person_card"
+                    android:layout_gravity="center_vertical"/>
+
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+            <include layout="@layout/divider"/>
+
+            <com.c3ai.sourcingoptimization.common.InterTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="SUPPLIER 352532"
+                android:textColor="@color/grey"
+                android:textSize="@dimen/text_12"
+                android:layout_marginTop="@dimen/margin_16dp"/>
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingVertical="@dimen/margin_16dp">
+
+                <com.c3ai.sourcingoptimization.common.InterTextView
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:text="AB"
+                    android:gravity="center"
+                    android:background="@drawable/round_grey_background"
+                    android:textColor="@color/grey_2"
+                    android:textSize="@dimen/text_20"
+                    android:layout_marginEnd="@dimen/margin_16dp"/>
+
+                <androidx.appcompat.widget.LinearLayoutCompat
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:orientation="vertical">
+
+                    <com.c3ai.sourcingoptimization.common.InterTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="ABC Inc."
+                        android:textColor="@color/grey_2"
+                        android:textSize="@dimen/text_16"/>
+
+                    <com.c3ai.sourcingoptimization.common.InterTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Chickago, US"
+                        android:textSize="@dimen/text_14"
+                        android:textColor="@color/grey"/>
+
+                </androidx.appcompat.widget.LinearLayoutCompat>
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:srcCompat="@drawable/person_card"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginEnd="@dimen/margin_16dp"/>
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:srcCompat="@drawable/alert"
+                    android:layout_gravity="center_vertical"/>
+
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+        </androidx.appcompat.widget.LinearLayoutCompat>
 
     </androidx.appcompat.widget.LinearLayoutCompat>
 

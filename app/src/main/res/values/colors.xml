@@ -5,7 +5,9 @@
     <color name="grey">#AAAEB5</color>
     <color name="grey_2">#F7F8FA</color>
     <color name="grey_3">#ADADAD</color>
+    <color name="grey_4">#50545C</color>
     <color name="blue">#4F8DFF</color>
+    <color name="blue_1">#37A2FF</color>
     <color name="card_background">#1C1D1F</color>
     <color name="divider">#393B40</color>
     <color name="black_text">#111112</color>

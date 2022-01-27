@@ -5,11 +5,23 @@
 <!--    android:id="@+id/poLinesList"-->
 <!--    android:clipToPadding="false"/>-->
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <include layout="@layout/po_line_item_view"
-        android:id="@+id/poLine"/>
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
-</FrameLayout>
+        <include layout="@layout/po_line_item_view"
+            android:id="@+id/poLine1"/>
+
+        <include layout="@layout/po_line_item_view"
+            android:id="@+id/poLine2"/>
+
+
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+</ScrollView>
