@@ -14,9 +14,13 @@ import com.c3ai.sourcingoptimization.authorization.presentation.signin.SignInScr
 import com.c3ai.sourcingoptimization.ui.theme.C3AppTheme
 import dagger.hilt.android.AndroidEntryPoint
 
+/**
+ * An entry point for the application. Activity with navigation for authorization flow
+ * @see LaunchScreen
+ * */
 @ExperimentalAnimationApi
 @AndroidEntryPoint
-class AuthorizationActivity : ComponentActivity() {
+class LaunchActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

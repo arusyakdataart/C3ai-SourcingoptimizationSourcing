@@ -1,5 +1,8 @@
 package com.c3ai.sourcingoptimization.common
 
+/**
+ * Class with general UI states, helps with application UI state logic
+ * */
 sealed class Resource<T>(data: T? = null, message: String? = null) {
     class Success<T>(data: T) : Resource<T>(data)
     class Error<T>(message: String, data: T? = null) : Resource<T>(data, message)

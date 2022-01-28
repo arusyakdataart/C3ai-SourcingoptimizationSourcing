@@ -1,5 +1,9 @@
 package com.c3ai.sourcingoptimization.data.network.requests
 
+/**
+ * Data class with parameters for Item[getItemDetails] request
+ * @see C3ApiService
+ * */
 data class ItemDetailsParameters(
     @Transient val itemId: String
 ) : RequestParameters {

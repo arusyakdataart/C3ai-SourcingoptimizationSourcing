@@ -18,7 +18,7 @@ class ItemsDetailPagerAdapter(fm: FragmentManager) : FragmentStatePagerAdapter(f
     private val tabFragmentsCreators: Map<Int, () -> Fragment> = mapOf(
         OVERVIEW_PAGE_INDEX to { ItemDetailsOverviewFragment() },
         PO_LINES_PAGE_INDEX to { ItemDetailsPOLinesFragment() },
-        SUPPLIERS_PAGE_INDEX to {ItemDetailsOverviewFragment()}
+        SUPPLIERS_PAGE_INDEX to { ItemDetailsOverviewFragment() }
     )
 
     override fun getCount() = tabFragmentsCreators.size

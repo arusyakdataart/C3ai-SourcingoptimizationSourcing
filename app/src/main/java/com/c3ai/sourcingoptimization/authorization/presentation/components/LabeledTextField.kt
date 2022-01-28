@@ -14,6 +14,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+/**
+ * A component for text field in authorization UI.
+ * */
 @Composable
 fun LabeledTextField(
     modifier: Modifier = Modifier,

@@ -13,6 +13,11 @@ import com.c3ai.sourcingoptimization.presentation.search.SearchScreen
 import com.c3ai.sourcingoptimization.ui.theme.C3AppTheme
 import dagger.hilt.android.AndroidEntryPoint
 
+/**
+ * An entry point for authorized users. The activity[MainActivity] setup the application theme and
+ * the main navigation.
+ * @see SearchScreen
+ * */
 @AndroidEntryPoint
 @ExperimentalAnimationApi
 class MainActivity : ComponentActivity() {

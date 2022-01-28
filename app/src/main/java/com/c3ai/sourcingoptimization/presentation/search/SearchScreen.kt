@@ -1,6 +1,5 @@
 package com.c3ai.sourcingoptimization.presentation.search
 
-import android.app.Activity
 import android.content.Intent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.*
@@ -18,7 +17,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.common.components.MButton
-import com.c3ai.sourcingoptimization.presentation.MainActivity
 import com.c3ai.sourcingoptimization.presentation.item_details.ItemDetailsActivity
 
 @ExperimentalAnimationApi
@@ -65,7 +63,6 @@ fun SearchScreen(
             text = "Item Details",
             onClick = {
                 context.startActivity(Intent(context, ItemDetailsActivity::class.java))
-                (context as? Activity)?.finish()
             }
         )
     }

@@ -9,6 +9,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.unit.dp
 
+/**
+ * A button component for the application, styled by application theme[C3AppTheme].
+ * @see MaterialTheme
+ * @see Button
+ * */
 @Composable
 fun MButton(
     modifier: Modifier,
@@ -17,7 +22,8 @@ fun MButton(
     onClick: () -> Unit
 ) {
     Button(
-        modifier = Modifier.composed { modifier }
+        modifier = Modifier
+            .composed { modifier }
             .height(40.dp),
         enabled = enabled,
         content = { Text(text = text, color = MaterialTheme.colors.onPrimary) },

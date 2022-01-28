@@ -101,7 +101,6 @@ class ItemDetailsViewModel @AssistedInject constructor(
      * Refresh posts and update the UI state accordingly
      */
     fun refresh() {
-        // Ui state is refreshing
         viewModelState.update { it.copy(isLoading = true) }
 
         viewModelScope.launch {

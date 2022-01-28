@@ -9,6 +9,10 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
 
+/**
+ * Module for auth flow. It provides the service to authorize on server[C3AuthService] and
+ * structural components.
+ */
 @Module
 @InstallIn(ViewModelComponent::class)
 object C3AuthModule {

@@ -15,6 +15,12 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import javax.inject.Singleton
 
+/**
+ * A module for the application, specializes on an entities that is needed
+ * for server interaction. The module[NetworkModule] defines the creation
+ * of current session[C3Session], network clients.
+ * @see OkHttpClient
+ */
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {

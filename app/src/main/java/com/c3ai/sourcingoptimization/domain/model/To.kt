@@ -1,6 +1,6 @@
 package com.c3ai.sourcingoptimization.domain.model
 
-data class To (
+data class To(
     val id: String,
     val name: String,
     val city: String,

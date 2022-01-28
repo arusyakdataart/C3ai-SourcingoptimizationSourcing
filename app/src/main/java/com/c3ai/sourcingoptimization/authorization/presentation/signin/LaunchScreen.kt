@@ -23,8 +23,13 @@ import androidx.navigation.NavController
 import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.authorization.presentation.AuthRouter
 import com.c3ai.sourcingoptimization.authorization.presentation.AuthViewModel
+import com.c3ai.sourcingoptimization.data.network.C3Session
 import com.c3ai.sourcingoptimization.presentation.MainActivity
 
+/**
+ * Start screen in the application. It checks authorization and navigates to next screen
+ * depending on the current state[C3Session]
+ * */
 @ExperimentalAnimationApi
 @Composable
 fun LaunchScreen(

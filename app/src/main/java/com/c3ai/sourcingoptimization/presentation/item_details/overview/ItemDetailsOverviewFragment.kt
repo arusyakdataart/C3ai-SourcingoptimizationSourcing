@@ -1,7 +1,6 @@
 package com.c3ai.sourcingoptimization.presentation.item_details.overview
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
@@ -11,7 +10,7 @@ import com.c3ai.sourcingoptimization.presentation.item_details.BaseFragment
 import com.c3ai.sourcingoptimization.presentation.item_details.ItemDetailsViewModel
 import com.c3ai.sourcingoptimization.presentation.item_details.ItemDetailsViewModelAssistedFactory
 import com.github.aachartmodel.aainfographics.aachartcreator.*
-import com.github.aachartmodel.aainfographics.aaoptionsmodel.*
+import com.github.aachartmodel.aainfographics.aaoptionsmodel.AAStyle
 import com.github.aachartmodel.aainfographics.aatools.AAGradientColor
 import com.github.aachartmodel.aainfographics.aatools.AALinearGradientDirection
 import dagger.hilt.android.AndroidEntryPoint
@@ -19,7 +18,8 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBinding>(
-    FragmentItemDetailsOverviewBinding::inflate)  {
+    FragmentItemDetailsOverviewBinding::inflate
+) {
 
     @Inject
     lateinit var assistedFactory: ItemDetailsViewModelAssistedFactory
@@ -60,11 +60,18 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
         totalSpentButton.isActivated = true
         totalSpentButton.setOnClickListener {
             if (!it.isActivated) {
-                totalSpentButton.background = ContextCompat.getDrawable(requireContext(), R.drawable.rounded_grey_view_20)
-                totalSpentButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.black_text))
+                totalSpentButton.background =
+                    ContextCompat.getDrawable(requireContext(), R.drawable.rounded_grey_view_20)
+                totalSpentButton.setTextColor(
+                    ContextCompat.getColor(
+                        requireContext(),
+                        R.color.black_text
+                    )
+                )
                 totalSpentButton.isActivated = true
 
-                shareButton.background = ContextCompat.getDrawable(requireContext(), R.drawable.outlined_view_20)
+                shareButton.background =
+                    ContextCompat.getDrawable(requireContext(), R.drawable.outlined_view_20)
                 shareButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.grey_3))
                 shareButton.isActivated = false
 
@@ -72,12 +79,24 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
         }
         shareButton.setOnClickListener {
             if (!it.isActivated) {
-                shareButton.background = ContextCompat.getDrawable(requireContext(), R.drawable.rounded_grey_view_20)
-                shareButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.black_text))
+                shareButton.background =
+                    ContextCompat.getDrawable(requireContext(), R.drawable.rounded_grey_view_20)
+                shareButton.setTextColor(
+                    ContextCompat.getColor(
+                        requireContext(),
+                        R.color.black_text
+                    )
+                )
                 shareButton.isActivated = true
 
-                totalSpentButton.background = ContextCompat.getDrawable(requireContext(), R.drawable.outlined_view_20)
-                totalSpentButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.grey_3))
+                totalSpentButton.background =
+                    ContextCompat.getDrawable(requireContext(), R.drawable.outlined_view_20)
+                totalSpentButton.setTextColor(
+                    ContextCompat.getColor(
+                        requireContext(),
+                        R.color.grey_3
+                    )
+                )
                 totalSpentButton.isActivated = false
             }
         }
@@ -87,10 +106,13 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
         return AAChartModel()
             .chartType(AAChartType.Column)
             .colorsTheme(arrayOf("#82B0FF", "#C799FF", "#F2950A", "#49BFA9", "#A7ADC4"))
-            .series(arrayOf(
-                AASeriesElement()
-                    .data(arrayOf(149.9, 171.5, 106.4, 129.2, 144.0))
-                    .colorByPoint(true)))
+            .series(
+                arrayOf(
+                    AASeriesElement()
+                        .data(arrayOf(149.9, 171.5, 106.4, 129.2, 144.0))
+                        .colorByPoint(true)
+                )
+            )
             .dataLabelsEnabled(true)
             .legendEnabled(false)
             .tooltipEnabled(false)
@@ -106,10 +128,11 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
             .categories(arrayOf("Jan", "Feb", "March", "Apr", "May"))
             .dataLabelsStyle(
                 AAStyle()
-                .color("#1f1b1b")//Title font color
-                .fontSize(11f)//Title font size
-                .fontWeight(AAChartFontWeightType.Bold)//Title font weight
-                .textOutline("0px 0px contrast"))
+                    .color("#1f1b1b")//Title font color
+                    .fontSize(11f)//Title font size
+                    .fontWeight(AAChartFontWeightType.Bold)//Title font weight
+                    .textOutline("0px 0px contrast")
+            )
     }
 
     private fun configureLineChartAndSplineChartStyle(): AAChartModel {
@@ -129,7 +152,7 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
             //.setTooltipValueSuffix("")
             .setDataLabelsEnabled(false)
             .setTouchEventEnabled(true)
-        .build()
+            .build()
 
         aaChartModel
             .markerSymbolStyle(AAChartSymbolStyleType.BorderBlank)
@@ -168,9 +191,9 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
             .data(arrayOf(150, 260, 100, 350, 150, 168))
 
 
-            aaChartModel
-                .animationType(AAChartAnimationType.SwingFromTo)
-                .series(arrayOf(element1, element2, element3, element4, element5))
+        aaChartModel
+            .animationType(AAChartAnimationType.SwingFromTo)
+            .series(arrayOf(element1, element2, element3, element4, element5))
         return aaChartModel
     }
 
@@ -211,7 +234,7 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
     }
 
     fun configureGradientColorAreasplineChart(): AAChartModel {
-        val stopsArr:Array<Any> = arrayOf(
+        val stopsArr: Array<Any> = arrayOf(
             arrayOf(0, "rgba(86,179,95,1)"),
             arrayOf(1, "rgba(86,179,95,0.5)")
         )
@@ -226,7 +249,22 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
             .title("")
             .subtitle("")
             .backgroundColor("rgba(0,0,0,0)")
-            .categories(arrayOf("一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"))
+            .categories(
+                arrayOf(
+                    "一月",
+                    "二月",
+                    "三月",
+                    "四月",
+                    "五月",
+                    "六月",
+                    "七月",
+                    "八月",
+                    "九月",
+                    "十月",
+                    "十一月",
+                    "十二月"
+                )
+            )
             .yAxisTitle("")
             .markerRadius(8f)
             .markerSymbolStyle(AAChartSymbolStyleType.InnerBlank)
@@ -246,12 +284,30 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
             //.setTooltipValueSuffix("")
             .dataLabelsEnabled(false)
             .touchEventEnabled(true)
-            .series(arrayOf(
-                AASeriesElement()
-                    .name("Tokyo Hot")
-                    .lineWidth(5.0f)
-                    .color("rgba(86,179,95, 1)")
-                    .fillColor(linearGradientColor)
-                    .data(arrayOf(7.0, 6.9, 2.5, 14.5, 18.2, 21.5, 5.2, 26.5, 23.3, 45.3, 13.9, 9.6))))
+            .series(
+                arrayOf(
+                    AASeriesElement()
+                        .name("Tokyo Hot")
+                        .lineWidth(5.0f)
+                        .color("rgba(86,179,95, 1)")
+                        .fillColor(linearGradientColor)
+                        .data(
+                            arrayOf(
+                                7.0,
+                                6.9,
+                                2.5,
+                                14.5,
+                                18.2,
+                                21.5,
+                                5.2,
+                                26.5,
+                                23.3,
+                                45.3,
+                                13.9,
+                                9.6
+                            )
+                        )
+                )
+            )
     }
 }

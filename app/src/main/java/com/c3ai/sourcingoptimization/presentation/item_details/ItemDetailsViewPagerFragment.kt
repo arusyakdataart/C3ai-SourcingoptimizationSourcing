@@ -5,7 +5,8 @@ import android.view.View
 import com.c3ai.sourcingoptimization.databinding.FragmentItemDetailsViewPagerBinding
 
 class ItemDetailsViewPagerFragment
-    : BaseFragment<FragmentItemDetailsViewPagerBinding>(FragmentItemDetailsViewPagerBinding::inflate) {
+    :
+    BaseFragment<FragmentItemDetailsViewPagerBinding>(FragmentItemDetailsViewPagerBinding::inflate) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

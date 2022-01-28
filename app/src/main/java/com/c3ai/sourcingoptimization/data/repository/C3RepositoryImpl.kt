@@ -7,6 +7,9 @@ import com.c3ai.sourcingoptimization.domain.model.C3Item
 import com.c3ai.sourcingoptimization.domain.model.SearchItem
 import javax.inject.Inject
 
+/**
+ * General repository implementation provides all necessary data.
+ * */
 class C3RepositoryImpl @Inject constructor(private val api: C3ApiService) : C3Repository {
 
     override suspend fun search(query: String): Result<List<SearchItem>> = Result.on {

@@ -2,6 +2,10 @@ package com.c3ai.sourcingoptimization.data.network
 
 import android.content.Context
 
+/**
+ * Session class for the application, show current state of authorization.
+ * Currently it works with cookies.
+ * */
 class C3Session private constructor(
     private val context: Context,
     var login: String = "",

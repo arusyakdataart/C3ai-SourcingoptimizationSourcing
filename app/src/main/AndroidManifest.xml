@@ -14,7 +14,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.C3AISourcing">
         <activity
-            android:name=".authorization.presentation.AuthorizationActivity"
+            android:name=".authorization.presentation.LaunchActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

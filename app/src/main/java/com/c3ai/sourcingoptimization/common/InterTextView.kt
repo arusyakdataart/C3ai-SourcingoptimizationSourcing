@@ -5,6 +5,9 @@ import android.graphics.Typeface
 import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatTextView
 
+/**
+ * A text component for the application, preset with Inter-Regular font.
+ * */
 class InterTextView : AppCompatTextView {
     constructor(context: Context) : super(context)
     constructor(context: Context, attributeSet: AttributeSet) : super(context, attributeSet)

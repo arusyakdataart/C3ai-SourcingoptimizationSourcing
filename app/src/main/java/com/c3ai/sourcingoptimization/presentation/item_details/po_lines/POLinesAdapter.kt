@@ -8,10 +8,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.c3ai.sourcingoptimization.databinding.PoLineItemViewBinding
 import com.c3ai.sourcingoptimization.domain.model.POLine
 
-class POLinesAdapter() : PagedListAdapter<POLine, POLinesAdapter.POLineViewHolder>(POLinesDiffCallback()) {
+class POLinesAdapter() :
+    PagedListAdapter<POLine, POLinesAdapter.POLineViewHolder>(POLinesDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): POLineViewHolder {
-        val itemBinding = PoLineItemViewBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        val itemBinding =
+            PoLineItemViewBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return POLineViewHolder(itemBinding)
     }
 
@@ -19,7 +21,8 @@ class POLinesAdapter() : PagedListAdapter<POLine, POLinesAdapter.POLineViewHolde
         holder.bind(getItem(position))
     }
 
-    class POLineViewHolder(private val itemBinding: PoLineItemViewBinding) : RecyclerView.ViewHolder(itemBinding.root) {
+    class POLineViewHolder(private val itemBinding: PoLineItemViewBinding) :
+        RecyclerView.ViewHolder(itemBinding.root) {
         fun bind(item: POLine?) {
 
         }

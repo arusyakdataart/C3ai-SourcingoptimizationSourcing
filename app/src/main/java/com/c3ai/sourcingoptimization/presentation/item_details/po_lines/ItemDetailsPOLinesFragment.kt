@@ -3,13 +3,13 @@ package com.c3ai.sourcingoptimization.presentation.item_details.po_lines
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
-import androidx.fragment.app.viewModels
 import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.databinding.FragmentItemDetailsPoLinesBinding
 import com.c3ai.sourcingoptimization.presentation.item_details.BaseFragment
 
 class ItemDetailsPOLinesFragment : BaseFragment<FragmentItemDetailsPoLinesBinding>(
-    FragmentItemDetailsPoLinesBinding::inflate)  {
+    FragmentItemDetailsPoLinesBinding::inflate
+) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -23,11 +23,21 @@ class ItemDetailsPOLinesFragment : BaseFragment<FragmentItemDetailsPoLinesBindin
             if (view.visibility == View.VISIBLE) {
                 view.visibility = View.GONE
                 text.text = "Expand"
-                text.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_baseline_keyboard_arrow_down_24, 0, 0, 0)
+                text.setCompoundDrawablesWithIntrinsicBounds(
+                    R.drawable.ic_baseline_keyboard_arrow_down_24,
+                    0,
+                    0,
+                    0
+                )
             } else {
                 view.visibility = View.VISIBLE
                 text.text = "Collapse"
-                text.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_baseline_keyboard_arrow_up_24, 0, 0, 0)
+                text.setCompoundDrawablesWithIntrinsicBounds(
+                    R.drawable.ic_baseline_keyboard_arrow_up_24,
+                    0,
+                    0,
+                    0
+                )
             }
         }
     }

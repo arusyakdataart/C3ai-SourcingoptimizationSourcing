@@ -11,7 +11,9 @@ import kotlin.reflect.KProperty
 import kotlin.reflect.KProperty0
 import kotlin.reflect.KProperty1
 
-inline fun <reified T: Any> intentFor(context: Context): Intent = Intent(context, T::class.java)
+// A collection of extensions that helps to set and get arguments for activities or fragments.
+
+inline fun <reified T : Any> intentFor(context: Context): Intent = Intent(context, T::class.java)
 
 inline fun <reified T : Activity> Context.createIntent(vararg extras: Pair<KProperty1<T, *>, Any?>): Intent {
     return intentFor<T>(this).setExtras(*extras)
@@ -21,9 +23,13 @@ fun <T : Fragment> T.setArgs(vararg args: Pair<KProperty0<Any?>, Any?>): T = app
     arguments = bundleOf(*args.map { it.first.name to it.second }.toTypedArray())
 }
 
-fun <T : Activity> Intent.setExtras(vararg extras: Pair<KProperty1<T, Any?>, Any?>): Intent = apply {
-    putExtra(DELEGATED_ARGS_BUNDLE_EXTRA, bundleOf(*extras.map { it.first.name to it.second }.toTypedArray()))
-}
+fun <T : Activity> Intent.setExtras(vararg extras: Pair<KProperty1<T, Any?>, Any?>): Intent =
+    apply {
+        putExtra(
+            DELEGATED_ARGS_BUNDLE_EXTRA,
+            bundleOf(*extras.map { it.first.name to it.second }.toTypedArray())
+        )
+    }
 
 inline fun <reified T> Fragment.arg(
     defaultValue: T? = null
@@ -44,7 +50,8 @@ class ActivityExtraDelegate<T>(
     nullable: Boolean
 ) : BundleValueDelegate<Activity, T>(defaultValue, clazz, nullable) {
 
-    override fun getBundle(thisRef: Activity) = thisRef.intent.getBundleExtra(DELEGATED_ARGS_BUNDLE_EXTRA)
+    override fun getBundle(thisRef: Activity) =
+        thisRef.intent.getBundleExtra(DELEGATED_ARGS_BUNDLE_EXTRA)
 }
 
 class FragmentArgumentDelegate<T>(

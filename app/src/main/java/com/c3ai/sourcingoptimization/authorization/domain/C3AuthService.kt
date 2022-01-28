@@ -1,5 +1,6 @@
 package com.c3ai.sourcingoptimization.authorization.domain
 
+import com.c3ai.sourcingoptimization.authorization.domain.C3AuthService.Companion.create
 import com.c3ai.sourcingoptimization.data.network.C3Session
 import com.c3ai.sourcingoptimization.utilities.API_DOMAIN
 import com.c3ai.sourcingoptimization.utilities.SCHEMA
@@ -10,6 +11,10 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.POST
 
+/**
+ * Api service for authorization, has configuration method[create]
+ * with internal building of client[OkHttpClient]
+ */
 interface C3AuthService {
 
     @POST("/auth/1/token")

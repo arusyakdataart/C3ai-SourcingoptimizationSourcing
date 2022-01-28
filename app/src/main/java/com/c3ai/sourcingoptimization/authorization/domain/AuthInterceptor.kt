@@ -6,6 +6,10 @@ import okhttp3.Interceptor
 import okhttp3.Request
 import okhttp3.Response
 
+/**
+ * The network client interceptor class[Interceptor] that works as cookie manager.
+ * @see OkHttpClient
+ * */
 class AuthInterceptor constructor(private val session: C3Session) : Interceptor {
 
     override fun intercept(chain: Interceptor.Chain): Response {

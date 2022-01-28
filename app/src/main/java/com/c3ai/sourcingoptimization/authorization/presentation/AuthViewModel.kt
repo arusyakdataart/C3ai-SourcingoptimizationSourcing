@@ -12,6 +12,11 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * ViewModel class with all authorization logic. It provides main actions and event handler
+ * for authorization flow
+ * @see ViewModel
+ * */
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val session: C3Session,

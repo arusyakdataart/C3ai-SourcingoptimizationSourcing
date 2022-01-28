@@ -5,7 +5,8 @@ import com.c3ai.sourcingoptimization.databinding.ActivityItemDetailsBinding
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class ItemDetailsActivity : BaseActivity<ActivityItemDetailsBinding>(ActivityItemDetailsBinding::inflate) {
+class ItemDetailsActivity :
+    BaseActivity<ActivityItemDetailsBinding>(ActivityItemDetailsBinding::inflate) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
