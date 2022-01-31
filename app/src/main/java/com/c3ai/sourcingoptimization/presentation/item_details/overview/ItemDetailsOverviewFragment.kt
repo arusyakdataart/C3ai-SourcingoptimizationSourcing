@@ -9,6 +9,7 @@ import com.c3ai.sourcingoptimization.databinding.FragmentItemDetailsOverviewBind
 import com.c3ai.sourcingoptimization.presentation.item_details.BaseFragment
 import com.c3ai.sourcingoptimization.presentation.item_details.ItemDetailsViewModel
 import com.c3ai.sourcingoptimization.presentation.item_details.ItemDetailsViewModelAssistedFactory
+import com.c3ai.sourcingoptimization.presentation.item_details.ItemDetailsViewPagerFragment
 import com.github.aachartmodel.aainfographics.aachartcreator.*
 import com.github.aachartmodel.aainfographics.aaoptionsmodel.AAStyle
 import com.github.aachartmodel.aainfographics.aatools.AAGradientColor
@@ -16,6 +17,10 @@ import com.github.aachartmodel.aainfographics.aatools.AALinearGradientDirection
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
+/**
+ * The fragment representing overview page in ItemDetailsViewPagerFragment
+ * @see ItemDetailsViewPagerFragment
+ * */
 @AndroidEntryPoint
 class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBinding>(
     FragmentItemDetailsOverviewBinding::inflate
@@ -102,6 +107,7 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
         }
     }
 
+    // FIXME - data is hardcoded. Not reviewable yet
     fun configureColorfulColumnChart(): AAChartModel {
         return AAChartModel()
             .chartType(AAChartType.Column)
@@ -135,6 +141,7 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
             )
     }
 
+    // FIXME - data is hardcoded. Not reviewable yet
     private fun configureLineChartAndSplineChartStyle(): AAChartModel {
         val aaChartModel = AAChartModel.Builder(requireContext())
             .setChartType(AAChartType.Line)
@@ -147,9 +154,6 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
             .setXAxisLabelsEnabled(false)
             .setYAxisLineWidth(0f)
             .setYAxisTitle("")
-//            .setYAxisLabelsEnabled(false)
-            //.setTooltipEnabled(false)
-            //.setTooltipValueSuffix("")
             .setDataLabelsEnabled(false)
             .setTouchEventEnabled(true)
             .build()
@@ -197,6 +201,7 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
         return aaChartModel
     }
 
+    // FIXME - data is hardcoded. Not reviewable yet
     private fun configureDahsedLineChartAndSplineChartStyle(): AAChartModel {
         val aaChartModel = AAChartModel.Builder(requireContext())
             .setChartType(AAChartType.Line)
@@ -209,9 +214,6 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
             .setXAxisLabelsEnabled(false)
             .setYAxisLineWidth(0f)
             .setYAxisTitle("")
-//            .setYAxisLabelsEnabled(false)
-            //.setTooltipEnabled(false)
-            //.setTooltipValueSuffix("")
             .setDataLabelsEnabled(false)
             .setTouchEventEnabled(true)
             .build()
@@ -233,6 +235,7 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
         return aaChartModel
     }
 
+    // FIXME - data is hardcoded. Not reviewable yet
     fun configureGradientColorAreasplineChart(): AAChartModel {
         val stopsArr: Array<Any> = arrayOf(
             arrayOf(0, "rgba(86,179,95,1)"),
@@ -249,22 +252,6 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
             .title("")
             .subtitle("")
             .backgroundColor("rgba(0,0,0,0)")
-            .categories(
-                arrayOf(
-                    "一月",
-                    "二月",
-                    "三月",
-                    "四月",
-                    "五月",
-                    "六月",
-                    "七月",
-                    "八月",
-                    "九月",
-                    "十月",
-                    "十一月",
-                    "十二月"
-                )
-            )
             .yAxisTitle("")
             .markerRadius(8f)
             .markerSymbolStyle(AAChartSymbolStyleType.InnerBlank)
@@ -279,9 +266,6 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
             .yAxisVisible(false)
             .markerRadius(0f)
             .tooltipEnabled(false)
-//            .setYAxisLabelsEnabled(false)
-            //.setTooltipEnabled(false)
-            //.setTooltipValueSuffix("")
             .dataLabelsEnabled(false)
             .touchEventEnabled(true)
             .series(

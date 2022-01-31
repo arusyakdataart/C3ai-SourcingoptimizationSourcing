@@ -4,6 +4,12 @@ import android.os.Bundle
 import android.view.View
 import com.c3ai.sourcingoptimization.databinding.FragmentItemDetailsViewPagerBinding
 
+/**
+ * The fragment [ItemDetailsViewPagerFragment] setups view pager with 3 tabs
+ * @see ItemDetailsOverviewFragment
+ * @see ItemDetailsPOLinesFragment
+ * @see ItemDetailsSuppliersFragment
+ * */
 class ItemDetailsViewPagerFragment
     :
     BaseFragment<FragmentItemDetailsViewPagerBinding>(FragmentItemDetailsViewPagerBinding::inflate) {

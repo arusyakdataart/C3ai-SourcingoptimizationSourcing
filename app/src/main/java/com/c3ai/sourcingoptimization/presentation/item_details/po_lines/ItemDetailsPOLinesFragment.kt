@@ -6,7 +6,12 @@ import android.widget.TextView
 import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.databinding.FragmentItemDetailsPoLinesBinding
 import com.c3ai.sourcingoptimization.presentation.item_details.BaseFragment
+import com.c3ai.sourcingoptimization.presentation.item_details.ItemDetailsViewPagerFragment
 
+/**
+ * The fragment representing PO Lines page in ItemDetailsViewPagerFragment
+ * @see ItemDetailsViewPagerFragment
+ * */
 class ItemDetailsPOLinesFragment : BaseFragment<FragmentItemDetailsPoLinesBinding>(
     FragmentItemDetailsPoLinesBinding::inflate
 ) {

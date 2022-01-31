@@ -4,7 +4,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewbinding.ViewBinding
+import com.c3ai.sourcingoptimization.presentation.MainActivity
+import com.c3ai.sourcingoptimization.presentation.search.SearchScreen
 
+/**
+ * A base activity for all activities not using jetpack compose.
+ * The activity[BaseActivity] implements view binding functionality.
+ * */
 abstract class BaseActivity<Binding : ViewBinding>(private val factory: (LayoutInflater) -> Binding) :
     AppCompatActivity() {
 

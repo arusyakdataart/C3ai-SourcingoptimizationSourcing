@@ -7,6 +7,10 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.viewbinding.ViewBinding
 
+/**
+ * A base fragment for all fragments not using jetpack compose.
+ * The fragment[BaseFragment] implements view binding functionality.
+ * */
 abstract class BaseFragment<Binding : ViewBinding>(private val factory: (LayoutInflater) -> Binding) :
     Fragment() {
 

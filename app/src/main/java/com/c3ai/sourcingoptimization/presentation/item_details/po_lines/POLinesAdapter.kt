@@ -7,7 +7,12 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.c3ai.sourcingoptimization.databinding.PoLineItemViewBinding
 import com.c3ai.sourcingoptimization.domain.model.POLine
+import com.c3ai.sourcingoptimization.presentation.item_details.ItemDetailsViewPagerFragment
 
+/**
+ * The adapter populating PO Lines list
+ * @see ItemDetailsPOLinesFragment
+ * */
 class POLinesAdapter() :
     PagedListAdapter<POLine, POLinesAdapter.POLineViewHolder>(POLinesDiffCallback()) {
 

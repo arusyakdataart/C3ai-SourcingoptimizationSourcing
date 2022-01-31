@@ -10,6 +10,10 @@ const val OVERVIEW_PAGE_INDEX = 0
 const val PO_LINES_PAGE_INDEX = 1
 const val SUPPLIERS_PAGE_INDEX = 2
 
+/**
+ * Populates pages inside the view pager
+ * @see ItemDetailsViewPagerFragment
+ * */
 class ItemsDetailPagerAdapter(fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
 
     /**
