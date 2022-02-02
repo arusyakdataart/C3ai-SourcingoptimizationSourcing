@@ -2,6 +2,9 @@ package com.c3ai.sourcingoptimization.presentation.item_details.overview
 
 import android.os.Bundle
 import android.view.View
+import android.widget.AdapterView
+import android.widget.Spinner
+import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.asLiveData
@@ -39,11 +42,11 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
             viewModel.uiState.asLiveData().observe(viewLifecycleOwner, { result ->
 
                 if (result is ItemDetailsUiState.HasItem) {
-                    binding.description.text = result.item[0].description
+                    description.text = result.item[0].description
                     if (result.item[0].hasActiveAlerts == true) {
-                        binding.alertsCount.visibility = View.VISIBLE
-                        binding.alertsCount.text = result.item[0].numberOfActiveAlerts?.toString()
-                        binding.suppliers.text = result.item[0].numberOfVendors?.toString()
+                        alertsCount.visibility = View.VISIBLE
+                        alertsCount.text = result.item[0].numberOfActiveAlerts?.toString()
+                        suppliers.text = result.item[0].numberOfVendors?.toString()
                     }
 
                 } else {
@@ -52,7 +55,8 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
             })
         }
 
-        setSwitchToButtons()
+        setSpinnerView(listOf("Total Spent ($)", "Share (%)"), binding.totalSharespinner)
+        setSpinnerView(listOf("3M", "6M", "1Y", "All"), binding.dateSpinner)
 
         val aaBarChartModel = configureColorfulColumnChart()
         val barChart = binding.barChartView
@@ -71,51 +75,20 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
         gradientChartChart.aa_drawChartWithChartModel(aaGradientChartModel)
     }
 
-    private fun setSwitchToButtons() {
-        val totalSpentButton = binding.totalSpent
-        val shareButton = binding.share
-        totalSpentButton.isActivated = true
-        totalSpentButton.setOnClickListener {
-            if (!it.isActivated) {
-                totalSpentButton.background =
-                    ContextCompat.getDrawable(requireContext(), R.drawable.rounded_grey_view_20)
-                totalSpentButton.setTextColor(
-                    ContextCompat.getColor(
-                        requireContext(),
-                        R.color.black_text
-                    )
-                )
-                totalSpentButton.isActivated = true
-
-                shareButton.background =
-                    ContextCompat.getDrawable(requireContext(), R.drawable.outlined_view_20)
-                shareButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.grey_3))
-                shareButton.isActivated = false
-
+    private fun setSpinnerView(spinnerValues: List<String>, spinnerView: Spinner) {
+        spinnerView.adapter = SpinnerArrayAdapter(requireContext(), spinnerValues)
+        spinnerView.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                spinnerView.findViewById<TextView>(R.id.input).text = spinnerValues[position]
+                //parent?.getChildAt(1)?.visibility = View.VISIBLE
             }
-        }
-        shareButton.setOnClickListener {
-            if (!it.isActivated) {
-                shareButton.background =
-                    ContextCompat.getDrawable(requireContext(), R.drawable.rounded_grey_view_20)
-                shareButton.setTextColor(
-                    ContextCompat.getColor(
-                        requireContext(),
-                        R.color.black_text
-                    )
-                )
-                shareButton.isActivated = true
 
-                totalSpentButton.background =
-                    ContextCompat.getDrawable(requireContext(), R.drawable.outlined_view_20)
-                totalSpentButton.setTextColor(
-                    ContextCompat.getColor(
-                        requireContext(),
-                        R.color.grey_3
-                    )
-                )
-                totalSpentButton.isActivated = false
-            }
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
     }
 
