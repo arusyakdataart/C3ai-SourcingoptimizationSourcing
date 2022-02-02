@@ -19,6 +19,6 @@
         android:layout_height="2dp"
         android:id="@+id/selectedView"
         android:background="@color/blue"
-        android:visibility="gone"/>
+        android:visibility="invisible"/>
 
 </androidx.appcompat.widget.LinearLayoutCompat>

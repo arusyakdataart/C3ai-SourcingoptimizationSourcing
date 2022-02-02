@@ -85,7 +85,7 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
                 id: Long
             ) {
                 spinnerView.findViewById<TextView>(R.id.input).text = spinnerValues[position]
-                //parent?.getChildAt(1)?.visibility = View.VISIBLE
+                (spinnerView.adapter as SpinnerArrayAdapter).selectedPosition = position
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {}
