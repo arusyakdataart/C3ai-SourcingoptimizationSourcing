@@ -1,13 +1,11 @@
 package com.c3ai.sourcingoptimization.data.network
 
 import com.c3ai.sourcingoptimization.data.network.converters.C3SpecJsonSerializer
-import com.c3ai.sourcingoptimization.data.network.requests.C3Spec
-import com.c3ai.sourcingoptimization.data.network.requests.DetailedPOParameters
-import com.c3ai.sourcingoptimization.data.network.requests.ItemDetailsParameters
-import com.c3ai.sourcingoptimization.data.network.requests.POLinesDetailsParameters
+import com.c3ai.sourcingoptimization.data.network.requests.*
 import com.c3ai.sourcingoptimization.domain.model.C3Item
 import com.c3ai.sourcingoptimization.domain.model.POLine
 import com.c3ai.sourcingoptimization.domain.model.SearchItem
+import com.c3ai.sourcingoptimization.domain.model.C3Supplier
 import com.c3ai.sourcingoptimization.utilities.MAIN_API_URL
 import com.google.gson.GsonBuilder
 import okhttp3.OkHttpClient
@@ -36,6 +34,14 @@ interface C3ApiService {
     @Headers("Accept: application/json")
     @POST("${MAIN_API_URL}PurchaseOrder?action=fetch")
     suspend fun getDetailedPO(@Body request: DetailedPOParameters): POLine
+
+    @Headers("Accept: application/json")
+    @POST("${MAIN_API_URL}Vendor?action=fetch")
+    suspend fun getSuppliersByItem(@Body request: SuppliersByItemParameters): List<C3Supplier>
+
+    @Headers("Accept: application/json")
+    @POST("${MAIN_API_URL}Vendor?action=fetch")
+    suspend fun getSuppliedItems(@Body request: SuppliedItemsParameters): List<C3Item>
 
     companion object {
 

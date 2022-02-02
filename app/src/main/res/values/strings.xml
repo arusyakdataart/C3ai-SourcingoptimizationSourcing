@@ -6,4 +6,9 @@
     <string name="password">Password</string>
     <string name="search_supplier_item_po">Search Supplier, Item, PO, POL, Alert</string>
     <string name="remember_me">Remember me?</string>
+    <string name="cd_navigation_back_button">Back button</string>
+    <string name="supplier_">"Supplier %s"</string>
+    <string name="cd_search">Search</string>
+    <string name="cd_search_clear">CLear search</string>
+    <string name="cd_sort_menu">Sort menu</string>
 </resources>

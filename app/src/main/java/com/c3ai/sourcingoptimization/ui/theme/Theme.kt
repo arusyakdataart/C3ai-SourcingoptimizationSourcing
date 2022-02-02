@@ -10,9 +10,10 @@ private val DarkColorPalette = darkColors(
     secondary = Secondary,
     background = BackgroundPrimary,
     onBackground = Color.White,
-    surface = LightBlue,
+    surface = BackgroundPrimary,
     onPrimary = OnPrimary,
-    onSurface = BackgroundPrimary,
+    onSecondary = OnSecondary,
+    onSurface = Color.White,
 )
 
 // Application theme for compose.
