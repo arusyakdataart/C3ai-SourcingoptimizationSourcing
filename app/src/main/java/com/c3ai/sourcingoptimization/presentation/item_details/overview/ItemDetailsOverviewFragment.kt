@@ -4,17 +4,16 @@ import android.os.Bundle
 import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.asLiveData
 import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.databinding.FragmentItemDetailsOverviewBinding
-import com.c3ai.sourcingoptimization.presentation.item_details.BaseFragment
-import com.c3ai.sourcingoptimization.presentation.item_details.ItemDetailsViewModel
-import com.c3ai.sourcingoptimization.presentation.item_details.ItemDetailsViewModelAssistedFactory
-import com.c3ai.sourcingoptimization.presentation.item_details.ItemDetailsViewPagerFragment
+import com.c3ai.sourcingoptimization.presentation.item_details.*
 import com.github.aachartmodel.aainfographics.aachartcreator.*
 import com.github.aachartmodel.aainfographics.aaoptionsmodel.AAStyle
 import com.github.aachartmodel.aainfographics.aatools.AAGradientColor
 import com.github.aachartmodel.aainfographics.aatools.AALinearGradientDirection
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.observeOn
 import javax.inject.Inject
 
 /**
@@ -37,7 +36,20 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
         super.onViewCreated(view, savedInstanceState)
 
         binding.apply {
-            viewModel.uiState
+            viewModel.uiState.asLiveData().observe(viewLifecycleOwner, { result ->
+
+                if (result is ItemDetailsUiState.HasItem) {
+                    binding.description.text = result.item[0].description
+                    if (result.item[0].hasActiveAlerts == true) {
+                        binding.alertsCount.visibility = View.VISIBLE
+                        binding.alertsCount.text = result.item[0].numberOfActiveAlerts?.toString()
+                        binding.suppliers.text = result.item[0].numberOfVendors?.toString()
+                    }
+
+                } else {
+                    // TODO!!! Handle error and loading states
+                }
+            })
         }
 
         setSwitchToButtons()

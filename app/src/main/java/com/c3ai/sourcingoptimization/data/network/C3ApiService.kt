@@ -5,7 +5,7 @@ import com.c3ai.sourcingoptimization.data.network.requests.C3Spec
 import com.c3ai.sourcingoptimization.data.network.requests.DetailedPOParameters
 import com.c3ai.sourcingoptimization.data.network.requests.ItemDetailsParameters
 import com.c3ai.sourcingoptimization.data.network.requests.POLinesDetailsParameters
-import com.c3ai.sourcingoptimization.domain.model.C3Item
+import com.c3ai.sourcingoptimization.domain.model.C3Items
 import com.c3ai.sourcingoptimization.domain.model.POLine
 import com.c3ai.sourcingoptimization.domain.model.SearchItem
 import com.c3ai.sourcingoptimization.utilities.MAIN_API_URL
@@ -27,7 +27,7 @@ interface C3ApiService {
 
     @Headers("Accept: application/json")
     @POST("${MAIN_API_URL}Item?action=fetch")
-    suspend fun getItemDetails(@Body request: ItemDetailsParameters): C3Item
+    suspend fun getItemDetails(@Body request: ItemDetailsParameters): C3Items
 
     @Headers("Accept: application/json")
     @POST("${MAIN_API_URL}PurchaseOrder?action=fetch")

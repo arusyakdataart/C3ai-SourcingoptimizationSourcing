@@ -40,7 +40,7 @@ sealed interface ItemDetailsUiState {
      *
      */
     data class HasItem(
-        val item: C3Item,
+        val item: List<C3Item>,
         override val isLoading: Boolean,
         override val itemId: String
     ) : ItemDetailsUiState
@@ -50,7 +50,7 @@ sealed interface ItemDetailsUiState {
  * An internal representation of the Home route state, in a raw form
  */
 private data class ItemDetailsViewModelState(
-    val item: C3Item? = null,
+    val item: List<C3Item>? = null,
     val isLoading: Boolean = false,
     val itemId: String = "",
 ) {
@@ -107,7 +107,7 @@ class ItemDetailsViewModel @AssistedInject constructor(
             val result = repository.getItemDetails(itemId)
             viewModelState.update {
                 when (result) {
-                    is Success -> it.copy(item = result.data, isLoading = false)
+                    is Success -> it.copy(item = result.data.objs, isLoading = false)
                     is Error -> {
                         it.copy(isLoading = false)
                     }
