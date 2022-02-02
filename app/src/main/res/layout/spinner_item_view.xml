@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:background="@color/card_background"
     android:paddingVertical="@dimen/margin_8dp"
-    android:paddingHorizontal="@dimen/margin_16dp"
+    android:paddingHorizontal="@dimen/margin_8dp"
     android:orientation="vertical">
 
     <com.c3ai.sourcingoptimization.common.InterTextView
@@ -12,7 +12,9 @@
         android:layout_height="wrap_content"
         android:id="@+id/title"
         android:textSize="@dimen/text_14"
-        android:textColor="@color/grey_2"/>
+        android:textColor="@color/grey_2"
+        android:layout_marginHorizontal="@dimen/margin_8dp"
+        android:layout_marginBottom="@dimen/margin_4dp"/>
 
     <View
         android:layout_width="match_parent"
