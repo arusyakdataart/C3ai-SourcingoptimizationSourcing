@@ -5,11 +5,12 @@
     <string name="login">Login</string>
     <string name="password">Password</string>
     <string name="search_supplier_item_po">Search Supplier, Item, PO, POL, Alert</string>
+    <string name="remember_me">Remember me?</string>
     <string name="search">Search</string>
     <string name="logout">Logout</string>
-    <string name="cd_open_navigation_drawer">Open side menu</string>
     <string name="Search" />
     <string name="cd_search">Search</string>
     <string name="cd_more_actions">Clear</string>
     <string name="retry">Retry</string>
+    <string name="cd_settings">Settings</string>
 </resources>

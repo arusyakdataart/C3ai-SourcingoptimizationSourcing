@@ -15,6 +15,7 @@ private val DarkColorPalette = darkColors(
     onSurface = BackgroundPrimary,
 )
 
+// Application theme for compose.
 @Composable
 fun C3AppTheme(darkTheme: Boolean = true, content: @Composable() () -> Unit) {
     MaterialTheme(

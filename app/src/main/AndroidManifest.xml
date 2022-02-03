@@ -7,13 +7,14 @@
     <application
         android:name=".C3Application"
         android:allowBackup="true"
+        android:networkSecurityConfig="@xml/network_security_config"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.C3AISourcing">
         <activity
-            android:name=".authorization.presentation.AuthorizationActivity"
+            android:name=".authorization.presentation.LaunchActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -22,6 +23,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".presentation.MainActivity" />
+        <activity android:name=".presentation.item_details.ItemDetailsActivity" />
     </application>
 
 </manifest>

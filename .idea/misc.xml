@@ -3,21 +3,24 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
-        <entry key="../../../../layout/compose-model-1642776774335.xml" value="1.1165311653116532" />
-        <entry key="../../../../layout/compose-model-1642777192166.xml" value="1.1165311653116532" />
-        <entry key="../../../../layout/compose-model-1642777287167.xml" value="1.1165311653116532" />
-        <entry key="../../../../layout/compose-model-1642777797755.xml" value="1.1165311653116532" />
-        <entry key="../../../../layout/compose-model-1642777918039.xml" value="1.1165311653116532" />
-        <entry key="../../../../layout/compose-model-1642778024481.xml" value="1.1165311653116532" />
-        <entry key="../../../../layout/compose-model-1642786378880.xml" value="1.1165311653116532" />
-        <entry key="..\:/Users/arhovhannisyan/AndroidStudioProjects/C3AISourcing/app/src/main/res/layout/activity_home.xml" value="0.16847826086956522" />
-        <entry key="..\:/Users/arhovhannisyan/AndroidStudioProjects/C3AISourcing/app/src/main/res/layout/activity_main.xml" value="0.16847826086956522" />
-        <entry key="app/src/main/res/drawable/bg_auth_textfield.xml" value="0.559375" />
-        <entry key="app/src/main/res/drawable/ic_app_logo.xml" value="0.33958333333333335" />
+        <entry key="..\:/Users/arhovhannisyan/AndroidStudioProjects/C3ai/C3ai-SourcingoptimizationSourcing/app/src/main/res/drawable/badge_background.xml" value="0.1" />
+        <entry key="..\:/Users/arhovhannisyan/AndroidStudioProjects/C3ai/C3ai-SourcingoptimizationSourcing/app/src/main/res/drawable/ic_baseline_keyboard_arrow_down_24.xml" value="0.1" />
+        <entry key="..\:/Users/arhovhannisyan/AndroidStudioProjects/C3ai/C3ai-SourcingoptimizationSourcing/app/src/main/res/drawable/ic_baseline_keyboard_arrow_up_24.xml" value="0.1" />
+        <entry key="..\:/Users/arhovhannisyan/AndroidStudioProjects/C3ai/C3ai-SourcingoptimizationSourcing/app/src/main/res/drawable/outlined_view_20.xml" value="0.26615384615384613" />
+        <entry key="..\:/Users/arhovhannisyan/AndroidStudioProjects/C3ai/C3ai-SourcingoptimizationSourcing/app/src/main/res/drawable/round_grey_background.xml" value="0.1" />
+        <entry key="..\:/Users/arhovhannisyan/AndroidStudioProjects/C3ai/C3ai-SourcingoptimizationSourcing/app/src/main/res/drawable/round_grey_view_20.xml" value="0.26615384615384613" />
+        <entry key="..\:/Users/arhovhannisyan/AndroidStudioProjects/C3ai/C3ai-SourcingoptimizationSourcing/app/src/main/res/drawable/shape.xml" value="0.1" />
+        <entry key="..\:/Users/arhovhannisyan/AndroidStudioProjects/C3ai/C3ai-SourcingoptimizationSourcing/app/src/main/res/layout/activity_item_details.xml" value="0.1793478260869565" />
+        <entry key="..\:/Users/arhovhannisyan/AndroidStudioProjects/C3ai/C3ai-SourcingoptimizationSourcing/app/src/main/res/layout/divider.xml" value="0.17300724637681159" />
+        <entry key="..\:/Users/arhovhannisyan/AndroidStudioProjects/C3ai/C3ai-SourcingoptimizationSourcing/app/src/main/res/layout/fragment_item_details_overview.xml" value="0.1" />
+        <entry key="..\:/Users/arhovhannisyan/AndroidStudioProjects/C3ai/C3ai-SourcingoptimizationSourcing/app/src/main/res/layout/fragment_item_details_po_lines.xml" value="0.1" />
+        <entry key="..\:/Users/arhovhannisyan/AndroidStudioProjects/C3ai/C3ai-SourcingoptimizationSourcing/app/src/main/res/layout/item_details_view_pager_fragment.xml" value="0.17300724637681159" />
+        <entry key="..\:/Users/arhovhannisyan/AndroidStudioProjects/C3ai/C3ai-SourcingoptimizationSourcing/app/src/main/res/layout/po_line_item_view.xml" value="0.1" />
+        <entry key="..\:/Users/arhovhannisyan/AndroidStudioProjects/C3ai/C3ai-SourcingoptimizationSourcing/app/src/main/res/layout/switch_buttons.xml" value="0.2341485507246377" />
       </map>
     </option>
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="11" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="Android Studio default JDK" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/build/classes" />
   </component>
   <component name="ProjectType">

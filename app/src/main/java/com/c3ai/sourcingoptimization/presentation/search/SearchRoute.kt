@@ -16,18 +16,16 @@ import androidx.hilt.navigation.compose.hiltViewModel
  *
  * @param viewModel ViewModel that handles the business logic of this screen
  * @param isExpandedScreen (state) whether the screen is expanded
- * @param openDrawer (event) request opening the app drawer
  * @param scaffoldState (state) state for the [Scaffold] component on this screen
  */
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun SearchRoute(
     viewModel: SearchViewModel = hiltViewModel(),
-    isExpandedScreen: Boolean,
-    openDrawer: () -> Unit,
     scaffoldState: ScaffoldState = rememberScaffoldState()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val isExpandedScreen = false
 
     when (getSearchScreenType(isExpandedScreen, uiState)) {
         SearchScreenType.Search -> {

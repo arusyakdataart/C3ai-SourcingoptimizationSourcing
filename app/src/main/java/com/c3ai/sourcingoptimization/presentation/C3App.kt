@@ -48,44 +48,9 @@ fun C3App(
             val currentRoute =
                 navBackStackEntry?.destination?.route ?: C3Destinations.SEARCH_ROUTE
 
-            val isExpandedScreen = windowSize == WindowSize.Expanded
-            val sizeAwareDrawerState = rememberSizeAwareDrawerState(isExpandedScreen)
-
-            ModalDrawer(
-                drawerContent = {
-                    AppDrawer(
-                        currentRoute = currentRoute,
-                        navigateToHome = navigationActions.navigateToHome,
-                        closeDrawer = { coroutineScope.launch { sizeAwareDrawerState.close() } },
-                        modifier = Modifier
-                            .statusBarsPadding()
-                            .navigationBarsPadding()
-                    )
-                },
-                drawerState = sizeAwareDrawerState,
-                // Only enable opening the drawer via gestures if the screen is not expanded
-                gesturesEnabled = !isExpandedScreen
-            ) {
-                Row(
-                    Modifier
-                        .fillMaxSize()
-                        .statusBarsPadding()
-                        .navigationBarsPadding(bottom = false)
-                ) {
-                    if (isExpandedScreen) {
-                        AppNavRail(
-                            currentRoute = currentRoute,
-                            navigateToHome = navigationActions.navigateToHome,
-                            logout = {},
-                        )
-                    }
-                    C3NavGraph(
-                        isExpandedScreen = isExpandedScreen,
-                        navController = navController,
-                        openDrawer = { coroutineScope.launch { sizeAwareDrawerState.open() } },
-                    )
-                }
-            }
+            C3NavGraph(
+                navController = navController,
+            )
         }
     }
 }

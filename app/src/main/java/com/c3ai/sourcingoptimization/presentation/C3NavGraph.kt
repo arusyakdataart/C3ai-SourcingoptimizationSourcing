@@ -10,10 +10,8 @@ import com.c3ai.sourcingoptimization.presentation.search.SearchRoute
 
 @Composable
 fun C3NavGraph(
-    isExpandedScreen: Boolean,
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
-    openDrawer: () -> Unit = {},
     startDestination: String = C3Destinations.SEARCH_ROUTE
 ) {
     NavHost(
@@ -22,10 +20,7 @@ fun C3NavGraph(
         modifier = modifier
     ) {
         composable(C3Destinations.SEARCH_ROUTE) {
-            SearchRoute(
-                isExpandedScreen = isExpandedScreen,
-                openDrawer = openDrawer
-            )
+            SearchRoute()
         }
     }
 }
