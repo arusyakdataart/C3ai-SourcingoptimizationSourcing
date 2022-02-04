@@ -3,8 +3,10 @@ package com.c3ai.sourcingoptimization.di
 import com.c3ai.sourcingoptimization.data.network.C3ApiService
 import com.c3ai.sourcingoptimization.data.repository.C3Repository
 import com.c3ai.sourcingoptimization.data.repository.C3RepositoryImpl
+import com.c3ai.sourcingoptimization.domain.use_case.GetSupplierDetails
 import com.c3ai.sourcingoptimization.domain.use_case.Search
 import com.c3ai.sourcingoptimization.domain.use_case.SearchUseCases
+import com.c3ai.sourcingoptimization.domain.use_case.SuppliersDetailsUseCases
 import com.c3ai.sourcingoptimization.utilities.AuthInterceptorOkHttpClient
 import dagger.Module
 import dagger.Provides
@@ -34,9 +36,16 @@ object AppModule {
     }
 
     @Provides
-    fun provideSearchUseCases(service: C3ApiService): SearchUseCases {
+    fun provideSearchUseCases(repository: C3Repository): SearchUseCases {
         return SearchUseCases(
-            Search(service)
+            Search(repository)
+        )
+    }
+
+    @Provides
+    fun provideSuppliersDetailsUseCases(repository: C3Repository): SuppliersDetailsUseCases {
+        return SuppliersDetailsUseCases(
+            GetSupplierDetails(repository)
         )
     }
 }

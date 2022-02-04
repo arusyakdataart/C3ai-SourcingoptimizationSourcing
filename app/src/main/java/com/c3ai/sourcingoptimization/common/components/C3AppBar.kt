@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.c3ai.sourcingoptimization.R
@@ -30,6 +31,8 @@ fun C3AppBar(
         title = {
             Text(text = title,
                 color = MaterialTheme.colors.primary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.fillMaxSize()
                 .padding(bottom = 4.dp, top = 10.dp))
         },
@@ -39,13 +42,12 @@ fun C3AppBar(
                     Icon(
                         imageVector = Icons.Filled.ArrowBack,
                         contentDescription = stringResource(R.string.cd_navigation_back_button),
-                        tint = MaterialTheme.colors.primary
                     )
                 }
             }
         } else { navigationIcon },
         actions = actions,
-        backgroundColor = MaterialTheme.colors.surface,
-        elevation = 4.dp
+        backgroundColor = MaterialTheme.colors.background,
+        elevation = 0.dp
     )
 }

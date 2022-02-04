@@ -6,9 +6,23 @@
     <string name="password">Password</string>
     <string name="search_supplier_item_po">Search Supplier, Item, PO, POL, Alert</string>
     <string name="remember_me">Remember me?</string>
+    <string name="search">Search</string>
+    <string name="logout">Logout</string>
+    <string name="Search" />
+    <string name="cd_search">Search</string>
+    <string name="cd_more_actions">Clear</string>
+    <string name="retry">Retry</string>
+    <string name="cd_settings">Settings</string>
     <string name="cd_navigation_back_button">Back button</string>
     <string name="supplier_">"Supplier %s"</string>
-    <string name="cd_search">Search</string>
     <string name="cd_search_clear">CLear search</string>
     <string name="cd_sort_menu">Sort menu</string>
+    <string name="load_error">Load error</string>
+    <string name="tap_to_load_content">Tap to load content</string>
+    <string name="contact_supplier">Contact Supplier</string>
+    <string name="cd_search_menu">Search</string>
+    <string name="open_po_value">Open PO Value | %s</string>
+    <string name="active">Active</string>
+    <string name="contract">Contract</string>
+    <string name="diversity">Diversity</string>
 </resources>

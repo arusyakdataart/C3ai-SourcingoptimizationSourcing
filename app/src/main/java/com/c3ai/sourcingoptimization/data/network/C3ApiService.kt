@@ -37,6 +37,10 @@ interface C3ApiService {
 
     @Headers("Accept: application/json")
     @POST("${MAIN_API_URL}Vendor?action=fetch")
+    suspend fun getSupplierDetails(@Body request: SupplierDetailsParameters): C3Response<C3Supplier>
+
+    @Headers("Accept: application/json")
+    @POST("${MAIN_API_URL}Vendor?action=fetch")
     suspend fun getSuppliersByItem(@Body request: SuppliersByItemParameters): List<C3Supplier>
 
     @Headers("Accept: application/json")

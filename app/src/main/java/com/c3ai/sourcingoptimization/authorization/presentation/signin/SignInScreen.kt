@@ -24,7 +24,7 @@ import com.c3ai.sourcingoptimization.authorization.presentation.AuthEvent
 import com.c3ai.sourcingoptimization.authorization.presentation.AuthViewModel
 import com.c3ai.sourcingoptimization.authorization.presentation.AuthViewModel.UiEvent
 import com.c3ai.sourcingoptimization.authorization.presentation.components.LabeledTextField
-import com.c3ai.sourcingoptimization.common.components.MButton
+import com.c3ai.sourcingoptimization.common.components.SButton
 import com.c3ai.sourcingoptimization.common.components.SharedPrefsToggle
 import com.c3ai.sourcingoptimization.presentation.MainActivity
 import kotlinx.coroutines.flow.collectLatest
@@ -94,7 +94,7 @@ fun SignInScreen(
             value = false,
             onValueChanged = {}
         )
-        MButton(
+        SButton(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 40.dp),

@@ -16,13 +16,37 @@ private val Inter = FontFamily(
 // Set of Material typography styles to start with
 val Typography = Typography(
     defaultFontFamily = Inter,
+    h1 = TextStyle(
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 20.sp
+    ),
+    h2 = TextStyle(
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 18.sp
+    ),
+    h3 = TextStyle(
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 16.sp
+    ),
+    h4 = TextStyle(
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 12.sp
+    ),
     body1 = TextStyle(
-        fontWeight = FontWeight.Normal,
+        fontWeight = FontWeight.SemiBold,
         fontSize = 14.sp
     ),
-    subtitle1 = TextStyle(
+    body2 = TextStyle(
         fontWeight = FontWeight.Normal,
+        fontSize = 12.sp
+    ),
+    subtitle1 = TextStyle(
+        fontWeight = FontWeight.SemiBold,
         fontSize = 14.sp
+    ),
+    subtitle2 = TextStyle(
+        fontWeight = FontWeight.Normal,
+        fontSize = 12.sp
     ),
     button = TextStyle(
         fontWeight = FontWeight.SemiBold,

@@ -7,6 +7,6 @@ import androidx.compose.ui.unit.dp
 // Custom Material Design shape for the application.
 val Shapes = Shapes(
     small = RoundedCornerShape(4.dp),
-    medium = RoundedCornerShape(4.dp),
+    medium = RoundedCornerShape(8.dp),
     large = RoundedCornerShape(0.dp)
 )

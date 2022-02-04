@@ -8,9 +8,9 @@ buildscript {
         targetSdkVersion = 31
 
         // App dependencies
-        kotlinVersion = '1.6.0'
+        kotlinVersion = '1.6.10'
 
-        appCompatVersion = '1.4.0'
+        appCompatVersion = '1.4.1'
         constraintLayoutVersion = '2.1.2'
         coreTestingVersion = '2.0.0'
         coroutinesVersion = "1.4.2"
@@ -24,7 +24,7 @@ buildscript {
         ktlintVersion = '0.38.1'
         ktxVersion = '1.7.0'
         lifecycleVersion = '2.2.0'
-        materialVersion = '1.4.0'
+        materialVersion = '1.5.0'
         navigationVersion = '2.3.5'
         pagingVersion = '3.1.0'
         playServices = '18.0.0'
@@ -46,7 +46,7 @@ buildscript {
     }
     dependencies {
         classpath "com.android.tools.build:gradle:7.0.4"
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.0"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.10"
         classpath "com.google.dagger:hilt-android-gradle-plugin:2.40"
 
         // NOTE: Do not place your application dependencies here; they belong

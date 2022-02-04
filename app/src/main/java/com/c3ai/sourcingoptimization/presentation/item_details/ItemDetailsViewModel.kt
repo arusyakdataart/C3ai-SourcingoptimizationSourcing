@@ -3,8 +3,8 @@ package com.c3ai.sourcingoptimization.presentation.item_details
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.c3ai.sourcingoptimization.data.Result.Error
-import com.c3ai.sourcingoptimization.data.Result.Success
+import com.c3ai.sourcingoptimization.data.C3Result.Error
+import com.c3ai.sourcingoptimization.data.C3Result.Success
 import com.c3ai.sourcingoptimization.data.repository.C3Repository
 import com.c3ai.sourcingoptimization.domain.model.C3Item
 import dagger.assisted.Assisted
