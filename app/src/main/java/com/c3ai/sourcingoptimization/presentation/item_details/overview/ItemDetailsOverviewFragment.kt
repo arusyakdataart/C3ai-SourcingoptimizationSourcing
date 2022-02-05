@@ -7,7 +7,12 @@ import android.widget.Spinner
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import androidx.lifecycle.asLiveData
+import androidx.lifecycle.switchMap
+import androidx.paging.DataSource
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.databinding.FragmentItemDetailsOverviewBinding
 import com.c3ai.sourcingoptimization.presentation.item_details.*
@@ -38,41 +43,80 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.apply {
-            viewModel.uiState.asLiveData().observe(viewLifecycleOwner, { result ->
+        val adapter = OverviewItemsAdapter()
+        binding.overviewItemsList.adapter = adapter
+        setupScrollListener()
 
-                if (result is ItemDetailsUiState.HasItem) {
-                    description.text = result.item[0].description
-                    if (result.item[0].hasActiveAlerts == true) {
-                        alertsCount.visibility = View.VISIBLE
-                        alertsCount.text = result.item[0].numberOfActiveAlerts?.toString()
-                        suppliers.text = result.item[0].numberOfVendors?.toString()
-                    }
+        viewModel.uiState.asLiveData().observe(viewLifecycleOwner, { result ->
+            if (result is ItemDetailsUiState.HasItem) {
+                adapter.submitList(result.items)
 
-                } else {
+            } else {
                     // TODO!!! Handle error and loading states
                 }
-            })
-        }
+        })
 
-        setSpinnerView(listOf("Total Spent ($)", "Share (%)"), binding.totalSharespinner)
-        setSpinnerView(listOf("3M", "6M", "1Y", "All"), binding.dateSpinner)
+        //        viewModel.observableData.observe(viewLifecycleOwner, { pagedList ->
+//            //adapter.submitList(pagedList)
+//        })
 
-        val aaBarChartModel = configureColorfulColumnChart()
-        val barChart = binding.barChartView
-        barChart.aa_drawChartWithChartModel(aaBarChartModel)
+//        binding.apply {
+//            viewModel.uiState.asLiveData().observe(viewLifecycleOwner, { result ->
+//
+//                if (result is ItemDetailsUiState.HasItem) {
+//                    description.text = result.item[0].description
+//                    if (result.item[0].hasActiveAlerts == true) {
+//                        alertsCount.visibility = View.VISIBLE
+//                        alertsCount.text = result.item[0].numberOfActiveAlerts?.toString()
+//                        suppliers.text = result.item[0].numberOfVendors?.toString()
+//                    }
+//
+//                } else {
+//                    // TODO!!! Handle error and loading states
+//                }
+//            })
+//        }
+//
+//        setSpinnerView(listOf("Total Spent ($)", "Share (%)"), binding.totalSharespinner)
+//        setSpinnerView(listOf("3M", "6M", "1Y", "All"), binding.dateSpinner)
+//
+//        val aaBarChartModel = configureColorfulColumnChart()
+//        val barChart = binding.barChartView
+//        barChart.aa_drawChartWithChartModel(aaBarChartModel)
+//
+//        val aaLineChartModel = configureLineChartAndSplineChartStyle()
+//        val lineChart = binding.lineChartView
+//        lineChart.aa_drawChartWithChartModel(aaLineChartModel)
+//
+//        val aaDashedLineChartModel = configureDahsedLineChartAndSplineChartStyle()
+//        val dashedLineChart = binding.dashedLineChartView
+//        dashedLineChart.aa_drawChartWithChartModel(aaDashedLineChartModel)
+//
+//        val aaGradientChartModel = configureGradientColorAreasplineChart()
+//        val gradientChartChart = binding.gradientChart
+//        gradientChartChart.aa_drawChartWithChartModel(aaGradientChartModel)
+    }
 
-        val aaLineChartModel = configureLineChartAndSplineChartStyle()
-        val lineChart = binding.lineChartView
-        lineChart.aa_drawChartWithChartModel(aaLineChartModel)
+    private fun setupScrollListener() {
 
-        val aaDashedLineChartModel = configureDahsedLineChartAndSplineChartStyle()
-        val dashedLineChart = binding.dashedLineChartView
-        dashedLineChart.aa_drawChartWithChartModel(aaDashedLineChartModel)
+        val layoutManager = binding.overviewItemsList.layoutManager as LinearLayoutManager
+        binding.overviewItemsList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                val totalItemCount = layoutManager.itemCount
+                val visibleItemCount = layoutManager.childCount
+                val lastVisibleItem = layoutManager.findLastVisibleItemPosition()
 
-        val aaGradientChartModel = configureGradientColorAreasplineChart()
-        val gradientChartChart = binding.gradientChart
-        gradientChartChart.aa_drawChartWithChartModel(aaGradientChartModel)
+                viewModel.accept(
+                    UiAction.Scroll(
+                        visibleItemCount = visibleItemCount,
+                        lastVisibleItemPosition = lastVisibleItem,
+                        totalItemCount = totalItemCount
+                    )
+                )
+            }
+        })
+
     }
 
     private fun setSpinnerView(spinnerValues: List<String>, spinnerView: Spinner) {

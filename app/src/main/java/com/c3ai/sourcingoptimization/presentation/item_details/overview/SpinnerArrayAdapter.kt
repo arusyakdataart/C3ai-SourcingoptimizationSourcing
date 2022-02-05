@@ -8,6 +8,9 @@ import android.widget.ArrayAdapter
 import android.widget.TextView
 import com.c3ai.sourcingoptimization.R
 
+/**
+ * The adapter populating Spinner dropdown list
+ * */
 class SpinnerArrayAdapter(context: Context, data: List<String>)
     : ArrayAdapter<String>(context, 0, data) {
 

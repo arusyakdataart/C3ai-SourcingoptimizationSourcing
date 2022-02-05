@@ -7,6 +7,8 @@ import com.c3ai.sourcingoptimization.data.Result.Error
 import com.c3ai.sourcingoptimization.data.Result.Success
 import com.c3ai.sourcingoptimization.data.repository.C3Repository
 import com.c3ai.sourcingoptimization.domain.model.C3Item
+import com.c3ai.sourcingoptimization.utilities.PAGINATED_RESPONSE_LIMIT
+import com.c3ai.sourcingoptimization.utilities.VISIBLE_THRESHOLD
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -40,7 +42,7 @@ sealed interface ItemDetailsUiState {
      *
      */
     data class HasItem(
-        val item: List<C3Item>,
+        val items: List<C3Item>,
         override val isLoading: Boolean,
         override val itemId: String
     ) : ItemDetailsUiState
@@ -50,7 +52,7 @@ sealed interface ItemDetailsUiState {
  * An internal representation of the Home route state, in a raw form
  */
 private data class ItemDetailsViewModelState(
-    val item: List<C3Item>? = null,
+    val items: List<C3Item>? = null,
     val isLoading: Boolean = false,
     val itemId: String = "",
 ) {
@@ -60,14 +62,14 @@ private data class ItemDetailsViewModelState(
      * for driving the ui.
      */
     fun toUiState(): ItemDetailsUiState =
-        if (item == null) {
+        if (items == null) {
             ItemDetailsUiState.NoItem(
                 isLoading = isLoading,
                 itemId = itemId
             )
         } else {
             ItemDetailsUiState.HasItem(
-                item = item,
+                items = items,
                 isLoading = isLoading,
                 itemId = itemId
             )
@@ -83,6 +85,7 @@ class ItemDetailsViewModel @AssistedInject constructor(
 ) : ViewModel() {
 
     private val viewModelState = MutableStateFlow(ItemDetailsViewModelState())
+    private var offset = 0
 
     // UI state exposed to the UI
     val uiState = viewModelState
@@ -93,8 +96,18 @@ class ItemDetailsViewModel @AssistedInject constructor(
             viewModelState.value.toUiState()
         )
 
+    val accept: (UiAction) -> Unit
+
     init {
         refresh()
+
+        accept = { action ->
+            when (action) {
+                is UiAction.Scroll -> if (action.shouldFetchMore(offset) && !viewModelState.value.isLoading) {
+                    refresh()
+                }
+            }
+        }
     }
 
     /**
@@ -107,7 +120,10 @@ class ItemDetailsViewModel @AssistedInject constructor(
             val result = repository.getItemDetails(itemId)
             viewModelState.update {
                 when (result) {
-                    is Success -> it.copy(item = result.data.objs, isLoading = false)
+                    is Success -> {
+                        offset += PAGINATED_RESPONSE_LIMIT
+                        it.copy(items = result.data.objs, isLoading = false)
+                    }
                     is Error -> {
                         it.copy(isLoading = false)
                     }
@@ -118,12 +134,27 @@ class ItemDetailsViewModel @AssistedInject constructor(
 
     class Factory(
         private val assistedFactory: ItemDetailsViewModelAssistedFactory,
-        private val itemId: String,
+        private val itemId: String
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return assistedFactory.create(itemId) as T
         }
     }
+}
+
+fun UiAction.Scroll.shouldFetchMore(offset: Int): Boolean {
+    return offset == totalItemCount *  PAGINATED_RESPONSE_LIMIT && visibleItemCount + lastVisibleItemPosition + VISIBLE_THRESHOLD >= totalItemCount
+}
+
+private val UiAction.Scroll.shouldFetchMore
+    get() = visibleItemCount + lastVisibleItemPosition + VISIBLE_THRESHOLD >= totalItemCount
+
+sealed class UiAction {
+    data class Scroll(
+        val visibleItemCount: Int,
+        val lastVisibleItemPosition: Int,
+        val totalItemCount: Int
+    ) : UiAction()
 }
 
 @AssistedFactory
