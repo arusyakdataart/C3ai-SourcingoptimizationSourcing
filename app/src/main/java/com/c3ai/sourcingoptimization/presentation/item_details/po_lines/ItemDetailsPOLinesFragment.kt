@@ -27,20 +27,20 @@ class ItemDetailsPOLinesFragment : BaseFragment<FragmentItemDetailsPoLinesBindin
         text.setOnClickListener {
             if (view.visibility == View.VISIBLE) {
                 view.visibility = View.GONE
-                text.text = "Expand"
+                text.text = "Expand "
                 text.setCompoundDrawablesWithIntrinsicBounds(
-                    R.drawable.ic_baseline_keyboard_arrow_down_24,
                     0,
                     0,
+                    R.drawable.arrow_down,
                     0
                 )
             } else {
                 view.visibility = View.VISIBLE
-                text.text = "Collapse"
+                text.text = "Collapse "
                 text.setCompoundDrawablesWithIntrinsicBounds(
-                    R.drawable.ic_baseline_keyboard_arrow_up_24,
                     0,
                     0,
+                    R.drawable.arrow_up,
                     0
                 )
             }

@@ -22,15 +22,14 @@
 
         <androidx.appcompat.widget.LinearLayoutCompat
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/margin_16dp">
+            android:layout_height="wrap_content">
 
             <com.c3ai.sourcingoptimization.common.InterTextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="$ 8,000"
-                android:textSize="@dimen/text_16"
+                android:textSize="@dimen/text_20"
                 android:textColor="@color/white"/>
 
             <androidx.appcompat.widget.AppCompatImageView
@@ -39,8 +38,6 @@
                 app:srcCompat="@drawable/alert_white"/>
 
         </androidx.appcompat.widget.LinearLayoutCompat>
-
-        <include layout="@layout/divider"/>
 
         <androidx.appcompat.widget.LinearLayoutCompat
             android:layout_width="match_parent"
@@ -70,12 +67,10 @@
 
         </androidx.appcompat.widget.LinearLayoutCompat>
 
-        <include layout="@layout/divider"/>
-
         <androidx.appcompat.widget.LinearLayoutCompat
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="@dimen/margin_8dp"
+            android:paddingVertical="@dimen/margin_16dp"
             android:weightSum="3">
 
             <androidx.appcompat.widget.LinearLayoutCompat
@@ -87,7 +82,7 @@
                 <com.c3ai.sourcingoptimization.common.InterTextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Item 352352"
+                    android:text="Opened Date"
                     android:textSize="@dimen/text_12"
                     android:textColor="@color/grey"
                     android:layout_marginBottom="@dimen/margin_4dp"/>
@@ -103,7 +98,7 @@
                 <com.c3ai.sourcingoptimization.common.InterTextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Lead Time"
+                    android:text="Lead Time\n"
                     android:textSize="@dimen/text_12"
                     android:textColor="@color/grey"
                     android:layout_marginBottom="@dimen/margin_4dp"/>
@@ -111,7 +106,7 @@
                 <com.c3ai.sourcingoptimization.common.InterTextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="-(Act.)"
+                    android:text="23 days (Act.)"
                     android:textSize="@dimen/text_12"
                     android:textColor="@color/grey_2"
                     android:layout_marginBottom="@dimen/margin_4dp"/>
@@ -134,7 +129,7 @@
                 <com.c3ai.sourcingoptimization.common.InterTextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Opened Date"
+                    android:text="Closed Date"
                     android:textSize="@dimen/text_12"
                     android:textColor="@color/grey"
                     android:layout_marginBottom="@dimen/margin_4dp"/>
@@ -160,7 +155,8 @@
                     android:layout_height="wrap_content"
                     android:text="05/1/2021"
                     android:textSize="@dimen/text_12"
-                    android:textColor="@color/grey_2"/>
+                    android:textColor="@color/grey_2"
+                    android:layout_marginBottom="@dimen/margin_4dp"/>
 
             </androidx.appcompat.widget.LinearLayoutCompat>
 
@@ -168,13 +164,12 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:orientation="vertical"
-                android:layout_marginBottom="@dimen/margin_4dp">
+                android:orientation="vertical">
 
                 <com.c3ai.sourcingoptimization.common.InterTextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Closed Date"
+                    android:text=""
                     android:textSize="@dimen/text_12"
                     android:textColor="@color/grey"
                     android:layout_marginBottom="@dimen/margin_4dp"/>
@@ -182,27 +177,26 @@
                 <com.c3ai.sourcingoptimization.common.InterTextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="-"
+                    android:text=""
                     android:textSize="@dimen/text_12"
                     android:textColor="@color/grey_2"
                     android:layout_marginBottom="@dimen/margin_8dp"/>
 
                 <com.c3ai.sourcingoptimization.common.InterTextView
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Promised\nDelivery Date"
                     android:textSize="@dimen/text_12"
-                    android:gravity="end"
                     android:textColor="@color/grey"
                     android:layout_marginBottom="@dimen/margin_4dp"/>
 
                 <com.c3ai.sourcingoptimization.common.InterTextView
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="12/20/2021"
-                    android:gravity="end"
+                    android:text="05/1/2021"
                     android:textSize="@dimen/text_12"
-                    android:textColor="@color/grey_2"/>
+                    android:textColor="@color/grey_2"
+                    android:layout_marginBottom="@dimen/margin_4dp"/>
 
             </androidx.appcompat.widget.LinearLayoutCompat>
 
@@ -216,12 +210,13 @@
             android:text="DELIVERY FACILITY"
             android:textColor="@color/grey"
             android:textSize="@dimen/text_12"
-            android:layout_marginVertical="@dimen/margin_16dp"/>
+            android:layout_marginTop="@dimen/margin_32dp"
+            android:layout_marginBottom="@dimen/margin_16dp"/>
 
         <androidx.appcompat.widget.LinearLayoutCompat
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/margin_16dp">
+            android:layout_marginBottom="@dimen/margin_24dp">
 
             <com.c3ai.sourcingoptimization.common.InterTextView
                 android:layout_width="48dp"
@@ -261,10 +256,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/expendCollapse"
-            android:text="Collapse"
+            android:text="Collapse "
             android:textColor="@color/blue_1"
             android:textSize="@dimen/text_16"
-            android:drawableEnd="@drawable/ic_baseline_keyboard_arrow_up_24"
+            android:drawableEnd="@drawable/arrow_up"
             android:paddingVertical="@dimen/margin_8dp"
             android:clickable="true"
             android:focusable="true"
@@ -274,7 +269,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/expandableContent"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:layout_marginTop="@dimen/margin_16dp">
 
             <com.c3ai.sourcingoptimization.common.InterTextView
                 android:layout_width="wrap_content"
@@ -286,7 +282,8 @@
             <androidx.appcompat.widget.LinearLayoutCompat
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingVertical="@dimen/margin_16dp">
+                android:paddingBottom="@dimen/margin_32dp"
+                android:paddingTop="@dimen/margin_16dp">
 
                 <com.c3ai.sourcingoptimization.common.InterTextView
                     android:layout_width="48dp"
@@ -308,14 +305,14 @@
                     <com.c3ai.sourcingoptimization.common.InterTextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Facility Name"
+                        android:text="Wilson Donin"
                         android:textColor="@color/grey_2"
                         android:textSize="@dimen/text_16"/>
 
                     <com.c3ai.sourcingoptimization.common.InterTextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="123 Main St. San Francisco, US"
+                        android:text="Facility Name"
                         android:textSize="@dimen/text_14"
                         android:textColor="@color/grey"/>
 
@@ -337,7 +334,7 @@
                 android:text="SUPPLIER 352532"
                 android:textColor="@color/grey"
                 android:textSize="@dimen/text_12"
-                android:layout_marginTop="@dimen/margin_16dp"/>
+                android:layout_marginTop="@dimen/margin_32dp"/>
 
             <androidx.appcompat.widget.LinearLayoutCompat
                 android:layout_width="match_parent"
