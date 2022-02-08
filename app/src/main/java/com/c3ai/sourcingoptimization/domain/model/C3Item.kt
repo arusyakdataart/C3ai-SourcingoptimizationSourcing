@@ -36,10 +36,6 @@ data class UnitValue(
     val unit: Unit?
 )
 
-data class Unit(
-    val id: String?
-)
-
 data class InventoryParams(
     val item: InventoryItem?,
     val quantityInStock: Value?,

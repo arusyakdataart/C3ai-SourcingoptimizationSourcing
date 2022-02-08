@@ -7,6 +7,7 @@ import com.c3ai.sourcingoptimization.data.Result.Error
 import com.c3ai.sourcingoptimization.data.Result.Success
 import com.c3ai.sourcingoptimization.data.repository.C3Repository
 import com.c3ai.sourcingoptimization.domain.model.C3Item
+import com.c3ai.sourcingoptimization.domain.model.OpenClosedPOLineQtyItem
 import com.c3ai.sourcingoptimization.utilities.PAGINATED_RESPONSE_LIMIT
 import com.c3ai.sourcingoptimization.utilities.VISIBLE_THRESHOLD
 import dagger.assisted.Assisted
@@ -41,8 +42,14 @@ sealed interface ItemDetailsUiState {
      * There are item to render, as contained in [item].
      *
      */
-    data class HasItem(
+    data class HasItems(
         val items: List<C3Item>,
+        override val isLoading: Boolean,
+        override val itemId: String
+    ) : ItemDetailsUiState
+
+    data class HasEvalMetrics(
+        val evalMetrics: OpenClosedPOLineQtyItem,
         override val isLoading: Boolean,
         override val itemId: String
     ) : ItemDetailsUiState
@@ -53,6 +60,8 @@ sealed interface ItemDetailsUiState {
  */
 private data class ItemDetailsViewModelState(
     val items: List<C3Item>? = null,
+    val openClosedPOLineQty: OpenClosedPOLineQtyItem? = null,
+    val savingOpportunity: OpenClosedPOLineQtyItem? = null,
     val isLoading: Boolean = false,
     val itemId: String = "",
 ) {
@@ -61,19 +70,28 @@ private data class ItemDetailsViewModelState(
      * Converts this [ItemDetailsViewModelState] into a more strongly typed [ItemDetailsUiState]
      * for driving the ui.
      */
-    fun toUiState(): ItemDetailsUiState =
-        if (items == null) {
-            ItemDetailsUiState.NoItem(
+    fun toUiState(): ItemDetailsUiState {
+        if (openClosedPOLineQty != null) {
+            return  ItemDetailsUiState.HasEvalMetrics(
+                evalMetrics = openClosedPOLineQty,
                 isLoading = isLoading,
                 itemId = itemId
             )
-        } else {
-            ItemDetailsUiState.HasItem(
+        }
+
+        if (items != null) {
+            return ItemDetailsUiState.HasItems(
                 items = items,
                 isLoading = isLoading,
                 itemId = itemId
             )
         }
+
+        return ItemDetailsUiState.NoItem(
+            isLoading = isLoading,
+            itemId = itemId
+        )
+    }
 }
 
 /**
@@ -81,7 +99,11 @@ private data class ItemDetailsViewModelState(
  */
 class ItemDetailsViewModel @AssistedInject constructor(
     private val repository: C3Repository,
-    @Assisted private val itemId: String
+    @Assisted ("itemId") private val itemId: String,
+    @Assisted ("expressions") private val expressions: List<String>,
+    @Assisted ("startDate") private val startDate: String,
+    @Assisted ("endDate") private val endDate: String,
+    @Assisted ("interval") private val interval: String
 ) : ViewModel() {
 
     private val viewModelState = MutableStateFlow(ItemDetailsViewModelState())
@@ -117,12 +139,24 @@ class ItemDetailsViewModel @AssistedInject constructor(
         viewModelState.update { it.copy(isLoading = true) }
 
         viewModelScope.launch {
-            val result = repository.getItemDetails(itemId)
+            val itemsResult = repository.getItemDetails(itemId)
             viewModelState.update {
-                when (result) {
+                when (itemsResult) {
                     is Success -> {
                         offset += PAGINATED_RESPONSE_LIMIT
-                        it.copy(items = result.data.objs, isLoading = false)
+                        it.copy(items = itemsResult.data.objs, isLoading = false)
+                    }
+                    is Error -> {
+                        it.copy(isLoading = false)
+                    }
+                }
+            }
+
+            val openClosedPOLineQtyResult = repository.getEvalMetrics(itemId, expressions, startDate, endDate, interval)
+            viewModelState.update {
+                when (openClosedPOLineQtyResult) {
+                    is Success -> {
+                        it.copy(openClosedPOLineQty = openClosedPOLineQtyResult.data, isLoading = false)
                     }
                     is Error -> {
                         it.copy(isLoading = false)
@@ -134,10 +168,14 @@ class ItemDetailsViewModel @AssistedInject constructor(
 
     class Factory(
         private val assistedFactory: ItemDetailsViewModelAssistedFactory,
-        private val itemId: String
+        private val itemId: String,
+        private val expressions: List<String>,
+        private val startDate: String,
+        private val endDate: String,
+        private val interval: String,
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return assistedFactory.create(itemId) as T
+            return assistedFactory.create(itemId, expressions, startDate, endDate, interval) as T
         }
     }
 }
@@ -145,9 +183,6 @@ class ItemDetailsViewModel @AssistedInject constructor(
 fun UiAction.Scroll.shouldFetchMore(offset: Int): Boolean {
     return offset == totalItemCount *  PAGINATED_RESPONSE_LIMIT && visibleItemCount + lastVisibleItemPosition + VISIBLE_THRESHOLD >= totalItemCount
 }
-
-private val UiAction.Scroll.shouldFetchMore
-    get() = visibleItemCount + lastVisibleItemPosition + VISIBLE_THRESHOLD >= totalItemCount
 
 sealed class UiAction {
     data class Scroll(
@@ -160,5 +195,9 @@ sealed class UiAction {
 @AssistedFactory
 interface ItemDetailsViewModelAssistedFactory {
 
-    fun create(itemId: String): ItemDetailsViewModel
+    fun create(@Assisted("itemId") itemId: String,
+               @Assisted("expressions") expressions: List<String>,
+               @Assisted("startDate") startDate: String,
+               @Assisted("endDate") endDate: String,
+               @Assisted("interval") interval: String): ItemDetailsViewModel
 }
