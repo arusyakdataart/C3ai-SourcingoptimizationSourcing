@@ -1,9 +1,9 @@
 package com.c3ai.sourcingoptimization.data.network.requests
 
-import com.c3ai.sourcingoptimization.domain.model.C3Supplier
+import com.c3ai.sourcingoptimization.domain.model.C3Vendor
 
 /**
- * Data class with parameters for Supplier[C3Supplier] request[getSupplierDetails] with details
+ * Data class with parameters for Supplier[C3Vendor] request[getSupplierDetails] with details
  * @see C3ApiService
  * */
 data class SupplierDetailsParameters(

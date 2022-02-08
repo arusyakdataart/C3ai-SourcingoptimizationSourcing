@@ -5,8 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.data.C3Result
 import com.c3ai.sourcingoptimization.domain.model.C3Item
-import com.c3ai.sourcingoptimization.domain.model.C3Supplier
-import com.c3ai.sourcingoptimization.domain.model.POLine
+import com.c3ai.sourcingoptimization.domain.model.C3Vendor
+import com.c3ai.sourcingoptimization.domain.model.PurchaseOrder
 import com.c3ai.sourcingoptimization.domain.use_case.SuppliersDetailsUseCases
 import com.c3ai.sourcingoptimization.utilities.ErrorMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -44,9 +44,10 @@ sealed interface SupplierDetailsUiState {
      *
      */
     data class HasDetails(
-        val supplier: C3Supplier,
-        val poLines: List<POLine> = emptyList(),
+        val supplier: C3Vendor,
+        val poLines: List<PurchaseOrder.Order> = emptyList(),
         val items: List<C3Item> = emptyList(),
+        val expandedListItemIds: Set<String> = emptySet(),
         override val isLoading: Boolean,
         override val errorMessages: List<ErrorMessage>,
         override val searchInput: String
@@ -57,7 +58,7 @@ sealed interface SupplierDetailsUiState {
  * An internal representation of the SupplierDetails route state, in a raw form
  */
 private data class SupplierDetailsViewModelState(
-    val supplier: C3Supplier? = null,
+    val supplier: C3Vendor? = null,
     val isLoading: Boolean = false,
     val errorMessages: List<ErrorMessage> = emptyList(),
     val searchInput: String = "",

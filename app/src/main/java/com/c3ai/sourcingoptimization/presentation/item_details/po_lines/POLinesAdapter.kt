@@ -6,19 +6,18 @@ import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.c3ai.sourcingoptimization.databinding.PoLineItemViewBinding
-import com.c3ai.sourcingoptimization.domain.model.POLine
-import com.c3ai.sourcingoptimization.presentation.item_details.ItemDetailsViewPagerFragment
+import com.c3ai.sourcingoptimization.domain.model.PurchaseOrder
 
 /**
  * The adapter populating PO Lines list
  * @see ItemDetailsPOLinesFragment
  * */
 class POLinesAdapter() :
-    PagedListAdapter<POLine, POLinesAdapter.POLineViewHolder>(POLinesDiffCallback()) {
+    PagedListAdapter<PurchaseOrder.Order, POLinesAdapter.POLineViewHolder>(POLinesDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): POLineViewHolder {
-        val itemBinding =
-            PoLineItemViewBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        val itemBinding = PoLineItemViewBinding
+            .inflate(LayoutInflater.from(parent.context), parent, false)
         return POLineViewHolder(itemBinding)
     }
 
@@ -28,17 +27,23 @@ class POLinesAdapter() :
 
     class POLineViewHolder(private val itemBinding: PoLineItemViewBinding) :
         RecyclerView.ViewHolder(itemBinding.root) {
-        fun bind(item: POLine?) {
+        fun bind(item: PurchaseOrder.Order?) {
 
         }
     }
 }
 
-private class POLinesDiffCallback : DiffUtil.ItemCallback<POLine>() {
+private class POLinesDiffCallback : DiffUtil.ItemCallback<PurchaseOrder.Order>() {
 
-    override fun areItemsTheSame(oldItem: POLine, newItem: POLine): Boolean =
+    override fun areItemsTheSame(
+        oldItem: PurchaseOrder.Order,
+        newItem: PurchaseOrder.Order
+    ): Boolean =
         oldItem.id == newItem.id
 
-    override fun areContentsTheSame(oldItem: POLine, newItem: POLine): Boolean =
+    override fun areContentsTheSame(
+        oldItem: PurchaseOrder.Order,
+        newItem: PurchaseOrder.Order
+    ): Boolean =
         oldItem == newItem
 }

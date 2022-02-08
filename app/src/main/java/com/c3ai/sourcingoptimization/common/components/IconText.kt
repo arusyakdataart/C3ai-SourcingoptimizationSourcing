@@ -37,9 +37,9 @@ fun IconText(
                 // Placeholder tells text layout the expected size and vertical alignment of
                 // children composable.
                 Placeholder(
-                    width = 12.sp,
-                    height = 12.sp,
-                    placeholderVerticalAlign = PlaceholderVerticalAlign.AboveBaseline
+                    width = 16.sp,
+                    height = 16.sp,
+                    placeholderVerticalAlign = PlaceholderVerticalAlign.Center
                 )
             ) { icon() }
         )

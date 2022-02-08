@@ -25,4 +25,7 @@
     <string name="active">Active</string>
     <string name="contract">Contract</string>
     <string name="diversity">Diversity</string>
+    <string name="total_cost">Total Cost</string>
+    <string name="opened_date">Opened Date</string>
+    <string name="closed_date">Closed Date</string>
 </resources>

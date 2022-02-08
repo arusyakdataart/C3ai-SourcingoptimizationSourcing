@@ -2,10 +2,7 @@ package com.c3ai.sourcingoptimization.data.network
 
 import com.c3ai.sourcingoptimization.data.network.converters.C3SpecJsonSerializer
 import com.c3ai.sourcingoptimization.data.network.requests.*
-import com.c3ai.sourcingoptimization.domain.model.C3Item
-import com.c3ai.sourcingoptimization.domain.model.POLine
-import com.c3ai.sourcingoptimization.domain.model.SearchItem
-import com.c3ai.sourcingoptimization.domain.model.C3Supplier
+import com.c3ai.sourcingoptimization.domain.model.*
 import com.c3ai.sourcingoptimization.utilities.MAIN_API_URL
 import com.google.gson.GsonBuilder
 import okhttp3.OkHttpClient
@@ -29,19 +26,19 @@ interface C3ApiService {
 
     @Headers("Accept: application/json")
     @POST("${MAIN_API_URL}PurchaseOrder?action=fetch")
-    suspend fun getPOLines(@Body request: POLinesDetailsParameters): POLine
+    suspend fun getPOLines(@Body request: POLinesDetailsParameters): C3Response<PurchaseOrder.Line>
 
     @Headers("Accept: application/json")
     @POST("${MAIN_API_URL}PurchaseOrder?action=fetch")
-    suspend fun getDetailedPO(@Body request: DetailedPOParameters): POLine
+    suspend fun getDetailedPO(@Body request: DetailedPOParameters): C3Response<PurchaseOrder.Order>
 
     @Headers("Accept: application/json")
     @POST("${MAIN_API_URL}Vendor?action=fetch")
-    suspend fun getSupplierDetails(@Body request: SupplierDetailsParameters): C3Response<C3Supplier>
+    suspend fun getSupplierDetails(@Body request: SupplierDetailsParameters): C3Response<C3Vendor>
 
     @Headers("Accept: application/json")
     @POST("${MAIN_API_URL}Vendor?action=fetch")
-    suspend fun getSuppliersByItem(@Body request: SuppliersByItemParameters): List<C3Supplier>
+    suspend fun getSuppliersByItem(@Body request: SuppliersByItemParameters): List<C3Vendor>
 
     @Headers("Accept: application/json")
     @POST("${MAIN_API_URL}Vendor?action=fetch")
@@ -51,7 +48,7 @@ interface C3ApiService {
 
         fun create(okHttpClient: OkHttpClient): C3ApiService {
             val gson = GsonBuilder()
-                .setDateFormat(DateFormat.LONG)
+                .setDateFormat("yyyy-MM-dd'T'HH:mm:ss")
                 .registerTypeAdapter(C3Spec::class.java, C3SpecJsonSerializer())
                 .create()
 

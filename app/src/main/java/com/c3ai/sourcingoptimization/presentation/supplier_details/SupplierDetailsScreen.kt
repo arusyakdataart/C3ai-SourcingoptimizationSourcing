@@ -1,43 +1,42 @@
 package com.c3ai.sourcingoptimization.presentation.supplier_details
 
-import androidx.compose.animation.AnimatedVisibility
+import android.icu.text.DateFormat
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Sort
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.common.components.*
+import com.c3ai.sourcingoptimization.data.C3Result
+import com.c3ai.sourcingoptimization.data.repository.C3MockRepositoryImpl
+import com.c3ai.sourcingoptimization.domain.model.PurchaseOrder
 import com.c3ai.sourcingoptimization.presentation.FullScreenLoading
 import com.c3ai.sourcingoptimization.presentation.LoadingContent
+import com.c3ai.sourcingoptimization.ui.theme.C3AppTheme
 import com.c3ai.sourcingoptimization.ui.theme.Green40
 import com.c3ai.sourcingoptimization.ui.theme.Lila40
+import kotlinx.coroutines.runBlocking
+import java.text.SimpleDateFormat
 
 
 /**
@@ -141,6 +140,7 @@ fun SupplierDetailsScreen(
 private fun SupplierDetailsDataScreen(
     uiState: SupplierDetailsUiState.HasDetails,
 ) {
+    val dateFormatter = SimpleDateFormat("dd/MM/yyyy")
     CollapsingContentList(
         contentModifier = Modifier
             .height(212.dp),
@@ -149,47 +149,10 @@ private fun SupplierDetailsDataScreen(
     ) { item ->
         Column(
             modifier = Modifier
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = 16.dp, vertical = 8.dp)
                 .background(MaterialTheme.colors.background)
         ) {
-            IconText(
-                item.id,
-                style = MaterialTheme.typography.h3,
-                color = MaterialTheme.colors.primary
-            ) {
-                Icon(Icons.Filled.Link, "", tint = MaterialTheme.colors.primary)
-            }
-            C3Card {
-                ConstraintLayout(
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .fillMaxWidth()
-                ) {
-                    // Create references for the composables to constrain
-                    val (
-                        status,
-                        totalCost,
-                        totalCostValue,
-                    ) = createRefs()
-
-                    Text(
-                        "Open",
-                        style = MaterialTheme.typography.subtitle1,
-                        color = Green40,
-                        modifier = Modifier.constrainAs(status) {
-                            top.linkTo(parent.top)
-                        }
-                    )
-
-                    Text(
-                        "Text",
-                        style = MaterialTheme.typography.h4,
-                        color = MaterialTheme.colors.secondary,
-                        modifier = Modifier.constrainAs(totalCost) {
-                            top.linkTo(status.top, margin = 16.dp)
-                        })
-                }
-            }
+            PoLinesListSimple(item, dateFormatter)
         }
     }
 }
@@ -204,10 +167,24 @@ private fun SuppliersDetailsInfo(
             .fillMaxWidth()
             .padding(16.dp)
     ) {
-        MultipleStatusText(
-            isActive = supplier.active,
-            isContract = supplier.hasActiveContracts,
-            isDiversity = supplier.diversity,
+        val isActive = supplier.active
+        val isContract = supplier.hasActiveContracts
+        val isDiversity = supplier.diversity
+        Text(
+            buildAnnotatedString {
+                withStyle(style = SpanStyle(color = if (isActive) Green40 else Lila40)) {
+                    append(stringResource(R.string.active).uppercase())
+                }
+                append(" • ")
+                withStyle(style = SpanStyle(color = if (isContract) Green40 else Lila40)) {
+                    append(stringResource(R.string.contract).uppercase())
+                }
+                append(" • ")
+                withStyle(style = SpanStyle(color = if (isDiversity) Green40 else Lila40)) {
+                    append(stringResource(R.string.diversity).uppercase())
+                }
+            },
+            style = MaterialTheme.typography.subtitle1,
             modifier = Modifier
                 .padding(bottom = 10.dp),
         )
@@ -219,14 +196,15 @@ private fun SuppliersDetailsInfo(
                 .padding(bottom = 10.dp),
         )
         Text(
-            "",
+            supplier.location.toString(),
             style = MaterialTheme.typography.subtitle1,
             color = MaterialTheme.colors.secondary,
             modifier = Modifier
                 .padding(bottom = 10.dp),
         )
+        val openPoValue = supplier.allPOValue.valueString
         Text(
-            stringResource(R.string.open_po_value, "usd1234"),
+            stringResource(R.string.open_po_value, openPoValue),
             style = MaterialTheme.typography.subtitle1,
             color = MaterialTheme.colors.secondary,
             modifier = Modifier
@@ -240,36 +218,111 @@ private fun SuppliersDetailsInfo(
 }
 
 @Composable
-fun MultipleStatusText(
-    isActive: Boolean,
-    isContract: Boolean,
-    isDiversity: Boolean,
-    modifier: Modifier
+private fun PoLinesListSimple(
+    item: PurchaseOrder.Order,
+    dateFormatter: SimpleDateFormat,
 ) {
-    Text(
-        buildAnnotatedString {
-            withStyle(style = SpanStyle(color = if (isActive) Green40 else Lila40)) {
-                append(stringResource(R.string.active).uppercase())
+
+    IconText(
+        item.id,
+        style = MaterialTheme.typography.h3,
+        color = MaterialTheme.colors.primary,
+        modifier = Modifier.padding(bottom = 16.dp)
+    ) {
+        Icon(Icons.Filled.Link, "", tint = MaterialTheme.colors.primary)
+    }
+    C3Card {
+        ConstraintLayout(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth()
+        ) {
+            // Create references for the composables to constrain
+            val (
+                status,
+                totalCost,
+                openedDate,
+                closedDate,
+            ) = createRefs()
+            Text(
+                item.fulfilledStr,
+                style = MaterialTheme.typography.subtitle1,
+                color = Green40,
+                modifier = Modifier.constrainAs(status) {
+                    top.linkTo(parent.top)
+                }
+            )
+            Column(
+                modifier = Modifier
+                    .constrainAs(totalCost) {
+                        top.linkTo(status.bottom, margin = 16.dp)
+                        start.linkTo(parent.start)
+                        end.linkTo(openedDate.start)
+                        width = Dimension.fillToConstraints
+                    }
+            ) {
+                Text(
+                    stringResource(R.string.total_cost),
+                    style = MaterialTheme.typography.h4,
+                    color = MaterialTheme.colors.secondary,
+                )
+                Text(
+                    item.totalCost.valueString,
+                    style = MaterialTheme.typography.h2,
+                    color = MaterialTheme.colors.primary,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
             }
-            append(" • ")
-            withStyle(style = SpanStyle(color = if (isContract) Green40 else Lila40)) {
-                append(stringResource(R.string.contract).uppercase())
+            Column(
+                modifier = Modifier
+                    .constrainAs(openedDate) {
+                        top.linkTo(status.bottom, margin = 16.dp)
+                        start.linkTo(totalCost.end, margin = 8.dp)
+                        end.linkTo(closedDate.start)
+                        width = Dimension.fillToConstraints
+                    }
+            ) {
+                Text(
+                    stringResource(R.string.opened_date),
+                    style = MaterialTheme.typography.h4,
+                    color = MaterialTheme.colors.secondary,
+                )
+                Text(
+                    dateFormatter.format(item.orderCreationDate),
+                    style = MaterialTheme.typography.subtitle2,
+                    color = MaterialTheme.colors.primary,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
             }
-            append(" • ")
-            withStyle(style = SpanStyle(color = if (isDiversity) Green40 else Lila40)) {
-                append(stringResource(R.string.diversity).uppercase())
+            Column(
+                modifier = Modifier
+                    .constrainAs(closedDate) {
+                        top.linkTo(status.bottom, margin = 16.dp)
+                        start.linkTo(openedDate.end, margin = 8.dp)
+                        end.linkTo(parent.end)
+                        width = Dimension.fillToConstraints
+                    }
+            ) {
+                Text(
+                    stringResource(R.string.closed_date),
+                    style = MaterialTheme.typography.h4,
+                    color = MaterialTheme.colors.secondary,
+                )
+                Text(
+                    dateFormatter.format(item.closedDate),
+                    style = MaterialTheme.typography.subtitle2,
+                    color = MaterialTheme.colors.primary,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
             }
-        },
-        style = MaterialTheme.typography.subtitle1,
-        modifier = modifier,
-    )
+        }
+    }
 }
 
 /**
  * TopAppBar for the suppliers details screen[SupplierDetailsScreen]
  */
-@ExperimentalAnimationApi
-@ExperimentalComposeUiApi
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun SuppliersDetailsAppBar(
     navController: NavController,
@@ -342,4 +395,29 @@ private fun SuppliersDetailsAppBar(
             }
         }
     )
+}
+
+@Preview
+@Composable
+fun ComposablePreview() {
+    val supplier = runBlocking {
+        (C3MockRepositoryImpl().getSupplierDetails("") as C3Result.Success).data
+    }
+    C3AppTheme {
+        SupplierDetailsScreen(
+            navController = rememberNavController(),
+            scaffoldState = rememberScaffoldState(),
+            uiState = SupplierDetailsUiState.HasDetails(
+                supplier = supplier,
+                poLines = supplier.purchaseOrders,
+                items = supplier.items,
+                isLoading = false,
+                errorMessages = emptyList(),
+                searchInput = ""
+            ),
+            onRefreshDetails = {},
+            onSearchInputChanged = {},
+            supplierId = supplier.id,
+        )
+    }
 }
