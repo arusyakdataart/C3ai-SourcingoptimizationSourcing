@@ -6,6 +6,7 @@ import com.c3ai.sourcingoptimization.data.network.requests.EvalMetricsParameters
 import com.c3ai.sourcingoptimization.data.network.requests.ItemDetailsParameters
 import com.c3ai.sourcingoptimization.domain.model.C3Items
 import com.c3ai.sourcingoptimization.domain.model.OpenClosedPOLineQtyItem
+import com.c3ai.sourcingoptimization.domain.model.SavingsOpportunityItem
 import com.c3ai.sourcingoptimization.domain.model.SearchItem
 import javax.inject.Inject
 
@@ -22,14 +23,29 @@ class C3RepositoryImpl @Inject constructor(private val api: C3ApiService) : C3Re
         api.getItemDetails(ItemDetailsParameters(itemId = itemId))
     }
 
-    override suspend fun getEvalMetrics(
+    override suspend fun getEvalMetricsForPOLineQty(
         itemId: String,
         expressions: List<String>,
         startDate: String,
         endDate: String,
         interval: String
     ): Result<OpenClosedPOLineQtyItem> = Result.on {
-        api.getEvalMetrics(EvalMetricsParameters(itemId = itemId, expressions = expressions,
+        api.getEvalMetricsForPOLineQty(EvalMetricsParameters(itemId = itemId, expressions = expressions,
             startDate = startDate, endDate = endDate, interval = interval))
+    }
+
+    override suspend fun getEvalMetricsForSavingsOpportunity(
+        itemId: String,
+        expressions: List<String>,
+        startDate: String,
+        endDate: String,
+        interval: String
+    ): Result<SavingsOpportunityItem> = Result.on {
+        api.getEvalMetricsForSavingOpportunity(
+            EvalMetricsParameters(
+                itemId = itemId, expressions = expressions,
+                startDate = startDate, endDate = endDate, interval = interval
+            )
+        )
     }
 }

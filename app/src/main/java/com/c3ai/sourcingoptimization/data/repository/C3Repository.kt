@@ -3,6 +3,7 @@ package com.c3ai.sourcingoptimization.data.repository
 import com.c3ai.sourcingoptimization.data.Result
 import com.c3ai.sourcingoptimization.domain.model.C3Items
 import com.c3ai.sourcingoptimization.domain.model.OpenClosedPOLineQtyItem
+import com.c3ai.sourcingoptimization.domain.model.SavingsOpportunityItem
 import com.c3ai.sourcingoptimization.domain.model.SearchItem
 
 /**
@@ -14,7 +15,10 @@ interface C3Repository {
 
     suspend fun getItemDetails(itemId: String): Result<C3Items>
 
-    suspend fun getEvalMetrics(itemId: String, expressions: List<String>, startDate: String,
-                               endDate: String, interval: String): Result<OpenClosedPOLineQtyItem>
+    suspend fun getEvalMetricsForPOLineQty(itemId: String, expressions: List<String>, startDate: String,
+                                           endDate: String, interval: String): Result<OpenClosedPOLineQtyItem>
+
+    suspend fun getEvalMetricsForSavingsOpportunity(itemId: String, expressions: List<String>, startDate: String,
+                                                    endDate: String, interval: String): Result<SavingsOpportunityItem>
 
 }

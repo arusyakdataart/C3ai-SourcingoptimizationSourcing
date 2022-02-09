@@ -37,13 +37,13 @@ data class UnitValue(
 )
 
 data class InventoryParams(
-    val item: InventoryItem?,
+    val item: Id?,
     val quantityInStock: Value?,
     val id: String?,
     val version: Int?
 )
 
-data class InventoryItem(
+data class Id(
     val id: String?
 )
 
