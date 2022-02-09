@@ -6,10 +6,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -29,12 +27,15 @@ fun C3AppBar(
 ) {
     TopAppBar(
         title = {
-            Text(text = title,
+            Text(
+                text = title,
                 color = MaterialTheme.colors.primary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.fillMaxSize()
-                .padding(bottom = 4.dp, top = 10.dp))
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = 4.dp, top = 10.dp)
+            )
         },
         navigationIcon = if (navigationIcon == null) {
             {
@@ -45,7 +46,9 @@ fun C3AppBar(
                     )
                 }
             }
-        } else { navigationIcon },
+        } else {
+            navigationIcon
+        },
         actions = actions,
         backgroundColor = MaterialTheme.colors.background,
         elevation = 0.dp

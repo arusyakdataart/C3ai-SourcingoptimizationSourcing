@@ -28,4 +28,8 @@
     <string name="total_cost">Total Cost</string>
     <string name="opened_date">Opened Date</string>
     <string name="closed_date">Closed Date</string>
+    <string name="cd_expandable_arrow">Expandable Arrow</string>
+    <string name="po_line_">PO Line %s</string>
+    <string name="unit_price_">Unit Price %s</string>
+    <string name="quantity_">Quantity %s</string>
 </resources>

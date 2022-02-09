@@ -3,7 +3,6 @@ plugins {
     id 'kotlin-android'
     id 'kotlin-kapt'
     id 'dagger.hilt.android.plugin'
-    id "org.jetbrains.kotlin.plugin.noarg" version "1.6.10"
 }
 
 android {
@@ -42,10 +41,6 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion '1.1.0-rc02'
         kotlinCompilerVersion '1.6.10'
-    }
-    noArg {
-        annotation("com.c3ai.sourcingoptimization.utilities.NoArg")
-        invokeInitializers = true
     }
 }
 

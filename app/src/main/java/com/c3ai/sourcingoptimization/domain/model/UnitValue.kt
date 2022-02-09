@@ -5,17 +5,9 @@ data class UnitValue(
     val value: Double
 ) {
 
-    val valueString: String
-        get() = unit.id + String.format("%.3f", value)
-
     companion object
 }
 
 data class Unit(
     val id: String
-) {
-
-    override fun toString(): String {
-        return id
-    }
-}
+)

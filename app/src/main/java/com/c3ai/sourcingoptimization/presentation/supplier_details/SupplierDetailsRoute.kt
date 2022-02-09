@@ -32,6 +32,7 @@ fun SupplierDetailsRoute(
         uiState = uiState,
         onRefreshDetails = { viewModel.refreshDetails() },
         onSearchInputChanged = { viewModel.onSearchInputChanged(it) },
-        supplierId = supplierId ?: ""
+        supplierId = supplierId ?: "",
+        onExpandableItemClick = { viewModel.onExpandableItemClick(it) }
     )
 }

@@ -1,8 +1,11 @@
 package com.c3ai.sourcingoptimization.di
 
+import android.content.Context
 import com.c3ai.sourcingoptimization.data.network.C3ApiService
 import com.c3ai.sourcingoptimization.data.repository.C3Repository
 import com.c3ai.sourcingoptimization.data.repository.C3RepositoryImpl
+import com.c3ai.sourcingoptimization.domain.settings.C3AppSettingsProvider
+import com.c3ai.sourcingoptimization.domain.settings.C3AppSettingsProviderImpl
 import com.c3ai.sourcingoptimization.domain.use_case.GetSupplierDetails
 import com.c3ai.sourcingoptimization.domain.use_case.Search
 import com.c3ai.sourcingoptimization.domain.use_case.SearchUseCases
@@ -11,6 +14,7 @@ import com.c3ai.sourcingoptimization.utilities.AuthInterceptorOkHttpClient
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import javax.inject.Singleton
@@ -33,6 +37,12 @@ object AppModule {
     @Singleton
     fun provideC3Repository(api: C3ApiService): C3Repository {
         return C3RepositoryImpl(api)
+    }
+
+    @Provides
+    @Singleton
+    fun provideC3SettingProvider(@ApplicationContext context: Context): C3AppSettingsProvider {
+        return C3AppSettingsProviderImpl(context)
     }
 
     @Provides

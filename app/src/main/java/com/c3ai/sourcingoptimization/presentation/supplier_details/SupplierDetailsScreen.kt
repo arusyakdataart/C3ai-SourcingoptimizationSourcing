@@ -1,6 +1,5 @@
 package com.c3ai.sourcingoptimization.presentation.supplier_details
 
-import android.icu.text.DateFormat
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -10,15 +9,15 @@ import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Sort
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -29,15 +28,13 @@ import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.common.components.*
 import com.c3ai.sourcingoptimization.data.C3Result
 import com.c3ai.sourcingoptimization.data.repository.C3MockRepositoryImpl
-import com.c3ai.sourcingoptimization.domain.model.PurchaseOrder
-import com.c3ai.sourcingoptimization.presentation.FullScreenLoading
-import com.c3ai.sourcingoptimization.presentation.LoadingContent
+import com.c3ai.sourcingoptimization.domain.settings.FakeC3AppSettingsProvider
+import com.c3ai.sourcingoptimization.presentation.models.UiPurchaseOrder
 import com.c3ai.sourcingoptimization.ui.theme.C3AppTheme
 import com.c3ai.sourcingoptimization.ui.theme.Green40
 import com.c3ai.sourcingoptimization.ui.theme.Lila40
 import kotlinx.coroutines.runBlocking
-import java.text.SimpleDateFormat
-
+import java.util.*
 
 /**
  * A display of the supplier details screen that has the lists.
@@ -53,10 +50,11 @@ import java.text.SimpleDateFormat
 fun SupplierDetailsScreen(
     navController: NavController,
     scaffoldState: ScaffoldState,
+    supplierId: String,
     uiState: SupplierDetailsUiState,
     onRefreshDetails: () -> Unit,
     onSearchInputChanged: (String) -> Unit,
-    supplierId: String,
+    onExpandableItemClick: (String) -> Unit,
 ) {
     Scaffold(
         scaffoldState = scaffoldState,
@@ -84,7 +82,8 @@ fun SupplierDetailsScreen(
             content = {
                 when (uiState) {
                     is SupplierDetailsUiState.HasDetails -> SupplierDetailsDataScreen(
-                        uiState = uiState
+                        uiState = uiState,
+                        onExpandableItemClick = onExpandableItemClick,
                     )
                     is SupplierDetailsUiState.NoDetails -> {
                         if (uiState.errorMessages.isEmpty()) {
@@ -139,20 +138,25 @@ fun SupplierDetailsScreen(
 @Composable
 private fun SupplierDetailsDataScreen(
     uiState: SupplierDetailsUiState.HasDetails,
+    onExpandableItemClick: (String) -> Unit,
 ) {
-    val dateFormatter = SimpleDateFormat("dd/MM/yyyy")
     CollapsingContentList(
         contentModifier = Modifier
             .height(212.dp),
         items = uiState.poLines,
         content = { SuppliersDetailsInfo(uiState) }
     ) { item ->
-        Column(
+        ExpandableLayout(
+            expanded = !uiState.expandedListItemIds.contains(item.id),
+            onClick = { onExpandableItemClick(item.id) },
+            content = { PoLinesListSimple(item) },
             modifier = Modifier
                 .padding(horizontal = 16.dp, vertical = 8.dp)
                 .background(MaterialTheme.colors.background)
         ) {
-            PoLinesListSimple(item, dateFormatter)
+            item.orderLines.map { poLine ->
+                PoLinesListExpanded(poLine)
+            }
         }
     }
 }
@@ -167,26 +171,15 @@ private fun SuppliersDetailsInfo(
             .fillMaxWidth()
             .padding(16.dp)
     ) {
-        val isActive = supplier.active
-        val isContract = supplier.hasActiveContracts
-        val isDiversity = supplier.diversity
-        Text(
-            buildAnnotatedString {
-                withStyle(style = SpanStyle(color = if (isActive) Green40 else Lila40)) {
-                    append(stringResource(R.string.active).uppercase())
-                }
-                append(" • ")
-                withStyle(style = SpanStyle(color = if (isContract) Green40 else Lila40)) {
-                    append(stringResource(R.string.contract).uppercase())
-                }
-                append(" • ")
-                withStyle(style = SpanStyle(color = if (isDiversity) Green40 else Lila40)) {
-                    append(stringResource(R.string.diversity).uppercase())
-                }
-            },
-            style = MaterialTheme.typography.subtitle1,
+        val activeColor = if (supplier.active == true) Green40 else Lila40
+        val contractColor = if (supplier.hasActiveContracts == true) Green40 else Lila40
+        val diversityColor = if (supplier.diversity == true) Green40 else Lila40
+        SplitText(
             modifier = Modifier
                 .padding(bottom = 10.dp),
+            SpanStyle(activeColor) to stringResource(R.string.active).uppercase(),
+            SpanStyle(contractColor) to stringResource(R.string.contract).uppercase(),
+            SpanStyle(diversityColor) to stringResource(R.string.diversity).uppercase(),
         )
         Text(
             supplier.name,
@@ -199,12 +192,13 @@ private fun SuppliersDetailsInfo(
             supplier.location.toString(),
             style = MaterialTheme.typography.subtitle1,
             color = MaterialTheme.colors.secondary,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
             modifier = Modifier
                 .padding(bottom = 10.dp),
         )
-        val openPoValue = supplier.allPOValue.valueString
         Text(
-            stringResource(R.string.open_po_value, openPoValue),
+            stringResource(R.string.open_po_value, supplier.allPOValue),
             style = MaterialTheme.typography.subtitle1,
             color = MaterialTheme.colors.secondary,
             modifier = Modifier
@@ -218,101 +212,148 @@ private fun SuppliersDetailsInfo(
 }
 
 @Composable
-private fun PoLinesListSimple(
-    item: PurchaseOrder.Order,
-    dateFormatter: SimpleDateFormat,
+private fun LabeledValue(
+    modifier: Modifier = Modifier,
+    label: String,
+    value: String,
+    valueStyle: TextStyle = MaterialTheme.typography.subtitle2,
+    valueColor: Color = MaterialTheme.colors.primary,
 ) {
-
-    IconText(
-        item.id,
-        style = MaterialTheme.typography.h3,
-        color = MaterialTheme.colors.primary,
-        modifier = Modifier.padding(bottom = 16.dp)
-    ) {
-        Icon(Icons.Filled.Link, "", tint = MaterialTheme.colors.primary)
+    Column(modifier = modifier) {
+        Text(label, style = MaterialTheme.typography.h4, color = MaterialTheme.colors.secondary)
+        Text(value, style = valueStyle, color = valueColor, modifier = Modifier.padding(top = 4.dp))
     }
-    C3Card {
-        ConstraintLayout(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth()
+}
+
+@Composable
+private fun PoLinesListSimple(
+    item: UiPurchaseOrder.Order,
+) {
+    Column {
+        IconText(
+            item.id,
+            style = MaterialTheme.typography.h3,
+            color = MaterialTheme.colors.primary,
+            modifier = Modifier.padding(bottom = 16.dp)
         ) {
-            // Create references for the composables to constrain
-            val (
-                status,
-                totalCost,
-                openedDate,
-                closedDate,
-            ) = createRefs()
-            Text(
-                item.fulfilledStr,
-                style = MaterialTheme.typography.subtitle1,
-                color = Green40,
-                modifier = Modifier.constrainAs(status) {
-                    top.linkTo(parent.top)
-                }
-            )
-            Column(
+            Icon(Icons.Filled.Link, "", tint = MaterialTheme.colors.primary)
+        }
+        C3SimpleCard {
+            ConstraintLayout(
                 modifier = Modifier
-                    .constrainAs(totalCost) {
-                        top.linkTo(status.bottom, margin = 16.dp)
-                        start.linkTo(parent.start)
-                        end.linkTo(openedDate.start)
-                        width = Dimension.fillToConstraints
-                    }
+                    .padding(16.dp)
+                    .fillMaxWidth()
             ) {
+                // Create references for the composables to constrain
+                val (status, totalCost, openedDate, closedDate) = createRefs()
                 Text(
-                    stringResource(R.string.total_cost),
-                    style = MaterialTheme.typography.h4,
-                    color = MaterialTheme.colors.secondary,
+                    item.fulfilledStr,
+                    style = MaterialTheme.typography.subtitle1,
+                    color = Green40,
+                    modifier = Modifier.constrainAs(status) {
+                        top.linkTo(parent.top)
+                    }
                 )
-                Text(
-                    item.totalCost.valueString,
-                    style = MaterialTheme.typography.h2,
-                    color = MaterialTheme.colors.primary,
-                    modifier = Modifier.padding(top = 4.dp)
+                LabeledValue(
+                    label = stringResource(R.string.total_cost),
+                    value = item.totalCost,
+                    valueStyle = MaterialTheme.typography.h2,
+                    modifier = Modifier
+                        .constrainAs(totalCost) {
+                            top.linkTo(status.bottom, margin = 16.dp)
+                            start.linkTo(parent.start)
+                            end.linkTo(openedDate.start)
+                            width = Dimension.fillToConstraints
+                        },
+                )
+                LabeledValue(
+                    label = stringResource(R.string.opened_date),
+                    value = item.orderCreationDate,
+                    modifier = Modifier
+                        .constrainAs(openedDate) {
+                            top.linkTo(status.bottom, margin = 16.dp)
+                            start.linkTo(totalCost.end, margin = 8.dp)
+                            end.linkTo(closedDate.start)
+                            width = Dimension.fillToConstraints
+                        },
+                )
+                LabeledValue(
+                    label = stringResource(R.string.closed_date),
+                    value = item.closedDate,
+                    modifier = Modifier
+                        .constrainAs(closedDate) {
+                            top.linkTo(status.bottom, margin = 16.dp)
+                            start.linkTo(openedDate.end, margin = 8.dp)
+                            end.linkTo(parent.end)
+                            width = Dimension.fillToConstraints
+                        },
                 )
             }
-            Column(
+        }
+    }
+}
+
+@Composable
+private fun PoLinesListExpanded(
+    item: UiPurchaseOrder.Line,
+) {
+    Box(
+        modifier = Modifier
+            .padding(top = 16.dp)
+            .fillMaxWidth()
+    ) {
+        C3SimpleCard {
+            ConstraintLayout(
                 modifier = Modifier
-                    .constrainAs(openedDate) {
-                        top.linkTo(status.bottom, margin = 16.dp)
-                        start.linkTo(totalCost.end, margin = 8.dp)
-                        end.linkTo(closedDate.start)
-                        width = Dimension.fillToConstraints
-                    }
+                    .padding(16.dp)
+                    .fillMaxWidth()
             ) {
-                Text(
-                    stringResource(R.string.opened_date),
-                    style = MaterialTheme.typography.h4,
-                    color = MaterialTheme.colors.secondary,
-                )
-                Text(
-                    dateFormatter.format(item.orderCreationDate),
-                    style = MaterialTheme.typography.subtitle2,
-                    color = MaterialTheme.colors.primary,
-                    modifier = Modifier.padding(top = 4.dp)
-                )
-            }
-            Column(
-                modifier = Modifier
-                    .constrainAs(closedDate) {
-                        top.linkTo(status.bottom, margin = 16.dp)
-                        start.linkTo(openedDate.end, margin = 8.dp)
-                        end.linkTo(parent.end)
-                        width = Dimension.fillToConstraints
+                // Create references for the composables to constrain
+                val (
+                    title,
+                    totalCost,
+                    status,
+                    openedDate,
+                    closedDate,
+                ) = createRefs()
+                LabeledValue(
+                    label = stringResource(R.string.po_line_, item.id),
+                    value = item.totalCost,
+                    valueStyle = MaterialTheme.typography.h1,
+                    modifier = Modifier.constrainAs(title) {
+                        top.linkTo(parent.top)
                     }
-            ) {
-                Text(
-                    stringResource(R.string.closed_date),
-                    style = MaterialTheme.typography.h4,
-                    color = MaterialTheme.colors.secondary,
                 )
-                Text(
-                    dateFormatter.format(item.closedDate),
-                    style = MaterialTheme.typography.subtitle2,
-                    color = MaterialTheme.colors.primary,
-                    modifier = Modifier.padding(top = 4.dp)
+                SplitText(
+                    modifier = Modifier.constrainAs(status) {
+                        top.linkTo(title.bottom, margin = 8.dp)
+                    },
+                    SpanStyle(if (item.fulfilled) Lila40 else Green40) to item.fulfilledStr,
+                    null to stringResource(R.string.unit_price_, item.unitPrice),
+                    null to stringResource(R.string.quantity_, item.totalQuantity),
+                )
+                LabeledValue(
+                    label = stringResource(R.string.opened_date),
+                    value = item.orderCreationDate,
+                    valueStyle = MaterialTheme.typography.h2,
+                    modifier = Modifier
+                        .constrainAs(totalCost) {
+                            top.linkTo(status.bottom, margin = 16.dp)
+                            start.linkTo(parent.start)
+                            end.linkTo(openedDate.start)
+                            width = Dimension.fillToConstraints
+                        },
+                )
+                LabeledValue(
+                    label = stringResource(R.string.closed_date),
+                    value = item.closedDate,
+                    modifier = Modifier
+                        .constrainAs(closedDate) {
+                            top.linkTo(status.bottom, margin = 16.dp)
+                            start.linkTo(openedDate.end, margin = 8.dp)
+                            end.linkTo(parent.end)
+                            width = Dimension.fillToConstraints
+                        },
                 )
             }
         }
@@ -407,17 +448,17 @@ fun ComposablePreview() {
         SupplierDetailsScreen(
             navController = rememberNavController(),
             scaffoldState = rememberScaffoldState(),
-            uiState = SupplierDetailsUiState.HasDetails(
+            supplierId = supplier.id,
+            uiState = SupplierDetailsViewModelState(
+                settings = FakeC3AppSettingsProvider(),
                 supplier = supplier,
-                poLines = supplier.purchaseOrders,
-                items = supplier.items,
                 isLoading = false,
                 errorMessages = emptyList(),
                 searchInput = ""
-            ),
+            ).toUiState(),
             onRefreshDetails = {},
             onSearchInputChanged = {},
-            supplierId = supplier.id,
+            onExpandableItemClick = {},
         )
     }
 }

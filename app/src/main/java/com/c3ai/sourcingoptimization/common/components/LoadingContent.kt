@@ -1,4 +1,4 @@
-package com.c3ai.sourcingoptimization.presentation
+package com.c3ai.sourcingoptimization.common.components
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize

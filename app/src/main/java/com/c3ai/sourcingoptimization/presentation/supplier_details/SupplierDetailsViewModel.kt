@@ -6,8 +6,12 @@ import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.data.C3Result
 import com.c3ai.sourcingoptimization.domain.model.C3Item
 import com.c3ai.sourcingoptimization.domain.model.C3Vendor
-import com.c3ai.sourcingoptimization.domain.model.PurchaseOrder
+import com.c3ai.sourcingoptimization.domain.settings.C3AppSettingsProvider
 import com.c3ai.sourcingoptimization.domain.use_case.SuppliersDetailsUseCases
+import com.c3ai.sourcingoptimization.presentation.ViewModelState
+import com.c3ai.sourcingoptimization.presentation.models.UiPurchaseOrder
+import com.c3ai.sourcingoptimization.presentation.models.UiVendor
+import com.c3ai.sourcingoptimization.presentation.models.convert
 import com.c3ai.sourcingoptimization.utilities.ErrorMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -44,9 +48,9 @@ sealed interface SupplierDetailsUiState {
      *
      */
     data class HasDetails(
-        val supplier: C3Vendor,
-        val poLines: List<PurchaseOrder.Order> = emptyList(),
-        val items: List<C3Item> = emptyList(),
+        val supplier: UiVendor,
+        val poLines: List<UiPurchaseOrder.Order> = supplier.purchaseOrders,
+        val items: List<C3Item> = supplier.items,
         val expandedListItemIds: Set<String> = emptySet(),
         override val isLoading: Boolean,
         override val errorMessages: List<ErrorMessage>,
@@ -57,12 +61,14 @@ sealed interface SupplierDetailsUiState {
 /**
  * An internal representation of the SupplierDetails route state, in a raw form
  */
-private data class SupplierDetailsViewModelState(
+data class SupplierDetailsViewModelState(
+    override val settings: C3AppSettingsProvider,
     val supplier: C3Vendor? = null,
     val isLoading: Boolean = false,
     val errorMessages: List<ErrorMessage> = emptyList(),
     val searchInput: String = "",
-) {
+    val expandedListItemIds: Set<String> = emptySet()
+) : ViewModelState() {
 
     /**
      * Converts this [SupplierDetailsViewModelState] into
@@ -77,9 +83,8 @@ private data class SupplierDetailsViewModelState(
             )
         } else {
             SupplierDetailsUiState.HasDetails(
-                supplier = supplier,
-                poLines = supplier.purchaseOrders,
-                items = supplier.items,
+                supplier = convert(supplier),
+                expandedListItemIds = expandedListItemIds,
                 isLoading = isLoading,
                 errorMessages = errorMessages,
                 searchInput = searchInput
@@ -92,10 +97,16 @@ private data class SupplierDetailsViewModelState(
  */
 @HiltViewModel
 class SuppliersDetailsViewModel @Inject constructor(
+    private val settings: C3AppSettingsProvider,
     private val useCases: SuppliersDetailsUseCases
 ) : ViewModel() {
 
-    private val viewModelState = MutableStateFlow(SupplierDetailsViewModelState(isLoading = true))
+    private val viewModelState = MutableStateFlow(
+        SupplierDetailsViewModelState(
+            settings = settings,
+            isLoading = true
+        )
+    )
 
     // UI state exposed to the UI
     val uiState = viewModelState
@@ -139,6 +150,18 @@ class SuppliersDetailsViewModel @Inject constructor(
     fun onSearchInputChanged(searchInput: String) {
         viewModelState.update {
             it.copy(searchInput = searchInput)
+        }
+    }
+
+    /**
+     * Add or remove item id from list of expanded items.
+     */
+    fun onExpandableItemClick(itemId: String) {
+        viewModelState.update {
+            it.copy(expandedListItemIds = it.expandedListItemIds.toMutableSet().apply {
+                val isRemoved = remove(itemId)
+                isRemoved || add((itemId))
+            })
         }
     }
 }
