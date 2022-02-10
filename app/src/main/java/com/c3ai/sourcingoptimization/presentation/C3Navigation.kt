@@ -9,6 +9,7 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 object C3Destinations {
     const val SEARCH_ROUTE = "search"
     const val SUPPLIER_DETAILS_ROUTE = "supplier_details/{supplierId}"
+    const val PO_DETAILS_ROUTE = "po_details/{orderId}"
 }
 
 /**
@@ -19,6 +20,15 @@ object C3Destinations {
 fun NavController.navigateToSupplierDetails(
     supplierId: String,
 ) = navigate("supplier_details/$supplierId")
+
+/**
+ * Navigate to the supplier details[PODetailsRoute]
+ *
+ * @param orderId the order's id
+ */
+fun NavController.navigateToPoDetails(
+    orderId: String,
+) = navigate("po_details/$orderId")
 
 /**
  * Models the navigation actions in the app.

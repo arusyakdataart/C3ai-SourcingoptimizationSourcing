@@ -1,4 +1,6 @@
 package com.c3ai.sourcingoptimization.presentation.supplier_details
 
-class SupplierDetailsEvent {
+sealed class SupplierDetailsEvent {
+    data class OnSearchInputChanged(val searchInput: String) : SupplierDetailsEvent()
+    data class OnExpandableItemClick(val itemId: String) : SupplierDetailsEvent()
 }

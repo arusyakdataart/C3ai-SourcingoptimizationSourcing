@@ -14,5 +14,9 @@ val OnSecondaryColor = Color(0xFF111112)
 val OnBackgroundColor = Color(0xFFD9DADC)
 val OnSurfaceColor = Color(0xFFAAAEB5)
 
+val DividerColor = Color(0xFF393B40)
+
 val Green40 = Color(0xFF49BFA9)
 val Lila40 = Color(0xFFC799FF)
+val Gray70 = Color(0xFF50545C)
+val Accent = Color(0xFF4F8DFF)

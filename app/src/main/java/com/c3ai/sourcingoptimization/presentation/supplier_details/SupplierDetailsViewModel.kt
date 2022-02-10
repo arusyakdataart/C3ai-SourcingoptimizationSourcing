@@ -3,15 +3,17 @@ package com.c3ai.sourcingoptimization.presentation.supplier_details
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.c3ai.sourcingoptimization.R
+import com.c3ai.sourcingoptimization.authorization.presentation.AuthEvent
 import com.c3ai.sourcingoptimization.data.C3Result
 import com.c3ai.sourcingoptimization.domain.model.C3Item
 import com.c3ai.sourcingoptimization.domain.model.C3Vendor
 import com.c3ai.sourcingoptimization.domain.settings.C3AppSettingsProvider
+import com.c3ai.sourcingoptimization.domain.settings.FakeC3AppSettingsProvider
 import com.c3ai.sourcingoptimization.domain.use_case.SuppliersDetailsUseCases
 import com.c3ai.sourcingoptimization.presentation.ViewModelState
-import com.c3ai.sourcingoptimization.presentation.models.UiPurchaseOrder
-import com.c3ai.sourcingoptimization.presentation.models.UiVendor
-import com.c3ai.sourcingoptimization.presentation.models.convert
+import com.c3ai.sourcingoptimization.presentation.views.UiPurchaseOrder
+import com.c3ai.sourcingoptimization.presentation.views.UiVendor
+import com.c3ai.sourcingoptimization.presentation.views.convert
 import com.c3ai.sourcingoptimization.utilities.ErrorMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -44,7 +46,7 @@ sealed interface SupplierDetailsUiState {
     ) : SupplierDetailsUiState
 
     /**
-     * There are details to render, as contained in [supplier].
+     * There are details to render, as contained in model[supplier].
      *
      */
     data class HasDetails(
@@ -61,7 +63,7 @@ sealed interface SupplierDetailsUiState {
 /**
  * An internal representation of the SupplierDetails route state, in a raw form
  */
-data class SupplierDetailsViewModelState(
+private data class SupplierDetailsViewModelState(
     override val settings: C3AppSettingsProvider,
     val supplier: C3Vendor? = null,
     val isLoading: Boolean = false,
@@ -97,7 +99,7 @@ data class SupplierDetailsViewModelState(
  */
 @HiltViewModel
 class SuppliersDetailsViewModel @Inject constructor(
-    private val settings: C3AppSettingsProvider,
+    settings: C3AppSettingsProvider,
     private val useCases: SuppliersDetailsUseCases
 ) : ViewModel() {
 
@@ -116,6 +118,11 @@ class SuppliersDetailsViewModel @Inject constructor(
             SharingStarted.Eagerly,
             viewModelState.value.toUiState()
         )
+
+    val sortPOItems = listOf(
+        "",
+        ""
+    )
 
     init {
         refreshDetails()
@@ -145,23 +152,33 @@ class SuppliersDetailsViewModel @Inject constructor(
     }
 
     /**
-     * Notify that the user updated the search query
+     * Update state by user event.
      */
-    fun onSearchInputChanged(searchInput: String) {
-        viewModelState.update {
-            it.copy(searchInput = searchInput)
+    fun onEvent(event: SupplierDetailsEvent) {
+        viewModelState.update { state ->
+            when (event) {
+                is SupplierDetailsEvent.OnSearchInputChanged -> {
+                    state.copy(searchInput = event.searchInput)
+                }
+                is SupplierDetailsEvent.OnExpandableItemClick -> {
+                    state.copy(
+                        expandedListItemIds = state.expandedListItemIds.toMutableSet().apply {
+                            val isRemoved = remove(event.itemId)
+                            isRemoved || add((event.itemId))
+                        })
+                }
+            }
         }
     }
+}
 
-    /**
-     * Add or remove item id from list of expanded items.
-     */
-    fun onExpandableItemClick(itemId: String) {
-        viewModelState.update {
-            it.copy(expandedListItemIds = it.expandedListItemIds.toMutableSet().apply {
-                val isRemoved = remove(itemId)
-                isRemoved || add((itemId))
-            })
-        }
-    }
+@Suppress("FunctionName")
+fun PreviewSupplierDetailsUiState(supplier: C3Vendor): SupplierDetailsUiState {
+    return SupplierDetailsViewModelState(
+        settings = FakeC3AppSettingsProvider(),
+        supplier = supplier,
+        isLoading = false,
+        errorMessages = emptyList(),
+        searchInput = ""
+    ).toUiState()
 }

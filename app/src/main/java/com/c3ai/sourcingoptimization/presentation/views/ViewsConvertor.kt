@@ -1,4 +1,4 @@
-package com.c3ai.sourcingoptimization.presentation.models
+package com.c3ai.sourcingoptimization.presentation.views
 
 import com.c3ai.sourcingoptimization.domain.model.C3Vendor
 import com.c3ai.sourcingoptimization.domain.model.PurchaseOrder
@@ -6,6 +6,7 @@ import com.c3ai.sourcingoptimization.domain.model.UnitValue
 import com.c3ai.sourcingoptimization.domain.settings.C3AppSettingsProvider
 import com.c3ai.sourcingoptimization.presentation.ViewModelState
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 fun ViewModelState.convert(vendor: C3Vendor): UiVendor = UiVendor(
     id = vendor.id,
@@ -51,6 +52,7 @@ fun ViewModelState.convert(line: PurchaseOrder.Line): UiPurchaseOrder.Line =
         requestedDeliveryDate = settings.format(line.requestedDeliveryDate),
         promisedDeliveryDate = settings.format(line.promisedDeliveryDate),
         requestedLeadTime = line.requestedLeadTime,
+        actualLeadTime = Date().daysBefore(line.promisedDeliveryDate),
         order = line.order?.let { convert(it) },
     )
 
@@ -79,4 +81,9 @@ fun UnitValue.format(pattern: String = "%s%.0f"): String {
 fun C3AppSettingsProvider.formatQuantity(source: PurchaseOrder.Line): String {
     return source.totalQuantity
         .let { String.format(Locale.getDefault(), "%.0f", it.value) }
+}
+
+fun Date.daysBefore(date: Date): Int {
+    val days = TimeUnit.DAYS.convert(date.time - time, TimeUnit.MILLISECONDS).toInt()
+    return if (days > 0) days else 0
 }

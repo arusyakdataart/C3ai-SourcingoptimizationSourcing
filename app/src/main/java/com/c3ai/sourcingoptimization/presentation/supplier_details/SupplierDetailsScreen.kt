@@ -2,12 +2,11 @@ package com.c3ai.sourcingoptimization.presentation.supplier_details
 
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Link
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Sort
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -22,19 +21,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.common.components.*
 import com.c3ai.sourcingoptimization.data.C3Result
 import com.c3ai.sourcingoptimization.data.repository.C3MockRepositoryImpl
-import com.c3ai.sourcingoptimization.domain.settings.FakeC3AppSettingsProvider
-import com.c3ai.sourcingoptimization.presentation.models.UiPurchaseOrder
+import com.c3ai.sourcingoptimization.domain.model.C3Item
+import com.c3ai.sourcingoptimization.presentation.views.UiPurchaseOrder
 import com.c3ai.sourcingoptimization.ui.theme.C3AppTheme
+import com.c3ai.sourcingoptimization.ui.theme.DividerColor
 import com.c3ai.sourcingoptimization.ui.theme.Green40
 import com.c3ai.sourcingoptimization.ui.theme.Lila40
 import kotlinx.coroutines.runBlocking
-import java.util.*
 
 /**
  * A display of the supplier details screen that has the lists.
@@ -48,27 +45,30 @@ import java.util.*
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalAnimationApi::class)
 @Composable
 fun SupplierDetailsScreen(
-    navController: NavController,
     scaffoldState: ScaffoldState,
     supplierId: String,
     uiState: SupplierDetailsUiState,
     onRefreshDetails: () -> Unit,
     onSearchInputChanged: (String) -> Unit,
     onExpandableItemClick: (String) -> Unit,
+    onPOItemClick: (String) -> Unit,
+    onPOAlertsClick: (String) -> Unit,
+    onBackButtonClick: () -> Unit,
 ) {
     Scaffold(
         scaffoldState = scaffoldState,
         snackbarHost = { C3SnackbarHost(hostState = it) },
         topBar = {
-            SuppliersDetailsAppBar(
-                navController,
+            TopAppBar(
                 title = stringResource(R.string.supplier_, supplierId),
                 searchInput = uiState.searchInput,
                 onSearchInputChanged = onSearchInputChanged,
-                onClearClick = { onSearchInputChanged("") }
+                onClearClick = { onSearchInputChanged("") },
+                onBackButtonClick = onBackButtonClick
             )
         },
     ) { innerPadding ->
+        var tabIndex by remember { mutableStateOf(0) }
         val contentModifier = Modifier.padding(innerPadding)
 
         LoadingContent(
@@ -81,10 +81,36 @@ fun SupplierDetailsScreen(
             onRefresh = onRefreshDetails,
             content = {
                 when (uiState) {
-                    is SupplierDetailsUiState.HasDetails -> SupplierDetailsDataScreen(
-                        uiState = uiState,
-                        onExpandableItemClick = onExpandableItemClick,
-                    )
+                    is SupplierDetailsUiState.HasDetails -> CollapsingContentList(
+                        contentModifier = Modifier.height(212.dp),
+                        items = when (tabIndex) {
+                            1 -> uiState.items
+                            else -> uiState.poLines
+                        },
+                        header = {
+                            Tabs(
+                                TabItem(stringResource(R.string.po_lines)) { tabIndex = 0 },
+                                TabItem(stringResource(R.string.items_supplied)) { tabIndex = 1 }
+                            )
+                        },
+                        content = { SuppliersDetailsInfo(uiState) }
+                    ) { item ->
+                        when (item) {
+                            is C3Item -> ItemsSuppliedList(item)
+                            is UiPurchaseOrder.Order -> ExpandableLayout(
+                                expanded = uiState.expandedListItemIds.contains(item.id),
+                                onClick = { onExpandableItemClick(item.id) },
+                                content = { PoLinesListSimple(item, onPOItemClick) },
+                                modifier = Modifier
+                                    .background(MaterialTheme.colors.background)
+                                    .padding(horizontal = 16.dp, vertical = 16.dp)
+                            ) {
+                                item.orderLines.map { poLine ->
+                                    PoLinesListExpanded(poLine, onPOAlertsClick)
+                                }
+                            }
+                        }
+                    }
                     is SupplierDetailsUiState.NoDetails -> {
                         if (uiState.errorMessages.isEmpty()) {
                             // if there are no posts, and no error, let the user refresh manually
@@ -134,33 +160,6 @@ fun SupplierDetailsScreen(
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class, ExperimentalAnimationApi::class)
-@Composable
-private fun SupplierDetailsDataScreen(
-    uiState: SupplierDetailsUiState.HasDetails,
-    onExpandableItemClick: (String) -> Unit,
-) {
-    CollapsingContentList(
-        contentModifier = Modifier
-            .height(212.dp),
-        items = uiState.poLines,
-        content = { SuppliersDetailsInfo(uiState) }
-    ) { item ->
-        ExpandableLayout(
-            expanded = !uiState.expandedListItemIds.contains(item.id),
-            onClick = { onExpandableItemClick(item.id) },
-            content = { PoLinesListSimple(item) },
-            modifier = Modifier
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-                .background(MaterialTheme.colors.background)
-        ) {
-            item.orderLines.map { poLine ->
-                PoLinesListExpanded(poLine)
-            }
-        }
-    }
-}
-
 @Composable
 private fun SuppliersDetailsInfo(
     uiState: SupplierDetailsUiState.HasDetails,
@@ -171,9 +170,9 @@ private fun SuppliersDetailsInfo(
             .fillMaxWidth()
             .padding(16.dp)
     ) {
-        val activeColor = if (supplier.active == true) Green40 else Lila40
-        val contractColor = if (supplier.hasActiveContracts == true) Green40 else Lila40
-        val diversityColor = if (supplier.diversity == true) Green40 else Lila40
+        val activeColor = if (supplier.active) Green40 else Lila40
+        val contractColor = if (supplier.hasActiveContracts) Green40 else Lila40
+        val diversityColor = if (supplier.diversity) Green40 else Lila40
         SplitText(
             modifier = Modifier
                 .padding(bottom = 10.dp),
@@ -226,15 +225,28 @@ private fun LabeledValue(
 }
 
 @Composable
+private fun PoLinesListDivider(modifier: Modifier = Modifier) {
+    Divider(
+        modifier = modifier.padding(vertical = 16.dp),
+        color = DividerColor
+    )
+}
+
+@Composable
 private fun PoLinesListSimple(
     item: UiPurchaseOrder.Order,
+    onPOItemClick: (String) -> Unit,
 ) {
     Column {
         IconText(
-            item.id,
+            stringResource(R.string.po_, item.id),
             style = MaterialTheme.typography.h3,
             color = MaterialTheme.colors.primary,
-            modifier = Modifier.padding(bottom = 16.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp, end = 34.dp)
+                .clickable { onPOItemClick(item.id) }
+
         ) {
             Icon(Icons.Filled.Link, "", tint = MaterialTheme.colors.primary)
         }
@@ -296,6 +308,7 @@ private fun PoLinesListSimple(
 @Composable
 private fun PoLinesListExpanded(
     item: UiPurchaseOrder.Line,
+    onPOAlertsClick: (String) -> Unit,
 ) {
     Box(
         modifier = Modifier
@@ -310,23 +323,45 @@ private fun PoLinesListExpanded(
             ) {
                 // Create references for the composables to constrain
                 val (
-                    title,
                     totalCost,
                     status,
                     openedDate,
                     closedDate,
+                    stubDate,
+                    leadTime,
+                    rDeliveryDate,
+                    pDeliveryDate,
+                    divider,
+                    facility,
+                    readMore,
                 ) = createRefs()
                 LabeledValue(
                     label = stringResource(R.string.po_line_, item.id),
                     value = item.totalCost,
                     valueStyle = MaterialTheme.typography.h1,
-                    modifier = Modifier.constrainAs(title) {
+                    modifier = Modifier.constrainAs(totalCost) {
                         top.linkTo(parent.top)
                     }
                 )
+                if (item.numberOfActiveAlerts > 0) {
+                    IconButton(
+                        onClick = { onPOAlertsClick(item.id) },
+                        Modifier
+                            .size(40.dp)
+                            .constrainAs(readMore) {
+                                top.linkTo(parent.top)
+                                end.linkTo(parent.end)
+                            }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Warning,
+                            contentDescription = stringResource(R.string.cd_read_more)
+                        )
+                    }
+                }
                 SplitText(
                     modifier = Modifier.constrainAs(status) {
-                        top.linkTo(title.bottom, margin = 8.dp)
+                        top.linkTo(totalCost.bottom, margin = 8.dp)
                     },
                     SpanStyle(if (item.fulfilled) Lila40 else Green40) to item.fulfilledStr,
                     null to stringResource(R.string.unit_price_, item.unitPrice),
@@ -335,12 +370,11 @@ private fun PoLinesListExpanded(
                 LabeledValue(
                     label = stringResource(R.string.opened_date),
                     value = item.orderCreationDate,
-                    valueStyle = MaterialTheme.typography.h2,
                     modifier = Modifier
-                        .constrainAs(totalCost) {
+                        .constrainAs(openedDate) {
                             top.linkTo(status.bottom, margin = 16.dp)
                             start.linkTo(parent.start)
-                            end.linkTo(openedDate.start)
+                            end.linkTo(closedDate.start)
                             width = Dimension.fillToConstraints
                         },
                 )
@@ -351,9 +385,143 @@ private fun PoLinesListExpanded(
                         .constrainAs(closedDate) {
                             top.linkTo(status.bottom, margin = 16.dp)
                             start.linkTo(openedDate.end, margin = 8.dp)
+                            end.linkTo(stubDate.start)
+                            width = Dimension.fillToConstraints
+                        },
+                )
+                LabeledValue(
+                    label = "",
+                    value = "",
+                    modifier = Modifier
+                        .constrainAs(stubDate) {
+                            top.linkTo(status.bottom, margin = 16.dp)
+                            start.linkTo(closedDate.end, margin = 8.dp)
                             end.linkTo(parent.end)
                             width = Dimension.fillToConstraints
                         },
+                )
+                Column(modifier = Modifier
+                    .constrainAs(leadTime) {
+                        top.linkTo(openedDate.bottom, margin = 16.dp)
+                        start.linkTo(parent.start)
+                        end.linkTo(rDeliveryDate.start)
+                        width = Dimension.fillToConstraints
+                    }
+                ) {
+                    Text(
+                        stringResource(R.string.lead_time),
+                        style = MaterialTheme.typography.h4,
+                        color = MaterialTheme.colors.secondary,
+                        modifier = Modifier.height(32.dp)
+                    )
+                    Text(
+                        stringResource(R.string.days_actual_, item.actualLeadTime),
+                        style = MaterialTheme.typography.subtitle2,
+                        color = MaterialTheme.colors.primary,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                    Text(
+                        stringResource(R.string.days_plan_, item.requestedLeadTime),
+                        style = MaterialTheme.typography.subtitle2,
+                        color = MaterialTheme.colors.secondary,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
+                LabeledValue(
+                    label = stringResource(R.string.requested_delivery_date),
+                    value = item.requestedDeliveryDate,
+                    modifier = Modifier
+                        .constrainAs(rDeliveryDate) {
+                            top.linkTo(openedDate.bottom, margin = 16.dp)
+                            start.linkTo(leadTime.end, margin = 8.dp)
+                            end.linkTo(pDeliveryDate.start)
+                            width = Dimension.fillToConstraints
+                        },
+                )
+                LabeledValue(
+                    label = stringResource(R.string.promised_delivery_date),
+                    value = item.promisedDeliveryDate,
+                    modifier = Modifier
+                        .constrainAs(pDeliveryDate) {
+                            top.linkTo(openedDate.bottom, margin = 16.dp)
+                            start.linkTo(rDeliveryDate.end, margin = 8.dp)
+                            end.linkTo(parent.end)
+                            width = Dimension.fillToConstraints
+                        },
+                )
+                PoLinesListDivider(Modifier.constrainAs(divider) { top.linkTo(leadTime.bottom) })
+                BusinessCard(
+                    label = stringResource(R.string.delivery_facility),
+                    title = item.order?.to?.name ?: "",
+                    subtitle = "",
+                    modifier = Modifier
+                        .constrainAs(facility) {
+                            top.linkTo(divider.bottom)
+                        }
+                )
+                var expanded by remember { mutableStateOf(false) }
+                IconButton(
+                    onClick = { expanded = true },
+                    Modifier
+                        .size(40.dp)
+                        .constrainAs(readMore) {
+                            top.linkTo(facility.bottom)
+                            end.linkTo(parent.end)
+                        }
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.ReadMore,
+                        contentDescription = stringResource(R.string.cd_read_more)
+                    )
+                }
+                PoLinesListReadMore(item = item, expanded = expanded) {
+                    expanded = false
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ItemsSuppliedList(
+    item: C3Item,
+) {
+    Text(item.id)
+}
+
+@Composable
+private fun PoLinesListReadMore(
+    item: UiPurchaseOrder.Line,
+    expanded: Boolean,
+    onDismissRequest: () -> Unit,
+) {
+    DropdownMenu(
+        modifier = Modifier
+            .padding(horizontal = 16.dp)
+            .width(300.dp),
+        expanded = expanded,
+        onDismissRequest = onDismissRequest
+    ) {
+        item.order?.buyer?.let { buyer ->
+            DropdownMenuItem(
+                onClick = {},
+            ) {
+                BusinessCard(
+                    label = stringResource(R.string.buyer_, buyer.id),
+                    title = buyer.name,
+                    subtitle = "",
+                )
+            }
+            PoLinesListDivider()
+        }
+        item.order?.vendor?.let { vendor ->
+            DropdownMenuItem(
+                onClick = {},
+            ) {
+                BusinessCard(
+                    label = stringResource(R.string.supplier_, vendor.id),
+                    title = vendor.name,
+                    subtitle = vendor.location.toString(),
                 )
             }
         }
@@ -365,21 +533,22 @@ private fun PoLinesListExpanded(
  */
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-private fun SuppliersDetailsAppBar(
-    navController: NavController,
+private fun TopAppBar(
     title: String,
     searchInput: String,
     placeholderText: String = "",
     onSearchInputChanged: (String) -> Unit = {},
     onClearClick: () -> Unit = {},
+    onBackButtonClick: () -> Unit,
 ) {
     var showClearButton by remember { mutableStateOf(false) }
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusRequester = remember { FocusRequester() }
+    var sortMenuExpanded by remember { mutableStateOf(false) }
 
-    C3AppBar(
-        navController = navController,
+    C3TopAppBar(
         title = title,
+        onBackButtonClick = onBackButtonClick,
         actions = {
 //            OutlinedTextField(
 //                modifier = Modifier
@@ -434,6 +603,13 @@ private fun SuppliersDetailsAppBar(
                     contentDescription = stringResource(R.string.cd_sort_menu)
                 )
             }
+            DropdownMenu(
+                modifier = Modifier,
+                expanded = sortMenuExpanded,
+                onDismissRequest = { sortMenuExpanded = false }
+            ) {
+
+            }
         }
     )
 }
@@ -446,19 +622,15 @@ fun ComposablePreview() {
     }
     C3AppTheme {
         SupplierDetailsScreen(
-            navController = rememberNavController(),
             scaffoldState = rememberScaffoldState(),
             supplierId = supplier.id,
-            uiState = SupplierDetailsViewModelState(
-                settings = FakeC3AppSettingsProvider(),
-                supplier = supplier,
-                isLoading = false,
-                errorMessages = emptyList(),
-                searchInput = ""
-            ).toUiState(),
+            uiState = PreviewSupplierDetailsUiState(supplier),
             onRefreshDetails = {},
             onSearchInputChanged = {},
             onExpandableItemClick = {},
+            onPOItemClick = {},
+            onPOAlertsClick = {},
+            onBackButtonClick = {},
         )
     }
 }

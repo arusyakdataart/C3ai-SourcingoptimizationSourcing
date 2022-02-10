@@ -4,12 +4,12 @@ data class C3Location(
     val id: String,
     val region: Unit,
     val city: String,
-    val address: Address,
+    val address: Address?,
     val state: String,
 ) {
 
     override fun toString(): String {
-        return address.toString()
+        return address?.toString() ?: ""
     }
 
     companion object

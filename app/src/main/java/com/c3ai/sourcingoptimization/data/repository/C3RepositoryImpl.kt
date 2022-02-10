@@ -7,6 +7,7 @@ import com.c3ai.sourcingoptimization.data.network.requests.SuppliedItemsParamete
 import com.c3ai.sourcingoptimization.data.network.requests.SupplierDetailsParameters
 import com.c3ai.sourcingoptimization.domain.model.C3Item
 import com.c3ai.sourcingoptimization.domain.model.C3Vendor
+import com.c3ai.sourcingoptimization.domain.model.PurchaseOrder
 import com.c3ai.sourcingoptimization.domain.model.SearchItem
 import javax.inject.Inject
 
@@ -25,6 +26,10 @@ class C3RepositoryImpl @Inject constructor(private val api: C3ApiService) : C3Re
 
     override suspend fun getSupplierDetails(supplierId: String): C3Result<C3Vendor> = C3Result.on {
         api.getSupplierDetails(SupplierDetailsParameters(supplierId)).objs[0]
+    }
+
+    override suspend fun getPODetails(orderId: String): C3Result<PurchaseOrder.Order> {
+        TODO("Not yet implemented")
     }
 
     override suspend fun getSuppliedItems(supplierId: String): C3Result<List<C3Item>> =

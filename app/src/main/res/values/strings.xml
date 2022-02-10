@@ -32,4 +32,26 @@
     <string name="po_line_">PO Line %s</string>
     <string name="unit_price_">Unit Price %s</string>
     <string name="quantity_">Quantity %s</string>
+    <string name="lead_time">Lead Time</string>
+    <string name="requested_delivery_date">Requested Delivery Date</string>
+    <string name="days_plan_">%d days (Plan)</string>
+    <string name="days_actual_">%d days (Act.)</string>
+    <string name="promised_delivery_date">Promised Delivery Date</string>
+    <string name="delivery_facility">Delivery facility</string>
+    <string name="po_">PO %s</string>
+    <string name="cd_read_more">Read More</string>
+    <string name="buyer_">Buyer %s</string>
+    <string name="po_lines">PO Lines</string>
+    <string name="items_supplied">Items Supplied</string>
+    <array name="sort_po">
+        <item>Total Cost</item>
+        <item>Unit Price</item>
+        <item>Quantity</item>
+        <item>Opened Date</item>
+        <item>Closed Date</item>
+        <item>Requested Delivery Date</item>
+        <item>Promised Delivery Date</item>
+        <item>Actual Lead Time</item>
+        <item>Planned Lead Time</item>
+    </array>
 </resources>

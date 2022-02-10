@@ -11,7 +11,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import com.c3ai.sourcingoptimization.R
 
 
@@ -19,9 +18,9 @@ import com.c3ai.sourcingoptimization.R
  * TopAppBar for the App screens
  */
 @Composable
-fun C3AppBar(
-    navController: NavController,
+fun C3TopAppBar(
     title: String,
+    onBackButtonClick: () -> Unit,
     navigationIcon: @Composable (() -> Unit)? = null,
     actions: @Composable RowScope.() -> Unit = {},
 ) {
@@ -39,7 +38,7 @@ fun C3AppBar(
         },
         navigationIcon = if (navigationIcon == null) {
             {
-                IconButton(onClick = { navController.navigateUp() }) {
+                IconButton(onClick = onBackButtonClick) {
                     Icon(
                         imageVector = Icons.Filled.ArrowBack,
                         contentDescription = stringResource(R.string.cd_navigation_back_button),

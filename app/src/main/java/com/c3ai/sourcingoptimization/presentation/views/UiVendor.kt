@@ -1,8 +1,7 @@
-package com.c3ai.sourcingoptimization.presentation.models
+package com.c3ai.sourcingoptimization.presentation.views
 
 import com.c3ai.sourcingoptimization.domain.model.C3Item
 import com.c3ai.sourcingoptimization.domain.model.C3Location
-import com.c3ai.sourcingoptimization.domain.model.UnitValue
 
 data class UiVendor(
     val id: String,

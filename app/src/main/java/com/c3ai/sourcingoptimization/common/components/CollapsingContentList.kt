@@ -1,23 +1,25 @@
 package com.c3ai.sourcingoptimization.common.components
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.unit.dp
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 inline fun <T> CollapsingContentList(
     modifier: Modifier = Modifier,
     contentModifier: Modifier = Modifier,
     items: List<T>,
+    noinline header: @Composable (LazyItemScope.() -> Unit)? = null,
     crossinline content: @Composable BoxScope.() -> Unit,
     crossinline itemContent: @Composable LazyItemScope.(item: T) -> Unit
 ) {
@@ -40,6 +42,7 @@ inline fun <T> CollapsingContentList(
                 content = content
             )
         }
+        header?.let { stickyHeader(content = header) }
         items(items = items, itemContent = itemContent)
     }
 }

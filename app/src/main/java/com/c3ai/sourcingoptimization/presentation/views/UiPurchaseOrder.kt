@@ -1,4 +1,4 @@
-package com.c3ai.sourcingoptimization.presentation.models
+package com.c3ai.sourcingoptimization.presentation.views
 
 import com.c3ai.sourcingoptimization.domain.model.C3Buyer
 import com.c3ai.sourcingoptimization.domain.model.C3Facility
@@ -43,6 +43,7 @@ sealed interface UiPurchaseOrder {
         val requestedDeliveryDate: String,
         val promisedDeliveryDate: String,
         val requestedLeadTime: Int,
+        val actualLeadTime: Int,
         val order: Order?,
     ) : UiPurchaseOrder
 }
