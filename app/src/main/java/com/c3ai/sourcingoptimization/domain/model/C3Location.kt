@@ -2,7 +2,7 @@ package com.c3ai.sourcingoptimization.domain.model
 
 data class C3Location(
     val id: String,
-    val region: Unit,
+    val region: C3Unit,
     val city: String,
     val address: Address?,
     val state: String,

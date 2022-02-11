@@ -7,8 +7,8 @@ sealed interface PurchaseOrder {
     val name: String
     val fulfilled: Boolean?
     val fulfilledStr: String?
-    val totalCost: UnitValue?
-    val totalCostLocal: UnitValue?
+    val totalCost: C3UnitValue?
+    val totalCostLocal: C3UnitValue?
     val orderCreationDate: Date?
     val closedDate: Date?
     val numberOfActiveAlerts: Int
@@ -18,8 +18,8 @@ sealed interface PurchaseOrder {
         override val name: String,
         override val fulfilled: Boolean?,
         override val fulfilledStr: String?,
-        override val totalCost: UnitValue?,
-        override val totalCostLocal: UnitValue?,
+        override val totalCost: C3UnitValue?,
+        override val totalCostLocal: C3UnitValue?,
         override val orderCreationDate: Date?,
         override val closedDate: Date?,
         override val numberOfActiveAlerts: Int,
@@ -38,14 +38,14 @@ sealed interface PurchaseOrder {
         override val name: String,
         override val fulfilled: Boolean?,
         override val fulfilledStr: String?,
-        override val totalCost: UnitValue?,
-        override val totalCostLocal: UnitValue?,
+        override val totalCost: C3UnitValue?,
+        override val totalCostLocal: C3UnitValue?,
         override val orderCreationDate: Date?,
         override val closedDate: Date?,
         override val numberOfActiveAlerts: Int,
-        val totalQuantity: UnitValue,
-        val unitPrice: UnitValue,
-        val unitPriceLocal: UnitValue,
+        val totalQuantity: C3UnitValue,
+        val unitPrice: C3UnitValue,
+        val unitPriceLocal: C3UnitValue,
         val requestedDeliveryDate: Date,
         val promisedDeliveryDate: Date,
         val requestedLeadTime: Int,

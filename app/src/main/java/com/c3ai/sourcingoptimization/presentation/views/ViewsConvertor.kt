@@ -2,7 +2,7 @@ package com.c3ai.sourcingoptimization.presentation.views
 
 import com.c3ai.sourcingoptimization.domain.model.C3Vendor
 import com.c3ai.sourcingoptimization.domain.model.PurchaseOrder
-import com.c3ai.sourcingoptimization.domain.model.UnitValue
+import com.c3ai.sourcingoptimization.domain.model.C3UnitValue
 import com.c3ai.sourcingoptimization.domain.settings.C3AppSettingsProvider
 import com.c3ai.sourcingoptimization.presentation.ViewModelState
 import java.util.*
@@ -74,7 +74,7 @@ fun C3AppSettingsProvider.formatUnitPrice(source: PurchaseOrder.Line): String {
     }.format("%s%.1f")
 }
 
-fun UnitValue.format(pattern: String = "%s%.0f"): String {
+fun C3UnitValue.format(pattern: String = "%s%.0f"): String {
     return String.format(Locale.getDefault(), pattern, unit.id, value)
 }
 

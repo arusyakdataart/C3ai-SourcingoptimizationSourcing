@@ -15,20 +15,20 @@ fun C3Item.Companion.fake(): C3Item {
         family = name(),
         numberOfOpenOrders = random.nextInt(50),
         latestOrderLineDate = dateString,
-        lastUnitPricePaid = UnitValue.fake(),
-        averageUnitPricePaid = UnitValue.fake(),
-        lastUnitPriceLocalPaid = UnitValue.fake(),
-        averageUnitPriceLocalPaid = UnitValue.fake(),
-        minimumUnitPricePaid = UnitValue.fake(),
-        minimumUnitPriceLocalPaid = UnitValue.fake(),
+        lastUnitPricePaid = C3UnitValue.fake(),
+        averageUnitPricePaid = C3UnitValue.fake(),
+        lastUnitPriceLocalPaid = C3UnitValue.fake(),
+        averageUnitPriceLocalPaid = C3UnitValue.fake(),
+        minimumUnitPricePaid = C3UnitValue.fake(),
+        minimumUnitPriceLocalPaid = C3UnitValue.fake(),
         itemFacilityInventoryParams = emptyList(),
         currentInventory = null,
-        unfulfilledOrderQuantity = UnitValue.fake(),
-        unfulfilledOrderCost = UnitValue.fake(),
+        unfulfilledOrderQuantity = C3UnitValue.fake(),
+        unfulfilledOrderCost = C3UnitValue.fake(),
         numberOfVendors = random.nextInt(),
-        recentPoLinesCost = UnitValue.fake(),
-        minPoLinesUnitPrice = UnitValue.fake(),
-        weightedAveragePoLineUnitPrice = UnitValue.fake(),
+        recentPoLinesCost = C3UnitValue.fake(),
+        minPoLinesUnitPrice = C3UnitValue.fake(),
+        weightedAveragePoLineUnitPrice = C3UnitValue.fake(),
         hasActiveAlerts = random.nextBoolean(),
         numberOfActiveAlerts = random.nextInt(),
     )
@@ -39,10 +39,11 @@ fun C3Vendor.Companion.fake(): C3Vendor {
         id = id(),
         name = name(),
         active = random.nextBoolean(),
-        allPOValue = UnitValue.fake(),
+        allPOValue = C3UnitValue.fake(),
         diversity = random.nextBoolean(),
         hasActiveContracts = random.nextBoolean(),
         location = C3Location.fake(),
+        spend = C3UnitValue.fake(),
         items = emptyList(),
         purchaseOrders = (1..20).map { PurchaseOrder.Order.fake() }
     )
@@ -50,7 +51,7 @@ fun C3Vendor.Companion.fake(): C3Vendor {
 
 fun C3Location.Companion.fake(): C3Location = C3Location(
     id = id(),
-    region = Unit(code()),
+    region = C3Unit.fake(),
     city = name(),
     address = Address(
         components = listOf(
@@ -63,9 +64,16 @@ fun C3Location.Companion.fake(): C3Location = C3Location(
     state = name(),
 )
 
-fun UnitValue.Companion.fake(): UnitValue = UnitValue(
-    unit = Unit(code()),
+fun C3UnitValue.Companion.fake(): C3UnitValue = C3UnitValue(
+    unit = C3Unit.fake(),
     value = random.nextInt(900000).toDouble()
+)
+
+fun C3Unit.Companion.fake(): C3Unit = C3Unit(
+    id = code(),
+    symbol = code(),
+    concept = code(),
+    name = name(),
 )
 
 fun C3Buyer.Companion.fake(): C3Buyer = C3Buyer(
@@ -83,8 +91,8 @@ fun PurchaseOrder.Order.Companion.fake(): PurchaseOrder.Order = PurchaseOrder.Or
     name = "",
     fulfilled = true,
     fulfilledStr = "Open",
-    totalCost = UnitValue.fake(),
-    totalCostLocal = UnitValue.fake(),
+    totalCost = C3UnitValue.fake(),
+    totalCostLocal = C3UnitValue.fake(),
     orderCreationDate = Date(),
     closedDate = Date(),
     numberOfActiveAlerts = 0,
@@ -95,10 +103,11 @@ fun PurchaseOrder.Order.Companion.fake(): PurchaseOrder.Order = PurchaseOrder.Or
         id = id(),
         name = name(),
         active = random.nextBoolean(),
-        allPOValue = UnitValue.fake(),
+        allPOValue = C3UnitValue.fake(),
         diversity = random.nextBoolean(),
         hasActiveContracts = random.nextBoolean(),
         location = C3Location.fake(),
+        spend = C3UnitValue.fake(),
         items = emptyList(),
         purchaseOrders = emptyList()
     ),
@@ -110,14 +119,14 @@ fun PurchaseOrder.Line.Companion.fake(): PurchaseOrder.Line = PurchaseOrder.Line
     name = "",
     fulfilled = true,
     fulfilledStr = "Open",
-    totalCost = UnitValue.fake(),
-    totalCostLocal = UnitValue.fake(),
+    totalCost = C3UnitValue.fake(),
+    totalCostLocal = C3UnitValue.fake(),
     orderCreationDate = Date(),
     closedDate = Date(),
     numberOfActiveAlerts = 0,
-    totalQuantity = UnitValue.fake(),
-    unitPrice = UnitValue.fake(),
-    unitPriceLocal = UnitValue.fake(),
+    totalQuantity = C3UnitValue.fake(),
+    unitPrice = C3UnitValue.fake(),
+    unitPriceLocal = C3UnitValue.fake(),
     requestedDeliveryDate = Date(),
     promisedDeliveryDate = Date(),
     requestedLeadTime = random.nextInt(180),
@@ -126,8 +135,8 @@ fun PurchaseOrder.Line.Companion.fake(): PurchaseOrder.Line = PurchaseOrder.Line
         name = "",
         fulfilled = true,
         fulfilledStr = "Open",
-        totalCost = UnitValue.fake(),
-        totalCostLocal = UnitValue.fake(),
+        totalCost = C3UnitValue.fake(),
+        totalCostLocal = C3UnitValue.fake(),
         orderCreationDate = Date(),
         closedDate = Date(),
         numberOfActiveAlerts = 0,
@@ -138,10 +147,11 @@ fun PurchaseOrder.Line.Companion.fake(): PurchaseOrder.Line = PurchaseOrder.Line
             id = id(),
             name = name(),
             active = random.nextBoolean(),
-            allPOValue = UnitValue.fake(),
+            allPOValue = C3UnitValue.fake(),
             diversity = random.nextBoolean(),
             hasActiveContracts = random.nextBoolean(),
             location = C3Location.fake(),
+            spend = C3UnitValue.fake(),
             items = emptyList(),
             purchaseOrders = emptyList()
         ),

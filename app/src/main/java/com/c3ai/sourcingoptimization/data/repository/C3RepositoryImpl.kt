@@ -2,13 +2,8 @@ package com.c3ai.sourcingoptimization.data.repository
 
 import com.c3ai.sourcingoptimization.data.C3Result
 import com.c3ai.sourcingoptimization.data.network.C3ApiService
-import com.c3ai.sourcingoptimization.data.network.requests.ItemDetailsParameters
-import com.c3ai.sourcingoptimization.data.network.requests.SuppliedItemsParameters
-import com.c3ai.sourcingoptimization.data.network.requests.SupplierDetailsParameters
-import com.c3ai.sourcingoptimization.domain.model.C3Item
-import com.c3ai.sourcingoptimization.domain.model.C3Vendor
-import com.c3ai.sourcingoptimization.domain.model.PurchaseOrder
-import com.c3ai.sourcingoptimization.domain.model.SearchItem
+import com.c3ai.sourcingoptimization.data.network.requests.*
+import com.c3ai.sourcingoptimization.domain.model.*
 import javax.inject.Inject
 
 /**
@@ -35,5 +30,46 @@ class C3RepositoryImpl @Inject constructor(private val api: C3ApiService) : C3Re
     override suspend fun getSuppliedItems(supplierId: String): C3Result<List<C3Item>> =
         C3Result.on {
             api.getSuppliedItems(SuppliedItemsParameters(supplierId))
+        }
+
+    override suspend fun getEvalMetricsForPOLineQty(
+        itemId: String,
+        expressions: List<String>,
+        startDate: String,
+        endDate: String,
+        interval: String
+    ): C3Result<OpenClosedPOLineQtyItem> = C3Result.on {
+        api.getEvalMetricsForPOLineQty(
+            EvalMetricsParameters(
+                itemId = itemId, expressions = expressions,
+                startDate = startDate, endDate = endDate, interval = interval
+            )
+        )
+    }
+
+    override suspend fun getEvalMetricsForSavingsOpportunity(
+        itemId: String,
+        expressions: List<String>,
+        startDate: String,
+        endDate: String,
+        interval: String
+    ): C3Result<SavingsOpportunityItem> = C3Result.on {
+        api.getEvalMetricsForSavingOpportunity(
+            EvalMetricsParameters(
+                itemId = itemId, expressions = expressions,
+                startDate = startDate, endDate = endDate, interval = interval
+            )
+        )
+    }
+
+    override suspend fun getItemDetailsSuppliers(itemId: String): C3Result<List<C3Vendor>> =
+        C3Result.on {
+            api.getSuppliers(
+                SuppliersParameters(
+                    itemId = itemId,
+                    limit = 5,
+                    order = "descending(spend.value)"
+                )
+            ).objs
         }
 }

@@ -5,35 +5,18 @@ package com.c3ai.sourcingoptimization.data.network.requests
  * @see C3ApiService
  * */
 data class EvalMetricsParameters(
-    @Transient val itemId: String
-) : RequestParameters {
+    @Transient val itemId: String,
+    @Transient val expressions: List<String>,
+    @Transient val startDate: String,
+    @Transient val endDate: String,
+    @Transient val interval: String
+) : EMRequestParameters {
 
-    override val spec: C3Spec = C3Spec(
-        include = listOf(
-            "description",
-            "family",
-            "numberOfOpenOrders",
-            "latestOrderLineDate",
-            "lastUnitPricePaid",
-            "averageUnitPricePaid",
-            "lastUnitPriceLocalPaid",
-            "averageUnitPriceLocalPaid",
-            "minimumUnitPricePaid",
-            "minimumUnitPriceLocalPaid",
-            "unfulfilledOrderQuantity",
-            "unfulfilledOrderCost",
-            "numberOfVendors",
-            "recentPoLinesCost",
-            "minPoLinesUnitPrice",
-            "weightedAveragePoLineUnitPrice",
-            "hasActiveAlerts",
-            "numberOfActiveAlerts",
-            "id",
-            "name",
-            "meta",
-            "currentInventory"
-        ),
-        filter = "id == '$itemId'"
+    override val spec: EMSpec = EMSpec(
+        ids = listOf(itemId),
+        expressions = expressions,
+        start = startDate,
+        end = endDate,
+        interval = interval
     )
-
 }

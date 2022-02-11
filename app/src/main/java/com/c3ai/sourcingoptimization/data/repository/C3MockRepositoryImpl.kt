@@ -2,10 +2,7 @@ package com.c3ai.sourcingoptimization.data.repository
 
 import com.c3ai.sourcingoptimization.data.C3Result
 import com.c3ai.sourcingoptimization.data.mock.fake
-import com.c3ai.sourcingoptimization.domain.model.C3Item
-import com.c3ai.sourcingoptimization.domain.model.C3Vendor
-import com.c3ai.sourcingoptimization.domain.model.PurchaseOrder
-import com.c3ai.sourcingoptimization.domain.model.SearchItem
+import com.c3ai.sourcingoptimization.domain.model.*
 
 /**
  * Fake repository implementation provides all faked data.
@@ -31,4 +28,28 @@ class C3MockRepositoryImpl : C3Repository {
         C3Result.on {
             (1..20).map { C3Item.fake() }
         }
+
+    override suspend fun getEvalMetricsForPOLineQty(
+        itemId: String,
+        expressions: List<String>,
+        startDate: String,
+        endDate: String,
+        interval: String
+    ): C3Result<OpenClosedPOLineQtyItem> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getEvalMetricsForSavingsOpportunity(
+        itemId: String,
+        expressions: List<String>,
+        startDate: String,
+        endDate: String,
+        interval: String
+    ): C3Result<SavingsOpportunityItem> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getItemDetailsSuppliers(itemId: String): C3Result<List<C3Vendor>> {
+        TODO("Not yet implemented")
+    }
 }

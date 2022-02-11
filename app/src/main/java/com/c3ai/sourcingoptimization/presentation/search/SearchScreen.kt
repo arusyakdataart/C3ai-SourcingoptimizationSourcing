@@ -42,6 +42,7 @@ import com.c3ai.sourcingoptimization.domain.model.Alert
 import com.c3ai.sourcingoptimization.modifiers.interceptKey
 import com.c3ai.sourcingoptimization.presentation.MainActivity
 import com.c3ai.sourcingoptimization.presentation.alerts.AlertCardSimple
+import com.c3ai.sourcingoptimization.presentation.item_details.ItemDetailsActivity
 import com.c3ai.sourcingoptimization.presentation.navigateToSupplierDetails
 import com.c3ai.sourcingoptimization.presentation.rememberContentPaddingForScreen
 import com.google.accompanist.insets.imePadding
@@ -75,7 +76,7 @@ fun SearchScreen(
                 .padding(top = 16.dp),
             text = "ItemDetails",
             onClick = {
-                context.startActivity(Intent(context, MainActivity::class.java))
+                context.startActivity(Intent(context, ItemDetailsActivity::class.java))
                 (context as? Activity)?.finish()
             }
         )
