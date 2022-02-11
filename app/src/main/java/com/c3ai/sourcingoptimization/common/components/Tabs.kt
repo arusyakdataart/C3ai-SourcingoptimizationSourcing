@@ -1,6 +1,5 @@
 package com.c3ai.sourcingoptimization.common.components
 
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.material.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*

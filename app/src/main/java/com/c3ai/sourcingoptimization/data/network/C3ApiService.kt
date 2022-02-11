@@ -9,7 +9,6 @@ import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.*
-import java.text.DateFormat
 
 /**
  * Api service for the application with internal building of client[OkHttpClient].
@@ -22,7 +21,7 @@ interface C3ApiService {
 
     @Headers("Accept: application/json")
     @POST("${MAIN_API_URL}Item?action=fetch")
-    suspend fun getItemDetails(@Body request: ItemDetailsParameters): C3Item
+    suspend fun getItemDetails(@Body request: ItemDetailsParameters): C3Response<C3Item>
 
     @Headers("Accept: application/json")
     @POST("${MAIN_API_URL}PurchaseOrder?action=fetch")

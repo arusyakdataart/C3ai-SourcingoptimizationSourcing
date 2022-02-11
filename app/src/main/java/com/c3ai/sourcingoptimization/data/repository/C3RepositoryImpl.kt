@@ -21,7 +21,7 @@ class C3RepositoryImpl @Inject constructor(private val api: C3ApiService) : C3Re
     }
 
     override suspend fun getItemDetails(itemId: String): C3Result<C3Item> = C3Result.on {
-        api.getItemDetails(ItemDetailsParameters(itemId = itemId))
+        api.getItemDetails(ItemDetailsParameters(itemId = itemId)).objs[0]
     }
 
     override suspend fun getSupplierDetails(supplierId: String): C3Result<C3Vendor> = C3Result.on {

@@ -22,6 +22,8 @@ class C3SpecJsonSerializer : JsonSerializer<C3Spec> {
         return JsonObject().apply {
             addProperty("include", src.include.joinToString(","))
             addProperty("filter", src.filter)
+            addProperty("limit", src.limit)
+            addProperty("offset", src.offset)
         }
     }
 

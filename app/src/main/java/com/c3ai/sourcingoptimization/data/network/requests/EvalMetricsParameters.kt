@@ -1,15 +1,11 @@
 package com.c3ai.sourcingoptimization.data.network.requests
 
-import com.c3ai.sourcingoptimization.utilities.PAGINATED_RESPONSE_LIMIT
-
 /**
- * Data class with parameters for Item[getItemDetails] request
+ * Data class with parameters for Item[getEvalMetrics] request
  * @see C3ApiService
  * */
-data class ItemDetailsParameters(
-    @Transient val itemId: String,
-    @Transient val limit: Int = PAGINATED_RESPONSE_LIMIT,
-    @Transient val offset: Int = 0
+data class EvalMetricsParameters(
+    @Transient val itemId: String
 ) : RequestParameters {
 
     override val spec: C3Spec = C3Spec(
@@ -37,8 +33,7 @@ data class ItemDetailsParameters(
             "meta",
             "currentInventory"
         ),
-        limit = limit,
-        offset = offset,
         filter = "id == '$itemId'"
     )
+
 }

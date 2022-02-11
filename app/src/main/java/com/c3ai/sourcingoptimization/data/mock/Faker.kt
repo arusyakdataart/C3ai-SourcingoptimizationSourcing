@@ -4,12 +4,33 @@ import com.c3ai.sourcingoptimization.domain.model.*
 import com.c3ai.sourcingoptimization.utilities.extentions.fastLazy
 import java.util.*
 
-val random by fastLazy { Random() }
+private const val dateString = "20/20/2000"
+private val random by fastLazy { Random() }
 
 fun C3Item.Companion.fake(): C3Item {
     return C3Item(
         id = id(),
         name = name(),
+        description = text(20),
+        family = name(),
+        numberOfOpenOrders = random.nextInt(50),
+        latestOrderLineDate = dateString,
+        lastUnitPricePaid = UnitValue.fake(),
+        averageUnitPricePaid = UnitValue.fake(),
+        lastUnitPriceLocalPaid = UnitValue.fake(),
+        averageUnitPriceLocalPaid = UnitValue.fake(),
+        minimumUnitPricePaid = UnitValue.fake(),
+        minimumUnitPriceLocalPaid = UnitValue.fake(),
+        itemFacilityInventoryParams = emptyList(),
+        currentInventory = null,
+        unfulfilledOrderQuantity = UnitValue.fake(),
+        unfulfilledOrderCost = UnitValue.fake(),
+        numberOfVendors = random.nextInt(),
+        recentPoLinesCost = UnitValue.fake(),
+        minPoLinesUnitPrice = UnitValue.fake(),
+        weightedAveragePoLineUnitPrice = UnitValue.fake(),
+        hasActiveAlerts = random.nextBoolean(),
+        numberOfActiveAlerts = random.nextInt(),
     )
 }
 
