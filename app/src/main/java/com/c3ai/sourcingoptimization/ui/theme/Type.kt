@@ -30,7 +30,15 @@ val Typography = Typography(
     ),
     h4 = TextStyle(
         fontWeight = FontWeight.SemiBold,
+        fontSize = 14.sp
+    ),
+    h5 = TextStyle(
+        fontWeight = FontWeight.SemiBold,
         fontSize = 12.sp
+    ),
+    h6 = TextStyle(
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 10.sp
     ),
     body1 = TextStyle(
         fontWeight = FontWeight.SemiBold,

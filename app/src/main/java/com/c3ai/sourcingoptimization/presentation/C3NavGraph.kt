@@ -1,5 +1,6 @@
 package com.c3ai.sourcingoptimization.presentation
 
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -12,6 +13,7 @@ import com.c3ai.sourcingoptimization.presentation.po_details.PODetailsRoute
 import com.c3ai.sourcingoptimization.presentation.search.SearchRoute
 import com.c3ai.sourcingoptimization.presentation.supplier_details.SupplierDetailsRoute
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun C3NavGraph(
     modifier: Modifier = Modifier,

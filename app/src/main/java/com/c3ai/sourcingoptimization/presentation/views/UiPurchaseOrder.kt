@@ -11,7 +11,7 @@ sealed interface UiPurchaseOrder {
     val totalCost: String
     val orderCreationDate: String
     val closedDate: String
-    val numberOfActiveAlerts: Int
+    val numberOfActiveAlerts: String
 
     data class Order(
         override val id: String,
@@ -21,7 +21,7 @@ sealed interface UiPurchaseOrder {
         override val totalCost: String,
         override val orderCreationDate: String,
         override val closedDate: String,
-        override val numberOfActiveAlerts: Int,
+        override val numberOfActiveAlerts: String,
         val buyer: C3Buyer?,
         val to: C3Facility?,
         val from: C3Facility?,
@@ -37,7 +37,7 @@ sealed interface UiPurchaseOrder {
         override val totalCost: String,
         override val orderCreationDate: String,
         override val closedDate: String,
-        override val numberOfActiveAlerts: Int,
+        override val numberOfActiveAlerts: String,
         val totalQuantity: String,
         val unitPrice: String,
         val requestedDeliveryDate: String,

@@ -1,6 +1,8 @@
 package com.c3ai.sourcingoptimization.domain.model
 
 data class C3Item(
+    val id: String,
+    val name: String?,
     val description: String?,
     val family: String?,
     val numberOfOpenOrders: Int?,
@@ -20,9 +22,7 @@ data class C3Item(
     val minPoLinesUnitPrice: C3UnitValue?,
     val weightedAveragePoLineUnitPrice: C3UnitValue?,
     val hasActiveAlerts: Boolean?,
-    val numberOfActiveAlerts: Int?,
-    val id: String,
-    val name: String
+    val numberOfActiveAlerts: Int,
 ) {
 
     companion object

@@ -10,8 +10,11 @@ import com.c3ai.sourcingoptimization.ui.theme.Accent
 
 
 @Composable
-fun Tabs(vararg items: TabItem) {
-    var tabIndex by remember { mutableStateOf(0) }
+fun Tabs(
+    selectedTab: Int = 0,
+    vararg items: TabItem
+) {
+    var tabIndex by remember { mutableStateOf(selectedTab) }
     Surface(
         elevation = 6.dp,
         color = MaterialTheme.colors.background,

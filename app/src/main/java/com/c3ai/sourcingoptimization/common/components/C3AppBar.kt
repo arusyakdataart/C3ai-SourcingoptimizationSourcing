@@ -28,6 +28,7 @@ fun C3TopAppBar(
         title = {
             Text(
                 text = title,
+                style = MaterialTheme.typography.caption,
                 color = MaterialTheme.colors.primary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,

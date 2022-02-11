@@ -3,14 +3,13 @@ package com.c3ai.sourcingoptimization.presentation.supplier_details
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.c3ai.sourcingoptimization.R
-import com.c3ai.sourcingoptimization.authorization.presentation.AuthEvent
 import com.c3ai.sourcingoptimization.data.C3Result
-import com.c3ai.sourcingoptimization.domain.model.C3Item
 import com.c3ai.sourcingoptimization.domain.model.C3Vendor
 import com.c3ai.sourcingoptimization.domain.settings.C3AppSettingsProvider
 import com.c3ai.sourcingoptimization.domain.settings.FakeC3AppSettingsProvider
 import com.c3ai.sourcingoptimization.domain.use_case.SuppliersDetailsUseCases
 import com.c3ai.sourcingoptimization.presentation.ViewModelState
+import com.c3ai.sourcingoptimization.presentation.views.UiItem
 import com.c3ai.sourcingoptimization.presentation.views.UiPurchaseOrder
 import com.c3ai.sourcingoptimization.presentation.views.UiVendor
 import com.c3ai.sourcingoptimization.presentation.views.convert
@@ -32,6 +31,7 @@ sealed interface SupplierDetailsUiState {
     val isLoading: Boolean
     val errorMessages: List<ErrorMessage>
     val searchInput: String
+    val tabIndex: Int
 
     /**
      * There are no details to render.
@@ -42,7 +42,8 @@ sealed interface SupplierDetailsUiState {
     data class NoDetails(
         override val isLoading: Boolean,
         override val errorMessages: List<ErrorMessage>,
-        override val searchInput: String
+        override val searchInput: String,
+        override val tabIndex: Int
     ) : SupplierDetailsUiState
 
     /**
@@ -52,11 +53,12 @@ sealed interface SupplierDetailsUiState {
     data class HasDetails(
         val supplier: UiVendor,
         val poLines: List<UiPurchaseOrder.Order> = supplier.purchaseOrders,
-        val items: List<C3Item> = supplier.items,
+        val items: List<UiItem> = supplier.items,
         val expandedListItemIds: Set<String> = emptySet(),
         override val isLoading: Boolean,
         override val errorMessages: List<ErrorMessage>,
-        override val searchInput: String
+        override val searchInput: String,
+        override val tabIndex: Int
     ) : SupplierDetailsUiState
 }
 
@@ -69,6 +71,7 @@ private data class SupplierDetailsViewModelState(
     val isLoading: Boolean = false,
     val errorMessages: List<ErrorMessage> = emptyList(),
     val searchInput: String = "",
+    val tabIndex: Int = 0,
     val expandedListItemIds: Set<String> = emptySet()
 ) : ViewModelState() {
 
@@ -81,7 +84,8 @@ private data class SupplierDetailsViewModelState(
             SupplierDetailsUiState.NoDetails(
                 isLoading = isLoading,
                 errorMessages = errorMessages,
-                searchInput = searchInput
+                searchInput = searchInput,
+                tabIndex = 0
             )
         } else {
             SupplierDetailsUiState.HasDetails(
@@ -89,7 +93,8 @@ private data class SupplierDetailsViewModelState(
                 expandedListItemIds = expandedListItemIds,
                 isLoading = isLoading,
                 errorMessages = errorMessages,
-                searchInput = searchInput
+                searchInput = searchInput,
+                tabIndex = tabIndex
             )
         }
 }
@@ -160,6 +165,9 @@ class SuppliersDetailsViewModel @Inject constructor(
                 is SupplierDetailsEvent.OnSearchInputChanged -> {
                     state.copy(searchInput = event.searchInput)
                 }
+                is SupplierDetailsEvent.OnTabItemClick -> {
+                    state.copy(tabIndex = event.tabIndex)
+                }
                 is SupplierDetailsEvent.OnExpandableItemClick -> {
                     state.copy(
                         expandedListItemIds = state.expandedListItemIds.toMutableSet().apply {
@@ -173,12 +181,16 @@ class SuppliersDetailsViewModel @Inject constructor(
 }
 
 @Suppress("FunctionName")
-fun PreviewSupplierDetailsUiState(supplier: C3Vendor): SupplierDetailsUiState {
+fun PreviewSupplierDetailsUiState(
+    supplier: C3Vendor,
+    tabIndex: Int = 0,
+): SupplierDetailsUiState {
     return SupplierDetailsViewModelState(
         settings = FakeC3AppSettingsProvider(),
         supplier = supplier,
         isLoading = false,
         errorMessages = emptyList(),
-        searchInput = ""
+        searchInput = "",
+        tabIndex = tabIndex,
     ).toUiState()
 }

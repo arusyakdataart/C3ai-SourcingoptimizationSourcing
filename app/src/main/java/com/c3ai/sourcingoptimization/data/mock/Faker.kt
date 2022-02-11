@@ -44,8 +44,8 @@ fun C3Vendor.Companion.fake(): C3Vendor {
         hasActiveContracts = random.nextBoolean(),
         location = C3Location.fake(),
         spend = C3UnitValue.fake(),
-        items = emptyList(),
-        purchaseOrders = (1..20).map { PurchaseOrder.Order.fake() }
+        purchaseOrders = (1..20).map { PurchaseOrder.Order.fake() },
+        items = (1..20).map { C3Item.fake() },
     )
 }
 

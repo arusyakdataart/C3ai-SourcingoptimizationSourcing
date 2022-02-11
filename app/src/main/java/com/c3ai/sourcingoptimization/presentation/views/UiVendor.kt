@@ -1,6 +1,5 @@
 package com.c3ai.sourcingoptimization.presentation.views
 
-import com.c3ai.sourcingoptimization.domain.model.C3Item
 import com.c3ai.sourcingoptimization.domain.model.C3Location
 
 data class UiVendor(
@@ -11,6 +10,6 @@ data class UiVendor(
     val diversity: Boolean,
     val hasActiveContracts: Boolean,
     val location: C3Location?,
-    val items: List<C3Item>,
+    val items: List<UiItem>,
     val purchaseOrders: List<UiPurchaseOrder.Order>
 )

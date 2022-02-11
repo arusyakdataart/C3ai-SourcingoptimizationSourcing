@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -25,12 +26,10 @@ import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.common.components.*
 import com.c3ai.sourcingoptimization.data.C3Result
 import com.c3ai.sourcingoptimization.data.repository.C3MockRepositoryImpl
-import com.c3ai.sourcingoptimization.domain.model.C3Item
+import com.c3ai.sourcingoptimization.presentation.views.UiItem
 import com.c3ai.sourcingoptimization.presentation.views.UiPurchaseOrder
-import com.c3ai.sourcingoptimization.ui.theme.C3AppTheme
-import com.c3ai.sourcingoptimization.ui.theme.DividerColor
-import com.c3ai.sourcingoptimization.ui.theme.Green40
-import com.c3ai.sourcingoptimization.ui.theme.Lila40
+import com.c3ai.sourcingoptimization.ui.theme.*
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 /**
@@ -42,33 +41,50 @@ import kotlinx.coroutines.runBlocking
  * This helper function exists because [SupplierDetailsScreen] is big and have two states,
  * so we need to decompose it with additional function [SupplierDetailsDataScreen].
  */
-@OptIn(ExperimentalComposeUiApi::class, ExperimentalAnimationApi::class)
+@OptIn(
+    ExperimentalComposeUiApi::class,
+    ExperimentalAnimationApi::class,
+    ExperimentalMaterialApi::class
+)
 @Composable
 fun SupplierDetailsScreen(
-    scaffoldState: ScaffoldState,
+    scaffoldState: BottomSheetScaffoldState,
     supplierId: String,
     uiState: SupplierDetailsUiState,
     onRefreshDetails: () -> Unit,
     onSearchInputChanged: (String) -> Unit,
+    onTabItemClick: (Int) -> Unit,
     onExpandableItemClick: (String) -> Unit,
     onPOItemClick: (String) -> Unit,
-    onPOAlertsClick: (String) -> Unit,
+    onC3ItemClick: (String) -> Unit,
+    onAlertsClick: (String) -> Unit,
     onBackButtonClick: () -> Unit,
 ) {
-    Scaffold(
+    val coroutineScope = rememberCoroutineScope()
+    BottomSheetScaffold(
         scaffoldState = scaffoldState,
-        snackbarHost = { C3SnackbarHost(hostState = it) },
         topBar = {
             TopAppBar(
                 title = stringResource(R.string.supplier_, supplierId),
                 searchInput = uiState.searchInput,
+                onBackButtonClick = onBackButtonClick,
                 onSearchInputChanged = onSearchInputChanged,
                 onClearClick = { onSearchInputChanged("") },
-                onBackButtonClick = onBackButtonClick
+                onContactsClick = {
+                    coroutineScope.launch {
+                        if (scaffoldState.bottomSheetState.isCollapsed) {
+                            scaffoldState.bottomSheetState.expand()
+                        } else {
+                            scaffoldState.bottomSheetState.collapse()
+                        }
+                    }
+                }
             )
         },
+        snackbarHost = { C3SnackbarHost(hostState = it) },
+        sheetContent = { ContactsBottomSheetContent() },
+        sheetPeekHeight = 0.dp
     ) { innerPadding ->
-        var tabIndex by remember { mutableStateOf(0) }
         val contentModifier = Modifier.padding(innerPadding)
 
         LoadingContent(
@@ -82,31 +98,37 @@ fun SupplierDetailsScreen(
             content = {
                 when (uiState) {
                     is SupplierDetailsUiState.HasDetails -> CollapsingContentList(
-                        contentModifier = Modifier.height(212.dp),
-                        items = when (tabIndex) {
+                        contentModifier = Modifier.height(156.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        items = when (uiState.tabIndex) {
                             1 -> uiState.items
                             else -> uiState.poLines
                         },
                         header = {
                             Tabs(
-                                TabItem(stringResource(R.string.po_lines)) { tabIndex = 0 },
-                                TabItem(stringResource(R.string.items_supplied)) { tabIndex = 1 }
+                                selectedTab = uiState.tabIndex,
+                                TabItem(stringResource(R.string.po_lines)) { onTabItemClick(0) },
+                                TabItem(stringResource(R.string.items_supplied)) { onTabItemClick(1) }
                             )
                         },
                         content = { SuppliersDetailsInfo(uiState) }
                     ) { item ->
                         when (item) {
-                            is C3Item -> ItemsSuppliedList(item)
+                            is UiItem -> ItemsSuppliedList(
+                                item,
+                                onC3ItemClick,
+                                onAlertsClick
+                            )
                             is UiPurchaseOrder.Order -> ExpandableLayout(
                                 expanded = uiState.expandedListItemIds.contains(item.id),
                                 onClick = { onExpandableItemClick(item.id) },
                                 content = { PoLinesListSimple(item, onPOItemClick) },
                                 modifier = Modifier
                                     .background(MaterialTheme.colors.background)
-                                    .padding(horizontal = 16.dp, vertical = 16.dp)
+                                    .padding(horizontal = 16.dp)
                             ) {
                                 item.orderLines.map { poLine ->
-                                    PoLinesListExpanded(poLine, onPOAlertsClick)
+                                    PoLinesListExpanded(poLine, onAlertsClick)
                                 }
                             }
                         }
@@ -201,11 +223,6 @@ private fun SuppliersDetailsInfo(
             style = MaterialTheme.typography.subtitle1,
             color = MaterialTheme.colors.secondary,
             modifier = Modifier
-                .padding(bottom = 10.dp),
-        )
-        PButton(
-            text = stringResource(R.string.contact_supplier),
-            onClick = {}
         )
     }
 }
@@ -219,13 +236,13 @@ private fun LabeledValue(
     valueColor: Color = MaterialTheme.colors.primary,
 ) {
     Column(modifier = modifier) {
-        Text(label, style = MaterialTheme.typography.h4, color = MaterialTheme.colors.secondary)
+        Text(label, style = MaterialTheme.typography.h5, color = MaterialTheme.colors.secondary)
         Text(value, style = valueStyle, color = valueColor, modifier = Modifier.padding(top = 4.dp))
     }
 }
 
 @Composable
-private fun PoLinesListDivider(modifier: Modifier = Modifier) {
+private fun ListDivider(modifier: Modifier = Modifier) {
     Divider(
         modifier = modifier.padding(vertical = 16.dp),
         color = DividerColor
@@ -244,7 +261,7 @@ private fun PoLinesListSimple(
             color = MaterialTheme.colors.primary,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 16.dp, end = 34.dp)
+                .padding(top = 16.dp, bottom = 16.dp, end = 34.dp)
                 .clickable { onPOItemClick(item.id) }
 
         ) {
@@ -312,10 +329,12 @@ private fun PoLinesListExpanded(
 ) {
     Box(
         modifier = Modifier
-            .padding(top = 16.dp)
             .fillMaxWidth()
+            .padding(top = 16.dp)
     ) {
-        C3SimpleCard {
+        C3SimpleCard(
+            backgroundColor = MaterialTheme.colors.surface.copy(alpha = ContentAlpha.medium)
+        ) {
             ConstraintLayout(
                 modifier = Modifier
                     .padding(16.dp)
@@ -324,6 +343,7 @@ private fun PoLinesListExpanded(
                 // Create references for the composables to constrain
                 val (
                     totalCost,
+                    alerts,
                     status,
                     openedDate,
                     closedDate,
@@ -343,21 +363,18 @@ private fun PoLinesListExpanded(
                         top.linkTo(parent.top)
                     }
                 )
-                if (item.numberOfActiveAlerts > 0) {
-                    IconButton(
-                        onClick = { onPOAlertsClick(item.id) },
-                        Modifier
-                            .size(40.dp)
-                            .constrainAs(readMore) {
-                                top.linkTo(parent.top)
-                                end.linkTo(parent.end)
-                            }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Warning,
-                            contentDescription = stringResource(R.string.cd_read_more)
-                        )
-                    }
+                C3IconButton(
+                    onClick = { onPOAlertsClick(item.id) },
+                    badgeText = item.numberOfActiveAlerts,
+                    modifier = Modifier
+                        .constrainAs(alerts) {
+                            top.linkTo(parent.top)
+                            end.linkTo(parent.end)
+                        }) {
+                    Icon(
+                        imageVector = Icons.Filled.Warning,
+                        contentDescription = stringResource(R.string.cd_read_more)
+                    )
                 }
                 SplitText(
                     modifier = Modifier.constrainAs(status) {
@@ -410,7 +427,7 @@ private fun PoLinesListExpanded(
                 ) {
                     Text(
                         stringResource(R.string.lead_time),
-                        style = MaterialTheme.typography.h4,
+                        style = MaterialTheme.typography.h5,
                         color = MaterialTheme.colors.secondary,
                         modifier = Modifier.height(32.dp)
                     )
@@ -449,7 +466,7 @@ private fun PoLinesListExpanded(
                             width = Dimension.fillToConstraints
                         },
                 )
-                PoLinesListDivider(Modifier.constrainAs(divider) { top.linkTo(leadTime.bottom) })
+                ListDivider(Modifier.constrainAs(divider) { top.linkTo(leadTime.bottom) })
                 BusinessCard(
                     label = stringResource(R.string.delivery_facility),
                     title = item.order?.to?.name ?: "",
@@ -473,20 +490,13 @@ private fun PoLinesListExpanded(
                         imageVector = Icons.Filled.ReadMore,
                         contentDescription = stringResource(R.string.cd_read_more)
                     )
-                }
-                PoLinesListReadMore(item = item, expanded = expanded) {
-                    expanded = false
+                    PoLinesListReadMore(item = item, expanded = expanded) {
+                        expanded = false
+                    }
                 }
             }
         }
     }
-}
-
-@Composable
-private fun ItemsSuppliedList(
-    item: C3Item,
-) {
-    Text(item.id)
 }
 
 @Composable
@@ -512,7 +522,7 @@ private fun PoLinesListReadMore(
                     subtitle = "",
                 )
             }
-            PoLinesListDivider()
+            ListDivider()
         }
         item.order?.vendor?.let { vendor ->
             DropdownMenuItem(
@@ -528,6 +538,162 @@ private fun PoLinesListReadMore(
     }
 }
 
+@Composable
+private fun ItemsSuppliedList(
+    item: UiItem,
+    onC3ItemClick: (String) -> Unit,
+    onAlertsClick: (String) -> Unit,
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+    ) {
+        C3SimpleCard(onClick = { onC3ItemClick(item.id) }) {
+            ConstraintLayout(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                // Create references for the composables to constrain
+                val (
+                    title,
+                    alerts,
+                    desc,
+                    divider,
+                    closedPOIV,
+                    openedPOIV,
+                    stubPOIV,
+                    moq,
+                    share,
+                    avgUnitPrice,
+                ) = createRefs()
+                Text(
+                    stringResource(R.string.item_, item.id),
+                    style = MaterialTheme.typography.subtitle2,
+                    color = MaterialTheme.colors.secondary,
+                    modifier = Modifier.constrainAs(title) {
+                        top.linkTo(parent.top)
+                    }
+                )
+                Text(
+                    item.description ?: "",
+                    style = MaterialTheme.typography.h3,
+                    color = MaterialTheme.colors.primary,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier
+                        .padding(end = 40.dp)
+                        .constrainAs(desc) {
+                            top.linkTo(title.bottom)
+                        }
+                )
+                C3IconButton(
+                    onClick = { onAlertsClick(item.id) },
+                    badgeText = item.numberOfActiveAlerts,
+                    modifier = Modifier
+                        .constrainAs(alerts) {
+                            top.linkTo(parent.top)
+                            end.linkTo(parent.end)
+                        }) {
+                    Icon(
+                        imageVector = Icons.Filled.Warning,
+                        contentDescription = stringResource(R.string.cd_read_more)
+                    )
+                }
+                ListDivider(Modifier.constrainAs(divider) { top.linkTo(desc.bottom) })
+                LabeledValue(
+                    label = stringResource(R.string.closed_po_item_value),
+                    value = "",
+                    modifier = Modifier
+                        .constrainAs(closedPOIV) {
+                            top.linkTo(desc.bottom, margin = 32.dp)
+                            start.linkTo(parent.start)
+                            end.linkTo(openedPOIV.start)
+                            width = Dimension.fillToConstraints
+                        },
+                )
+                LabeledValue(
+                    label = stringResource(R.string.open_po_item_value),
+                    value = "",
+                    modifier = Modifier
+                        .constrainAs(openedPOIV) {
+                            top.linkTo(desc.bottom, margin = 32.dp)
+                            start.linkTo(closedPOIV.end, margin = 12.dp)
+                            end.linkTo(stubPOIV.start)
+                            width = Dimension.fillToConstraints
+                        },
+                )
+                LabeledValue(
+                    label = "",
+                    value = "",
+                    modifier = Modifier
+                        .constrainAs(stubPOIV) {
+                            top.linkTo(desc.bottom, margin = 32.dp)
+                            start.linkTo(openedPOIV.end, margin = 12.dp)
+                            end.linkTo(parent.end)
+                            width = Dimension.fillToConstraints
+                        },
+                )
+                LabeledValue(
+                    label = stringResource(R.string.moq),
+                    value = "",
+                    modifier = Modifier
+                        .constrainAs(moq) {
+                            top.linkTo(closedPOIV.bottom, margin = 20.dp)
+                            start.linkTo(parent.start)
+                            end.linkTo(share.start)
+                            width = Dimension.fillToConstraints
+                        },
+                )
+                LabeledValue(
+                    label = stringResource(R.string._share),
+                    value = "",
+                    modifier = Modifier
+                        .constrainAs(share) {
+                            top.linkTo(closedPOIV.bottom, margin = 20.dp)
+                            start.linkTo(moq.end, margin = 12.dp)
+                            end.linkTo(avgUnitPrice.start)
+                            width = Dimension.fillToConstraints
+                        },
+                )
+                LabeledValue(
+                    label = stringResource(R.string.avg_unit_price),
+                    value = item.averageUnitPricePaid,
+                    modifier = Modifier
+                        .constrainAs(avgUnitPrice) {
+                            top.linkTo(closedPOIV.bottom, margin = 20.dp)
+                            start.linkTo(share.end, margin = 12.dp)
+                            end.linkTo(parent.end)
+                            width = Dimension.fillToConstraints
+                        },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ContactsBottomSheetContent() {
+    BottomSheetContent(
+        BottomSheetItem(
+            image = Icons.Filled.Call,
+            contentDescription = stringResource(R.string.cd_make_call),
+            text = stringResource(R.string.make_call),
+        ),
+        BottomSheetItem(
+            image = Icons.Filled.Sms,
+            contentDescription = stringResource(R.string.cd_send_sms),
+            text = stringResource(R.string.send_sms),
+        ),
+        BottomSheetItem(
+            image = Icons.Filled.Email,
+            contentDescription = stringResource(R.string.cd_send_email),
+            text = stringResource(R.string.send_email),
+        ),
+    )
+}
+
 /**
  * TopAppBar for the suppliers details screen[SupplierDetailsScreen]
  */
@@ -537,9 +703,10 @@ private fun TopAppBar(
     title: String,
     searchInput: String,
     placeholderText: String = "",
+    onBackButtonClick: () -> Unit,
     onSearchInputChanged: (String) -> Unit = {},
     onClearClick: () -> Unit = {},
-    onBackButtonClick: () -> Unit,
+    onContactsClick: () -> Unit,
 ) {
     var showClearButton by remember { mutableStateOf(false) }
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -591,13 +758,13 @@ private fun TopAppBar(
 //                    keyboardController?.hide()
 //                }),
 //            )
-            IconButton(onClick = { /* TODO: Open search */ }) {
+            IconButton(onClick = onContactsClick) {
                 Icon(
-                    imageVector = Icons.Filled.Search,
-                    contentDescription = stringResource(R.string.cd_search_menu)
+                    imageVector = Icons.Filled.ContactPage,
+                    contentDescription = stringResource(R.string.cd_contact_supplier)
                 )
             }
-            IconButton(onClick = { /* TODO: Open sort */ }) {
+            IconButton(onClick = { sortMenuExpanded = true }) {
                 Icon(
                     imageVector = Icons.Filled.Sort,
                     contentDescription = stringResource(R.string.cd_sort_menu)
@@ -608,28 +775,71 @@ private fun TopAppBar(
                 expanded = sortMenuExpanded,
                 onDismissRequest = { sortMenuExpanded = false }
             ) {
-
+                stringArrayResource(R.array.sort_po).map { title ->
+                    DropdownMenuItem(
+                        onClick = {},
+                    ) {
+                        Text(
+                            title,
+                            style = MaterialTheme.typography.subtitle1,
+                            color = MaterialTheme.colors.secondaryVariant,
+                        )
+                    }
+                }
+            }
+            IconButton(onClick = { /* TODO: Open search */ }) {
+                Icon(
+                    imageVector = Icons.Filled.Search,
+                    contentDescription = stringResource(R.string.cd_search_menu)
+                )
             }
         }
     )
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Preview
 @Composable
-fun ComposablePreview() {
+fun SupplierDetailsPreview() {
     val supplier = runBlocking {
         (C3MockRepositoryImpl().getSupplierDetails("") as C3Result.Success).data
     }
     C3AppTheme {
         SupplierDetailsScreen(
-            scaffoldState = rememberScaffoldState(),
+            scaffoldState = rememberBottomSheetScaffoldState(),
             supplierId = supplier.id,
             uiState = PreviewSupplierDetailsUiState(supplier),
             onRefreshDetails = {},
             onSearchInputChanged = {},
+            onTabItemClick = {},
             onExpandableItemClick = {},
             onPOItemClick = {},
-            onPOAlertsClick = {},
+            onC3ItemClick = {},
+            onAlertsClick = {},
+            onBackButtonClick = {},
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Preview
+@Composable
+fun SupplierDetailsItemsSuppliedTabPreview() {
+    val supplier = runBlocking {
+        (C3MockRepositoryImpl().getSupplierDetails("") as C3Result.Success).data
+    }
+    C3AppTheme {
+        SupplierDetailsScreen(
+            scaffoldState = rememberBottomSheetScaffoldState(),
+            supplierId = supplier.id,
+            uiState = PreviewSupplierDetailsUiState(supplier, 1),
+            onRefreshDetails = {},
+            onSearchInputChanged = {},
+            onTabItemClick = {},
+            onExpandableItemClick = {},
+            onPOItemClick = {},
+            onC3ItemClick = {},
+            onAlertsClick = {},
             onBackButtonClick = {},
         )
     }
