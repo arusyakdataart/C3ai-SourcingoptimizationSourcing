@@ -4,10 +4,8 @@ import com.c3ai.sourcingoptimization.data.Result
 import com.c3ai.sourcingoptimization.data.network.C3ApiService
 import com.c3ai.sourcingoptimization.data.network.requests.EvalMetricsParameters
 import com.c3ai.sourcingoptimization.data.network.requests.ItemDetailsParameters
-import com.c3ai.sourcingoptimization.domain.model.C3Items
-import com.c3ai.sourcingoptimization.domain.model.OpenClosedPOLineQtyItem
-import com.c3ai.sourcingoptimization.domain.model.SavingsOpportunityItem
-import com.c3ai.sourcingoptimization.domain.model.SearchItem
+import com.c3ai.sourcingoptimization.data.network.requests.SuppliersParameters
+import com.c3ai.sourcingoptimization.domain.model.*
 import javax.inject.Inject
 
 /**
@@ -47,5 +45,9 @@ class C3RepositoryImpl @Inject constructor(private val api: C3ApiService) : C3Re
                 startDate = startDate, endDate = endDate, interval = interval
             )
         )
+    }
+
+    override suspend fun getSuppliers(itemId: String): Result<Vendors> = Result.on {
+        api.getSuppliers(SuppliersParameters(itemId = itemId))
     }
 }

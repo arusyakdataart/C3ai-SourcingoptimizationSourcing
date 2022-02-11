@@ -33,6 +33,10 @@ interface C3ApiService {
     suspend fun getEvalMetricsForSavingOpportunity(@Body request: EvalMetricsParameters): SavingsOpportunityItem
 
     @Headers("Accept: application/json")
+    @POST("${MAIN_API_URL}Vendor?action=fetch")
+    suspend fun getSuppliers(@Body request: SuppliersParameters): Vendors
+
+    @Headers("Accept: application/json")
     @POST("${MAIN_API_URL}PurchaseOrder?action=fetch")
     suspend fun getPOLines(@Body request: POLinesDetailsParameters): POLine
 

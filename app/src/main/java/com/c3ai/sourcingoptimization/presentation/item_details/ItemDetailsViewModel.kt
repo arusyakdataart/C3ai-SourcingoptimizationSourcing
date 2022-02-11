@@ -9,6 +9,7 @@ import com.c3ai.sourcingoptimization.data.repository.C3Repository
 import com.c3ai.sourcingoptimization.domain.model.C3Item
 import com.c3ai.sourcingoptimization.domain.model.OpenClosedPOLineQtyItem
 import com.c3ai.sourcingoptimization.domain.model.SavingsOpportunityItem
+import com.c3ai.sourcingoptimization.domain.model.Vendors
 import com.c3ai.sourcingoptimization.utilities.PAGINATED_RESPONSE_LIMIT
 import com.c3ai.sourcingoptimization.utilities.VISIBLE_THRESHOLD
 import dagger.assisted.Assisted
@@ -60,6 +61,12 @@ sealed interface ItemDetailsUiState {
         override val isLoading: Boolean,
         override val itemId: String
     ) : ItemDetailsUiState
+
+    data class HasSuppliers(
+        val suppliers: Vendors,
+        override val isLoading: Boolean,
+        override val itemId: String
+    ) : ItemDetailsUiState
 }
 
 /**
@@ -69,6 +76,7 @@ private data class ItemDetailsViewModelState(
     val items: List<C3Item>? = null,
     val openClosedPOLineQty: OpenClosedPOLineQtyItem? = null,
     val savingsOpportunity: SavingsOpportunityItem? = null,
+    val suppliers: Vendors? = null,
     val isLoading: Boolean = false,
     val itemId: String = "",
 ) {
@@ -97,6 +105,14 @@ private data class ItemDetailsViewModelState(
         if (savingsOpportunity != null) {
             return  ItemDetailsUiState.HasSavingsOpportunity(
                 savingsOpportunity = savingsOpportunity,
+                isLoading = isLoading,
+                itemId = itemId
+            )
+        }
+
+        if (suppliers != null) {
+            return ItemDetailsUiState.HasSuppliers(
+                suppliers = suppliers,
                 isLoading = isLoading,
                 itemId = itemId
             )
@@ -167,6 +183,7 @@ class ItemDetailsViewModel @AssistedInject constructor(
                             items = itemsResult.data.objs,
                             openClosedPOLineQty = null,
                             savingsOpportunity = null,
+                            suppliers = null,
                             isLoading = false
                         )
                     }
@@ -190,6 +207,7 @@ class ItemDetailsViewModel @AssistedInject constructor(
                             items = null,
                             openClosedPOLineQty = openClosedPOLineQtyResult.data,
                             savingsOpportunity = null,
+                            suppliers = null,
                             isLoading = false
                         )
                     }
@@ -213,6 +231,25 @@ class ItemDetailsViewModel @AssistedInject constructor(
                             items = null,
                             openClosedPOLineQty = null,
                             savingsOpportunity = savingsOpportunityResult.data,
+                            suppliers = null,
+                            isLoading = false
+                        )
+                    }
+                    is Error -> {
+                        it.copy(isLoading = false)
+                    }
+                }
+            }
+
+            val suppliersResult = repository.getSuppliers(itemId)
+            viewModelState.update {
+                when (suppliersResult) {
+                    is Success -> {
+                        it.copy(
+                            items = null,
+                            openClosedPOLineQty = null,
+                            savingsOpportunity = null,
+                            suppliers = suppliersResult.data,
                             isLoading = false
                         )
                     }

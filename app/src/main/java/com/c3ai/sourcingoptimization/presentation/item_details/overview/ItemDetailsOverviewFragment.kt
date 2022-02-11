@@ -15,18 +15,25 @@ import com.c3ai.sourcingoptimization.databinding.FragmentItemDetailsOverviewBind
 import com.c3ai.sourcingoptimization.domain.model.C3Item
 import com.c3ai.sourcingoptimization.domain.model.OpenClosedPOLineQtyItem
 import com.c3ai.sourcingoptimization.domain.model.SavingsOpportunityItem
+import com.c3ai.sourcingoptimization.domain.model.Vendors
 import com.c3ai.sourcingoptimization.presentation.item_details.*
 import com.github.aachartmodel.aainfographics.aachartcreator.*
+import com.github.aachartmodel.aainfographics.aaoptionsmodel.AADataLabels
+import com.github.aachartmodel.aainfographics.aaoptionsmodel.AAStyle
 import com.github.aachartmodel.aainfographics.aatools.AAGradientColor
 import com.github.aachartmodel.aainfographics.aatools.AALinearGradientDirection
 import dagger.hilt.android.AndroidEntryPoint
-import java.util.*
 import javax.inject.Inject
+
 
 /**
  * The fragment representing overview page in ItemDetailsViewPagerFragment
  * @see ItemDetailsViewPagerFragment
  * */
+
+const val TOTAL_SPENT = 0
+const val SHARE = 1
+
 @AndroidEntryPoint
 class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBinding>(
     FragmentItemDetailsOverviewBinding::inflate
@@ -35,8 +42,13 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
     @Inject
     lateinit var assistedFactory: ItemDetailsViewModelAssistedFactory
 
+    private var selectedSpinnerPosition = 0
+    lateinit var vendors: Vendors
+
+
     private val viewModel: ItemDetailsViewModel by viewModels {
-        ItemDetailsViewModel.Factory(assistedFactory, "item0",
+        ItemDetailsViewModel.Factory(
+            assistedFactory, "item0",
             po_expressions = listOf("OpenPOLineQuantity", "ClosedPOLineQuantity"),
             po_startDate = formatDate(date = getYearBackDate(1)),
             po_endDate = formatDate(date = getCurrentDate()),
@@ -77,6 +89,10 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
                 is ItemDetailsUiState.HasSavingsOpportunity -> {
                     bindSavingsOpportunity(result.savingsOpportunity)
                 }
+                is ItemDetailsUiState.HasSuppliers -> {
+                    vendors = result.suppliers
+                    bindSuppliers()
+                }
                 else -> {
                     // TODO!!! Handle error and loading states
                 }
@@ -100,8 +116,13 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
                 position: Int,
                 id: Long
             ) {
+                selectedSpinnerPosition = position
                 binding.totalSharespinner.findViewById<TextView>(R.id.input).text = spinnerValues[position]
                 (binding.totalSharespinner.adapter as SpinnerArrayAdapter).selectedPosition = position
+
+                if (::vendors.isInitialized) {
+                    bindSuppliers()
+                }
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {}
@@ -114,8 +135,8 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
         if (item.hasActiveAlerts == true) {
             binding.alertsCount.visibility = View.VISIBLE
             binding.alertsCount.text = item.numberOfActiveAlerts?.toString()
-            binding.suppliers.text = item.numberOfVendors?.toString()
         }
+        binding.suppliers.text = item.numberOfVendors?.toString()
         binding.inventory.text = String.format("%s%s", item.currentInventory?.value, " Cases")
         binding.lastPrice.text = String.format("%s%s", "$", String.format("%.2f", item.lastUnitPricePaid?.value))
         binding.avgPrice.text = String.format("%s%s", "$", String.format("%.2f", item.averageUnitPricePaid?.value))
@@ -182,6 +203,101 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
                         .data(data.result?.item0?.SavingsOpportunityCompound?.data?.toTypedArray() ?: arrayOf())
                 )
             )
+    }
+
+    private fun bindSuppliers() {
+        val aaBarChartModel = configureColorfulColumnChart()
+        val barChart = binding.barChartView
+        barChart.aa_drawChartWithChartModel(aaBarChartModel)
+    }
+
+    private fun getMin(): Double? {
+        if (selectedSpinnerPosition == TOTAL_SPENT) {
+            return vendors?.objs?.map { it.spend.value }?.minOrNull()?.minus(50.0) ?: 0.0
+        }
+        return 0.0
+    }
+
+    private fun getMax(): Double? {
+        if (selectedSpinnerPosition == TOTAL_SPENT) {
+            return vendors?.objs?.map { it.spend.value }?.maxOrNull()?.plus(50.0) ?: 0.0
+        }
+        val total = vendors.objs?.sumOf { it.spend.value }
+        if (total == 0.0) {
+            return 0.0
+        }
+        val shares = vendors.objs?.map { ((it.spend.value / total!!) * 100) }?.toTypedArray()
+        return shares?.maxOrNull()
+    }
+
+    private fun configureColorfulColumnChart(): AAChartModel {
+        val values = getBarChartData(vendors)
+
+        return AAChartModel()
+            .chartType(AAChartType.Column)
+            .colorsTheme(arrayOf("#82B0FF", "#C799FF", "#F2950A", "#49BFA9", "#A7ADC4"))
+            .series(
+                arrayOf(
+//                    AASeriesElement()
+//                        .name("Tokyo")
+//                        .data(arrayOf(6858554.9, 0.0))
+//                        .dataLabels(AADataLabels().format("OOOO")),
+//                    AASeriesElement()
+//                        .name("NewYork")
+//                        .data(arrayOf(0.0, 6858554.9))
+//                        .dataLabels(AADataLabels().format("1111")),
+
+                    AASeriesElement()
+                        .data(values)
+                        .colorByPoint(true)
+                        .dataLabels(AADataLabels().format("aaa")),
+                )
+            )
+            .dataLabelsEnabled(true)
+            .legendEnabled(false)
+            .tooltipEnabled(false)
+            .xAxisVisible(true)
+            .axesTextColor("#FFFFFF")
+            .yAxisVisible(false)
+            .yAxisLabelsEnabled(false)
+            .xAxisLabelsEnabled(true)
+            .yAxisMin(getMin()?.toFloat())
+            .yAxisMax(getMax()?.toFloat())
+            .stacking(AAChartStackingType.Normal)
+            .backgroundColor("rgba(0,0,0,0)")
+            .categories(vendors.objs?.map { it.name }?.toTypedArray() ?: arrayOf())
+            .dataLabelsStyle(
+                AAStyle()
+                    .color("#1f1b1b")//Title font color
+                    .lineWidth(0f)
+                    .fontSize(11f)//Title font size
+                    .fontWeight(AAChartFontWeightType.Bold)//Title font weight
+                    .textOutline("0px 0px contrast")
+            )
+    }
+
+    private fun getBarChartData(data: Vendors): Array<Any> {
+        if (selectedSpinnerPosition == TOTAL_SPENT) {
+            return data.objs?.map { it.spend.value }?.toTypedArray() ?: arrayOf()
+        }
+
+        val total = data.objs?.sumOf { it.spend.value }
+        if (total == 0.0) {
+            return arrayOf()
+        }
+        return data.objs?.map { ((it.spend.value / total!!) * 100).toInt() }?.toTypedArray() ?: arrayOf()
+    }
+
+    private fun formatNumber(number: Double): String {
+        var numberString = ""
+        if (Math.abs(number / 1000000) > 1) {
+            numberString = String.format("%.2f", number / 1000000) + "M"
+        } else if (Math.abs(number / 1000) > 1) {
+            numberString = String.format("%.2f", number / 1000) + "K"
+        } else {
+            number.toString()
+        }
+        return numberString
     }
 
 //    private fun setupScrollListener() {
