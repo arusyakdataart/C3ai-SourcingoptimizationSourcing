@@ -15,13 +15,14 @@ import com.c3ai.sourcingoptimization.databinding.FragmentItemDetailsOverviewBind
 import com.c3ai.sourcingoptimization.domain.model.*
 import com.c3ai.sourcingoptimization.presentation.item_details.*
 import com.github.aachartmodel.aainfographics.aachartcreator.*
-import com.github.aachartmodel.aainfographics.aaoptionsmodel.AADataLabels
+import com.github.aachartmodel.aainfographics.aaoptionsmodel.AAColumn
 import com.github.aachartmodel.aainfographics.aaoptionsmodel.AAStyle
+import com.github.aachartmodel.aainfographics.aatools.AAColor
 import com.github.aachartmodel.aainfographics.aatools.AAGradientColor
 import com.github.aachartmodel.aainfographics.aatools.AALinearGradientDirection
 import dagger.hilt.android.AndroidEntryPoint
+import java.text.DecimalFormat
 import javax.inject.Inject
-import kotlin.math.abs
 
 
 /**
@@ -217,28 +218,34 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
     }
 
     private fun bindSuppliers() {
-        val aaBarChartModel = configureColorfulColumnChart()
         val barChart = binding.barChartView
-        barChart.aa_drawChartWithChartModel(aaBarChartModel)
-    }
-
-    private fun getMin(): Double? {
-        if (selectedSpinnerPosition == TOTAL_SPENT) {
-            return suppliers.map { it.spend.value }?.minOrNull()?.minus(50.0) ?: 0.0
-        }
-        return 0.0
+        barChart.aa_drawChartWithChartOptions(columnChartOptions())
     }
 
     private fun getMax(): Double? {
         if (selectedSpinnerPosition == TOTAL_SPENT) {
-            return suppliers.map { it.spend.value }.maxOrNull()?.plus(50.0) ?: 0.0
+            return suppliers.map { formatNumber(it.spend.value) }.maxOrNull()
         }
         val total = suppliers.sumOf { it.spend.value }
         if (total == 0.0) {
             return 0.0
         }
-        val shares = suppliers.map { ((it.spend.value / total!!) * 100) }?.toTypedArray()
-        return shares?.maxOrNull()
+        val shares = suppliers.map { ((it.spend.value / total!!) * 100) }.toTypedArray()
+        return shares.maxOrNull()
+    }
+
+    private fun columnChartOptions(): AAOptions {
+        val model = configureColorfulColumnChart()
+        val aaColumn = AAColumn().groupPadding(0.01f).borderWidth(0f)
+
+        val aaOptions = model.aa_toAAOptions()
+        aaOptions.xAxis?.lineColor = AAColor.Clear
+        aaOptions.plotOptions?.column = aaColumn
+        model.aa_toAAOptions()
+        aaOptions.plotOptions?.series?.dataLabels?.format(
+            if (selectedSpinnerPosition == TOTAL_SPENT ) "{point.y:,.2f}M" else "{point.y:,.0f} %"
+        )
+        return aaOptions
     }
 
     private fun configureColorfulColumnChart(): AAChartModel {
@@ -249,19 +256,9 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
             .colorsTheme(arrayOf("#82B0FF", "#C799FF", "#F2950A", "#49BFA9", "#A7ADC4"))
             .series(
                 arrayOf(
-//                    AASeriesElement()
-//                        .name("Tokyo")
-//                        .data(arrayOf(6858554.9, 0.0))
-//                        .dataLabels(AADataLabels().format("OOOO")),
-//                    AASeriesElement()
-//                        .name("NewYork")
-//                        .data(arrayOf(0.0, 6858554.9))
-//                        .dataLabels(AADataLabels().format("1111")),
-
                     AASeriesElement()
                         .data(values)
                         .colorByPoint(true)
-                        .dataLabels(AADataLabels().format("aaa")),
                 )
             )
             .dataLabelsEnabled(true)
@@ -272,7 +269,7 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
             .yAxisVisible(false)
             .yAxisLabelsEnabled(false)
             .xAxisLabelsEnabled(true)
-            .yAxisMin(getMin()?.toFloat())
+            .yAxisMin(0f)
             .yAxisMax(getMax()?.toFloat())
             .stacking(AAChartStackingType.Normal)
             .backgroundColor("rgba(0,0,0,0)")
@@ -289,7 +286,7 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
 
     private fun getBarChartData(data: List<C3Vendor>): Array<Any> {
         if (selectedSpinnerPosition == TOTAL_SPENT) {
-            return data.map { it.spend.value }.toTypedArray() ?: arrayOf()
+            return data.map { formatNumber(it.spend.value) }.toTypedArray()
         }
 
         val total = data.sumOf { it.spend.value }
@@ -297,23 +294,12 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
             return arrayOf()
         }
         return data.map { ((it.spend.value / total) * 100).toInt() }.toTypedArray()
-            ?: arrayOf()
     }
 
-    private fun formatNumber(number: Double): String {
-        var numberString = ""
-        when {
-            abs(number / 1000000) > 1 -> {
-                numberString = String.format("%.2f", number / 1000000) + "M"
-            }
-            abs(number / 1000) > 1 -> {
-                numberString = String.format("%.2f", number / 1000) + "K"
-            }
-            else -> {
-                number.toString()
-            }
-        }
-        return numberString
+    private fun formatNumber(number: Double): Double {
+        val dec = DecimalFormat("#,###.##")
+        val formattedNumber = dec.format(number / 1000000)
+        return formattedNumber.toDouble()
     }
 
 //    private fun setupScrollListener() {
