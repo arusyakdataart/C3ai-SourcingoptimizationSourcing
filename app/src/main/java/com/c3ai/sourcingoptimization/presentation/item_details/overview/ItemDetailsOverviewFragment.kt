@@ -41,13 +41,14 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
     @Inject
     lateinit var assistedFactory: ItemDetailsViewModelAssistedFactory
 
+    private val itemId = "item0"
     private var selectedSpinnerPosition = 0
     lateinit var suppliers: List<C3Vendor>
 
 
     private val viewModel: ItemDetailsViewModel by viewModels {
         ItemDetailsViewModel.Factory(
-            assistedFactory, "item0",
+            assistedFactory, itemId,
             po_expressions = listOf("OpenPOLineQuantity", "ClosedPOLineQuantity"),
             po_startDate = formatDate(date = getYearBackDate(1)),
             po_endDate = formatDate(date = getCurrentDate()),
@@ -55,7 +56,7 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
             so_expressions = listOf("SavingsOpportunityCompound"),
             so_startDate = formatDate(date = getMonthBackDate(1)),
             so_endDate = formatDate(date = getCurrentDate()),
-            so_interval = "DAY",
+            so_interval = "MONTH",
         )
     }
 
@@ -89,6 +90,16 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
                 is ItemDetailsUiState.HasSuppliers -> {
                     suppliers = result.suppliers
                     bindSuppliers()
+                    viewModel.getItemVendorRelation(itemId, suppliers.map { it.id })
+                }
+                is ItemDetailsUiState.HasItemVendorRelation -> {
+                    val relations = result.relations
+                    viewModel.getItemVendorRelationMetrics(
+                        ids = relations.map { it.id },
+                        expressions = listOf("OrderLineValue"),
+                        startDate = formatDate(date = getYearBackDate(1)),
+                        endDate = formatDate(date = getCurrentDate()),
+                        interval = "YEAR")
                 }
                 else -> {
                     // TODO!!! Handle error and loading states

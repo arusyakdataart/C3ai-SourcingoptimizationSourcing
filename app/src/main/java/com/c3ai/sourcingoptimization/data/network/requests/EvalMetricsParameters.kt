@@ -5,7 +5,7 @@ package com.c3ai.sourcingoptimization.data.network.requests
  * @see C3ApiService
  * */
 data class EvalMetricsParameters(
-    @Transient val itemId: String,
+    @Transient val ids: List<String>,
     @Transient val expressions: List<String>,
     @Transient val startDate: String,
     @Transient val endDate: String,
@@ -13,7 +13,7 @@ data class EvalMetricsParameters(
 ) : EMRequestParameters {
 
     override val spec: EMSpec = EMSpec(
-        ids = listOf(itemId),
+        ids = ids,
         expressions = expressions,
         start = startDate,
         end = endDate,

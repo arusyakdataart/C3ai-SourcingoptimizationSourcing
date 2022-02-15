@@ -55,6 +55,13 @@ interface C3ApiService {
     @POST("${MAIN_API_URL}Vendor?action=fetch")
     suspend fun getSuppliedItems(@Body request: SuppliedItemsParameters): List<C3Item>
 
+    @Headers("Accept: application/json")
+    @POST("${MAIN_API_URL}ItemVendorRelation?action=fetch")
+    suspend fun getItemVendorRelation(@Body request: ItemVendorRelationParameters): C3Response<ItemVendorRelation>
+
+    @Headers("Accept: application/json")
+    @POST("${MAIN_API_URL}ItemVendorRelation?action=evalMetrics")
+    suspend fun getItemVendorRelationMetrics(@Body request: EvalMetricsParameters): ItemVendorRelationMetrics
     companion object {
 
         fun create(okHttpClient: OkHttpClient): C3ApiService {

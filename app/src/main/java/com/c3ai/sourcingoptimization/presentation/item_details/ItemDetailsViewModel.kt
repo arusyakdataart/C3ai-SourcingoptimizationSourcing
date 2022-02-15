@@ -64,6 +64,18 @@ sealed interface ItemDetailsUiState {
         override val isLoading: Boolean,
         override val itemId: String
     ) : ItemDetailsUiState
+
+    data class HasItemVendorRelation(
+        val relations: List<ItemVendorRelation>,
+        override val isLoading: Boolean,
+        override val itemId: String
+    ) : ItemDetailsUiState
+
+    data class HasItemVendorRelationMetrics(
+        val relationMetrics: ItemVendorRelationMetrics,
+        override val isLoading: Boolean,
+        override val itemId: String
+    ) : ItemDetailsUiState
 }
 
 /**
@@ -74,6 +86,8 @@ private data class ItemDetailsViewModelState(
     val openClosedPOLineQty: OpenClosedPOLineQtyItem? = null,
     val savingsOpportunity: SavingsOpportunityItem? = null,
     val suppliers: List<C3Vendor>? = null,
+    val itemVendorRelations: List<ItemVendorRelation>? = null,
+    val itemVendorRelationMetrics: ItemVendorRelationMetrics? = null,
     val isLoading: Boolean = false,
     val itemId: String = "",
 ) {
@@ -110,6 +124,22 @@ private data class ItemDetailsViewModelState(
         if (suppliers != null) {
             return ItemDetailsUiState.HasSuppliers(
                 suppliers = suppliers,
+                isLoading = isLoading,
+                itemId = itemId
+            )
+        }
+
+        if (itemVendorRelations != null) {
+            return ItemDetailsUiState.HasItemVendorRelation(
+                relations = itemVendorRelations,
+                isLoading = isLoading,
+                itemId = itemId
+            )
+        }
+
+        if (itemVendorRelationMetrics != null) {
+            return ItemDetailsUiState.HasItemVendorRelationMetrics(
+                relationMetrics = itemVendorRelationMetrics,
                 isLoading = isLoading,
                 itemId = itemId
             )
@@ -181,6 +211,8 @@ class ItemDetailsViewModel @AssistedInject constructor(
                             openClosedPOLineQty = null,
                             savingsOpportunity = null,
                             suppliers = null,
+                            itemVendorRelations = null,
+                            itemVendorRelationMetrics = null,
                             isLoading = false
                         )
                     }
@@ -205,6 +237,8 @@ class ItemDetailsViewModel @AssistedInject constructor(
                             openClosedPOLineQty = openClosedPOLineQtyResult.data,
                             savingsOpportunity = null,
                             suppliers = null,
+                            itemVendorRelations = null,
+                            itemVendorRelationMetrics = null,
                             isLoading = false
                         )
                     }
@@ -229,6 +263,8 @@ class ItemDetailsViewModel @AssistedInject constructor(
                             openClosedPOLineQty = null,
                             savingsOpportunity = savingsOpportunityResult.data,
                             suppliers = null,
+                            itemVendorRelations = null,
+                            itemVendorRelationMetrics = null,
                             isLoading = false
                         )
                     }
@@ -247,6 +283,68 @@ class ItemDetailsViewModel @AssistedInject constructor(
                             openClosedPOLineQty = null,
                             savingsOpportunity = null,
                             suppliers = suppliersResult.data,
+                            itemVendorRelations = null,
+                            itemVendorRelationMetrics = null,
+                            isLoading = false
+                        )
+                    }
+                    is Error -> {
+                        it.copy(isLoading = false)
+                    }
+                }
+            }
+        }
+    }
+
+    fun getItemVendorRelation(itemId: String, supplierIds: List<String>) {
+        viewModelScope.launch {
+            val itemVendorRelations = repository.getItemVendorRelation(itemId, supplierIds = supplierIds)
+            viewModelState.update {
+                when (itemVendorRelations) {
+                    is Success -> {
+                        it.copy(
+                            item = null,
+                            openClosedPOLineQty = null,
+                            savingsOpportunity = null,
+                            suppliers = null,
+                            itemVendorRelations = itemVendorRelations.data,
+                            itemVendorRelationMetrics = null,
+                            isLoading = false
+                        )
+                    }
+                    is Error -> {
+                        it.copy(isLoading = false)
+                    }
+                }
+            }
+        }
+    }
+
+    fun getItemVendorRelationMetrics(
+        ids: List<String>,
+        expressions: List<String>,
+        startDate: String,
+        endDate: String,
+        interval: String
+    ) {
+        viewModelScope.launch {
+            val itemVendorRelationMetrics = repository.getItemVendorRelationMetrics(
+                ids,
+                expressions,
+                startDate,
+                endDate,
+                interval
+            )
+            viewModelState.update {
+                when (itemVendorRelationMetrics) {
+                    is Success -> {
+                        it.copy(
+                            item = null,
+                            openClosedPOLineQty = null,
+                            savingsOpportunity = null,
+                            suppliers = null,
+                            itemVendorRelations = null,
+                            itemVendorRelationMetrics = itemVendorRelationMetrics.data,
                             isLoading = false
                         )
                     }

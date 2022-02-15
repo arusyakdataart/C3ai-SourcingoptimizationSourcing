@@ -30,4 +30,14 @@ interface C3Repository {
 
     suspend fun getItemDetailsSuppliers(itemId: String): C3Result<List<C3Vendor>>
 
+    suspend fun getItemVendorRelation(itemId: String, supplierIds: List<String>):
+            C3Result<List<ItemVendorRelation>>
+
+    suspend fun getItemVendorRelationMetrics(
+        ids: List<String>,
+        expressions: List<String>,
+        startDate: String,
+        endDate: String,
+        interval: String): C3Result<ItemVendorRelationMetrics>
+
 }
