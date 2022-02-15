@@ -160,11 +160,11 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
     private fun bindOpenClosedPOLineQty(data: OpenClosedPOLineQtyItem) {
         binding.openValue.text = String.format(
             "%s%s", "$",
-            data.result?.item0?.OpenPOLineQuantity?.data?.get(0)?.toString()
+            data.result[itemId]?.OpenPOLineQuantity?.data?.get(0)?.toString()
         )
         binding.closedValue.text = String.format(
             "%s%s", "$",
-            data.result?.item0?.ClosedPOLineQuantity?.data?.get(0)?.toString()
+            data.result[itemId]?.ClosedPOLineQuantity?.data?.get(0)?.toString()
         )
     }
 
@@ -174,7 +174,7 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
         gradientChartChart.aa_drawChartWithChartModel(aaGradientChartModel)
 
         val notMissingData =
-            data.result?.item0?.SavingsOpportunityCompound?.missing?.filter { it < 100 }
+            data.result[itemId]?.SavingsOpportunityCompound?.missing?.filter { it < 100 }
         val savingOpp = if (notMissingData.isNullOrEmpty()) 0 else notMissingData?.sum()
             ?.div(notMissingData.size)
 
@@ -221,7 +221,7 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
                         .color("rgba(86,179,95, 1)")
                         .fillColor(linearGradientColor)
                         .data(
-                            data.result?.item0?.SavingsOpportunityCompound?.data?.toTypedArray()
+                            data.result[itemId]?.SavingsOpportunityCompound?.data?.toTypedArray()
                                 ?: arrayOf()
                         )
                 )

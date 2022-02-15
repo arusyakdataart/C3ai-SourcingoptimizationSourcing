@@ -1,11 +1,6 @@
 package com.c3ai.sourcingoptimization.domain.model
 
-import com.google.gson.annotations.Expose
-import com.google.gson.annotations.SerializedName
-
 data class ItemVendorRelationMetrics(
-    @SerializedName("id")
-    @Expose
     val result: Map<String, ItemVendorRelationMetric>
 )
 

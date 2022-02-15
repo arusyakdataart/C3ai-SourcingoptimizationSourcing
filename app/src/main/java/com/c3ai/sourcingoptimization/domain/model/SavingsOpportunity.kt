@@ -1,11 +1,7 @@
 package com.c3ai.sourcingoptimization.domain.model
 
 data class SavingsOpportunityItem(
-    val result: AAA?
-)
-
-data class AAA(
-    val item0: SavingsOpportunity?
+    val result: Map<String, SavingsOpportunity>
 )
 
 data class SavingsOpportunity(
