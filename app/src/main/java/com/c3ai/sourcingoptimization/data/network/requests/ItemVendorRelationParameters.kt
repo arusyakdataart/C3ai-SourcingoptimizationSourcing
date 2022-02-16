@@ -13,6 +13,6 @@ data class ItemVendorRelationParameters(
         include = listOf(
             "to"
         ),
-        filter = "from == '$itemId' && " + supplierIds.joinToString(separator = " || ") { "to == '$it'" }
+        filter = "from == '$itemId' && (" + supplierIds.joinToString(separator = " || ") { "to == '$it'" } + ")"
     )
 }

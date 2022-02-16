@@ -44,6 +44,7 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
     private val itemId = "item0"
     private var selectedSpinnerPosition = 0
     lateinit var suppliers: List<C3Vendor>
+    private val chartColors : Array<Any> = arrayOf("#82B0FF", "#C799FF", "#F2950A", "#49BFA9", "#A7ADC4")
 
 
     private val viewModel: ItemDetailsViewModel by viewModels {
@@ -74,6 +75,8 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
 
         setSpinnerView()
 
+        var relations = listOf<ItemVendorRelation>()
+
         viewModel.uiState.asLiveData().observe(viewLifecycleOwner) { result ->
             when (result) {
                 is ItemDetailsUiState.HasItem -> {
@@ -93,13 +96,18 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
                     viewModel.getItemVendorRelation(itemId, suppliers.map { it.id })
                 }
                 is ItemDetailsUiState.HasItemVendorRelation -> {
-                    val relations = result.relations
+                    relations = result.relations
                     viewModel.getItemVendorRelationMetrics(
                         ids = relations.map { it.id },
                         expressions = listOf("OrderLineValue"),
                         startDate = formatDate(date = getYearBackDate(1)),
                         endDate = formatDate(date = getCurrentDate()),
                         interval = "YEAR")
+                }
+
+                is ItemDetailsUiState.HasMarketPriceIndex -> {
+                    val indexes = result.indexes
+
                 }
                 else -> {
                     // TODO!!! Handle error and loading states
@@ -264,7 +272,7 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
 
         return AAChartModel()
             .chartType(AAChartType.Column)
-            .colorsTheme(arrayOf("#82B0FF", "#C799FF", "#F2950A", "#49BFA9", "#A7ADC4"))
+            .colorsTheme(chartColors)
             .series(
                 arrayOf(
                     AASeriesElement()
@@ -312,6 +320,47 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
         val formattedNumber = dec.format(number / 1000000)
         return formattedNumber.toDouble()
     }
+
+    private fun bindMultiLineChart(data: Map<String, List<Double>>) {
+        val aaLineChartModel = configureMultiLineChart(data)
+        val lineChart = binding.lineChartView
+        lineChart.aa_drawChartWithChartModel(aaLineChartModel)
+    }
+
+    private fun configureMultiLineChart(data: Map<String, List<Double>>): AAChartModel {
+        val chartData = mutableListOf<AASeriesElement>()
+        data.values.forEachIndexed { index, d ->
+            val element = AASeriesElement()
+                .color(chartColors[index])
+                .lineWidth(2f)
+                .data(d.toTypedArray())
+            chartData.add(element)
+        }
+        val aaChartModel = AAChartModel.Builder(requireContext())
+            .setChartType(AAChartType.Line)
+            .setBackgroundColor("rgba(0,0,0,0)")
+            .setDataLabelsEnabled(false)
+            .setXAxisGridLineWidth(0f)
+            .setYAxisGridLineWidth(0f)
+            .setLegendEnabled(false)
+            .setXAxisVisible(false)
+            .setXAxisLabelsEnabled(false)
+            .setYAxisLineWidth(0f)
+            .setYAxisTitle("")
+            .setDataLabelsEnabled(false)
+            .setTouchEventEnabled(true)
+            .build()
+
+        aaChartModel
+            .markerSymbolStyle(AAChartSymbolStyleType.BorderBlank)
+            .markerSymbol(AAChartSymbolType.Circle)
+            .markerRadius(1f)
+        aaChartModel
+            .animationType(AAChartAnimationType.SwingFromTo)
+            .series(chartData.toTypedArray())
+        return aaChartModel
+    }
+
 
 //    private fun setupScrollListener() {
 //
