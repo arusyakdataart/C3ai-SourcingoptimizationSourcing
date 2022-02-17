@@ -7,15 +7,14 @@ import android.widget.TextView
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.asLiveData
 import com.c3ai.sourcingoptimization.R
-import com.c3ai.sourcingoptimization.common.formatDate
-import com.c3ai.sourcingoptimization.common.getCurrentDate
-import com.c3ai.sourcingoptimization.common.getMonthBackDate
-import com.c3ai.sourcingoptimization.common.getYearBackDate
+import com.c3ai.sourcingoptimization.common.*
 import com.c3ai.sourcingoptimization.databinding.FragmentItemDetailsOverviewBinding
 import com.c3ai.sourcingoptimization.domain.model.*
 import com.c3ai.sourcingoptimization.presentation.item_details.*
 import com.github.aachartmodel.aainfographics.aachartcreator.*
 import com.github.aachartmodel.aainfographics.aaoptionsmodel.AAColumn
+import com.github.aachartmodel.aainfographics.aaoptionsmodel.AACrosshair
+import com.github.aachartmodel.aainfographics.aaoptionsmodel.AAStates
 import com.github.aachartmodel.aainfographics.aaoptionsmodel.AAStyle
 import com.github.aachartmodel.aainfographics.aatools.AAColor
 import com.github.aachartmodel.aainfographics.aatools.AAGradientColor
@@ -103,7 +102,7 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
                         expressions = listOf("OrderLineValue"),
                         startDate = formatDate(date = getYearBackDate(1)),
                         endDate = formatDate(date = getCurrentDate()),
-                        interval = "YEAR"
+                        interval = "MONTH"
                     )
                 }
                 is ItemDetailsUiState.HasItemVendorRelationMetrics -> {
@@ -212,8 +211,8 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
 
         val notMissingData =
             data.result[itemId]?.SavingsOpportunityCompound?.missing?.filter { it < 100 }
-        val savingOpp = if (notMissingData.isNullOrEmpty()) 0 else notMissingData?.sum()
-            ?.div(notMissingData.size)
+        val savingOpp = if (notMissingData.isNullOrEmpty()) 0 else notMissingData.sum()
+            .div(notMissingData.size)
 
         binding.savingPrice.text = String.format("%s%s", "$", savingOpp)
     }
@@ -321,7 +320,7 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
             .yAxisMax(getMax()?.toFloat())
             .stacking(AAChartStackingType.Normal)
             .backgroundColor("rgba(0,0,0,0)")
-            .categories(suppliers.map { it.name }.toTypedArray() ?: arrayOf())
+            .categories(suppliers.map { it.name }.toTypedArray())
             .dataLabelsStyle(
                 AAStyle()
                     .color("#1f1b1b")//Title font color
@@ -351,9 +350,8 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
     }
 
     private fun bindMultiLineChart(data: Map<String, List<Double>>) {
-        val aaLineChartModel = configureMultiLineChart(data)
         val lineChart = binding.lineChartView
-        lineChart.aa_drawChartWithChartModel(aaLineChartModel)
+        lineChart.aa_drawChartWithChartOptions(multiLineChartOptions(data))
     }
 
     private fun configureMultiLineChart(data: Map<String, List<Double>>): AAChartModel {
@@ -369,6 +367,7 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
             .setChartType(AAChartType.Line)
             .setBackgroundColor("rgba(0,0,0,0)")
             .setDataLabelsEnabled(false)
+            .setAxesTextColor("#AAAEB5")
             .setXAxisGridLineWidth(0f)
             .setYAxisGridLineWidth(0f)
             .setLegendEnabled(false)
@@ -376,39 +375,49 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
             .setXAxisLabelsEnabled(false)
             .setYAxisLineWidth(0f)
             .setYAxisTitle("")
-            .setDataLabelsEnabled(false)
-            .setTouchEventEnabled(true)
+            .setLegendEnabled(false)
+            .setTooltipEnabled(false)
+            .setAnimationType(AAChartAnimationType.Bounce)
             .build()
 
         aaChartModel
-            .markerSymbolStyle(AAChartSymbolStyleType.BorderBlank)
+            .markerSymbolStyle(AAChartSymbolStyleType.InnerBlank)
             .markerSymbol(AAChartSymbolType.Circle)
-            .markerRadius(1f)
+            .markerRadius(0f)
         aaChartModel
             .animationType(AAChartAnimationType.SwingFromTo)
             .series(chartData.toTypedArray())
         return aaChartModel
     }
 
+    private fun multiLineChartOptions(data: Map<String, List<Double>>): AAOptions {
+        val model = configureMultiLineChart(data)
+        val aaOptions = model.aa_toAAOptions()
+        aaOptions.xAxis?.crosshair(AACrosshair().width(1f))
+        aaOptions.yAxis?.lineWidth(0f)?.gridLineColor(AAColor.Clear)?.lineColor(AAColor.Clear)
+        //val states = AAStates().inactive(AAInactive().enabled(false))
+        //aaOptions.plotOptions?.series?.states(states)
+        return aaOptions
+    }
+
     private fun bindDashedLineChart(data: IndexPrice) {
-        val aaDashedLineChartModel = configureDashedLineChart(data)
         val dashedLineChart = binding.dashedLineChartView
-        dashedLineChart.aa_drawChartWithChartModel(aaDashedLineChartModel)
+        dashedLineChart.aa_drawChartWithChartOptions(dashedLineChartOptions(data))
     }
 
     private fun configureDashedLineChart(data: IndexPrice): AAChartModel {
+        val max = data.data.toTypedArray().maxOrNull()
         val aaChartModel = AAChartModel.Builder(requireContext())
             .setChartType(AAChartType.Line)
             .setBackgroundColor("rgba(0,0,0,0)")
             .setDataLabelsEnabled(false)
-            .setXAxisGridLineWidth(0f)
-            .setYAxisGridLineWidth(0f)
-            .setLegendEnabled(false)
-            .setXAxisVisible(false)
-            .setXAxisLabelsEnabled(false)
-            .setYAxisLineWidth(0f)
+            .setCategories(*data.dates.map { getMonth(it) }.toTypedArray())
+            .setAxesTextColor("#AAAEB5")
             .setYAxisTitle("")
+            .setYAxisMax(if (max == null || max == 0.0) 2f else max.toFloat())
             .setDataLabelsEnabled(false)
+            .setLegendEnabled(false)
+            .setTooltipEnabled(false)
             .setTouchEventEnabled(true)
             .build()
 
@@ -422,11 +431,21 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
             .name("")
             .lineWidth(2f)
             .data(data.data.toTypedArray())
+            .dashStyle(AAChartLineDashStyleType.ShortDash)
 
         aaChartModel
             .animationType(AAChartAnimationType.SwingFromTo)
             .series(arrayOf(element))
         return aaChartModel
+    }
+
+    private fun dashedLineChartOptions(data: IndexPrice): AAOptions {
+        val model = configureDashedLineChart(data)
+        val aaOptions = model.aa_toAAOptions()
+        aaOptions.xAxis?.crosshair(AACrosshair().width(1f))
+        aaOptions.yAxis?.gridLineColor(AAColor.Clear)?.lineColor(AAColor.Clear)
+        aaOptions.xAxis?.gridLineColor(AAColor.Clear)?.lineColor(AAColor.Clear)?.labels?.autoRotationLimit(0f)?.step(3)
+        return aaOptions
     }
 
 

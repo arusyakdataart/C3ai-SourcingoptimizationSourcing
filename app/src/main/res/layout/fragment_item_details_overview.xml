@@ -503,6 +503,15 @@
                 android:background="@drawable/graph_background"
                 android:layout_marginHorizontal="@dimen/margin_16dp">
 
+                <com.c3ai.sourcingoptimization.common.InterTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Supplier Avg. Price ($)"
+                    android:textColor="@color/grey"
+                    android:textSize="@dimen/text_10"
+                    android:layout_marginTop="@dimen/margin_8dp"
+                    android:layout_marginStart="@dimen/margin_32dp"/>
+
                 <com.github.aachartmodel.aainfographics.aachartcreator.AAChartView
                     android:id="@+id/lineChartView"
                     android:layout_width="match_parent"
@@ -511,6 +520,15 @@
                     android:layout_marginEnd="@dimen/margin_16dp"/>
 
                 <include layout="@layout/divider"/>
+
+                <com.c3ai.sourcingoptimization.common.InterTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Index ($)"
+                    android:textColor="@color/grey"
+                    android:textSize="@dimen/text_10"
+                    android:layout_marginTop="@dimen/margin_16dp"
+                    android:layout_marginStart="@dimen/margin_32dp"/>
 
                 <com.github.aachartmodel.aainfographics.aachartcreator.AAChartView
                     android:id="@+id/dashedLineChartView"
