@@ -57,11 +57,24 @@ interface C3ApiService {
 
     @Headers("Accept: application/json")
     @POST("${MAIN_API_URL}ItemVendorRelation?action=fetch")
-    suspend fun getItemVendorRelation(@Body request: ItemVendorRelationParameters): C3Response<ItemVendorRelation>
+    suspend fun getItemVendorRelation(@Body request: ItemVendorRelationParameters): C3Response<ItemRelation>
 
     @Headers("Accept: application/json")
     @POST("${MAIN_API_URL}ItemVendorRelation?action=evalMetrics")
     suspend fun getItemVendorRelationMetrics(@Body request: EvalMetricsParameters): ItemVendorRelationMetrics
+
+    @Headers("Accept: application/json")
+    @POST("${MAIN_API_URL}MarketPriceIndex?action=fetch")
+    suspend fun getMarketPriceIndex(): C3Response<MarketPriceIndex>
+
+    @Headers("Accept: application/json")
+    @POST("${MAIN_API_URL}ItemMarketPriceIndexRelation?action=fetch")
+    suspend fun getItemMarketPriceIndexRelation(@Body request: ItemMarketPriceIndexRelationParameters): C3Response<ItemRelation>
+
+    @Headers("Accept: application/json")
+    @POST("${MAIN_API_URL}ItemMarketPriceIndexRelation?action=evalMetrics")
+    suspend fun getItemMarketPriceIndexRelationMetrics(@Body request: EvalMetricsParameters): ItemMarketPriceIndexRelationMetrics
+
     companion object {
 
         fun create(okHttpClient: OkHttpClient): C3ApiService {

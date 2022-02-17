@@ -66,13 +66,31 @@ sealed interface ItemDetailsUiState {
     ) : ItemDetailsUiState
 
     data class HasItemVendorRelation(
-        val relations: List<ItemVendorRelation>,
+        val relations: List<ItemRelation>,
         override val isLoading: Boolean,
         override val itemId: String
     ) : ItemDetailsUiState
 
     data class HasItemVendorRelationMetrics(
         val relationMetrics: ItemVendorRelationMetrics,
+        override val isLoading: Boolean,
+        override val itemId: String
+    ) : ItemDetailsUiState
+
+    data class HasMarketPriceIndex(
+        val indexes: List<MarketPriceIndex>,
+        override val isLoading: Boolean,
+        override val itemId: String
+    ) : ItemDetailsUiState
+
+    data class HasItemMarketPriceIndexRelation(
+        val relations: List<ItemRelation>,
+        override val isLoading: Boolean,
+        override val itemId: String
+    ) : ItemDetailsUiState
+
+    data class HasItemMarketPriceIndexRelationMetrics(
+        val relationMetrics: ItemMarketPriceIndexRelationMetrics,
         override val isLoading: Boolean,
         override val itemId: String
     ) : ItemDetailsUiState
@@ -86,8 +104,11 @@ private data class ItemDetailsViewModelState(
     val openClosedPOLineQty: OpenClosedPOLineQtyItem? = null,
     val savingsOpportunity: SavingsOpportunityItem? = null,
     val suppliers: List<C3Vendor>? = null,
-    val itemVendorRelations: List<ItemVendorRelation>? = null,
+    val itemVendorRelations: List<ItemRelation>? = null,
     val itemVendorRelationMetrics: ItemVendorRelationMetrics? = null,
+    val marketPriceIndex: List<MarketPriceIndex>? = null,
+    val itemMarketPriceIndexRelations: List<ItemRelation>? = null,
+    val itemMarketPriceIndexRelationMetrics: ItemMarketPriceIndexRelationMetrics? = null,
     val isLoading: Boolean = false,
     val itemId: String = "",
 ) {
@@ -140,6 +161,30 @@ private data class ItemDetailsViewModelState(
         if (itemVendorRelationMetrics != null) {
             return ItemDetailsUiState.HasItemVendorRelationMetrics(
                 relationMetrics = itemVendorRelationMetrics,
+                isLoading = isLoading,
+                itemId = itemId
+            )
+        }
+
+        if (marketPriceIndex != null) {
+            return ItemDetailsUiState.HasMarketPriceIndex(
+                indexes = marketPriceIndex,
+                isLoading = isLoading,
+                itemId = itemId
+            )
+        }
+
+        if (itemMarketPriceIndexRelations != null) {
+            return ItemDetailsUiState.HasItemMarketPriceIndexRelation(
+                relations = itemMarketPriceIndexRelations,
+                isLoading = isLoading,
+                itemId = itemId
+            )
+        }
+
+        if (itemMarketPriceIndexRelationMetrics != null) {
+            return ItemDetailsUiState.HasItemMarketPriceIndexRelationMetrics(
+                relationMetrics = itemMarketPriceIndexRelationMetrics,
                 isLoading = isLoading,
                 itemId = itemId
             )
@@ -213,6 +258,9 @@ class ItemDetailsViewModel @AssistedInject constructor(
                             suppliers = null,
                             itemVendorRelations = null,
                             itemVendorRelationMetrics = null,
+                            marketPriceIndex = null,
+                            itemMarketPriceIndexRelations = null,
+                            itemMarketPriceIndexRelationMetrics = null,
                             isLoading = false
                         )
                     }
@@ -239,6 +287,9 @@ class ItemDetailsViewModel @AssistedInject constructor(
                             suppliers = null,
                             itemVendorRelations = null,
                             itemVendorRelationMetrics = null,
+                            marketPriceIndex = null,
+                            itemMarketPriceIndexRelations = null,
+                            itemMarketPriceIndexRelationMetrics = null,
                             isLoading = false
                         )
                     }
@@ -265,6 +316,9 @@ class ItemDetailsViewModel @AssistedInject constructor(
                             suppliers = null,
                             itemVendorRelations = null,
                             itemVendorRelationMetrics = null,
+                            marketPriceIndex = null,
+                            itemMarketPriceIndexRelations = null,
+                            itemMarketPriceIndexRelationMetrics = null,
                             isLoading = false
                         )
                     }
@@ -285,6 +339,32 @@ class ItemDetailsViewModel @AssistedInject constructor(
                             suppliers = suppliersResult.data,
                             itemVendorRelations = null,
                             itemVendorRelationMetrics = null,
+                            marketPriceIndex = null,
+                            itemMarketPriceIndexRelations = null,
+                            itemMarketPriceIndexRelationMetrics = null,
+                            isLoading = false
+                        )
+                    }
+                    is Error -> {
+                        it.copy(isLoading = false)
+                    }
+                }
+            }
+
+            val marketPriceIndex = repository.getMarketPriceIndex()
+            viewModelState.update {
+                when (marketPriceIndex) {
+                    is Success -> {
+                        it.copy(
+                            item = null,
+                            openClosedPOLineQty = null,
+                            savingsOpportunity = null,
+                            suppliers = null,
+                            itemVendorRelations = null,
+                            itemVendorRelationMetrics = null,
+                            marketPriceIndex = marketPriceIndex.data,
+                            itemMarketPriceIndexRelations = null,
+                            itemMarketPriceIndexRelationMetrics = null,
                             isLoading = false
                         )
                     }
@@ -309,6 +389,9 @@ class ItemDetailsViewModel @AssistedInject constructor(
                             suppliers = null,
                             itemVendorRelations = itemVendorRelations.data,
                             itemVendorRelationMetrics = null,
+                            marketPriceIndex = null,
+                            itemMarketPriceIndexRelations = null,
+                            itemMarketPriceIndexRelationMetrics = null,
                             isLoading = false
                         )
                     }
@@ -345,6 +428,77 @@ class ItemDetailsViewModel @AssistedInject constructor(
                             suppliers = null,
                             itemVendorRelations = null,
                             itemVendorRelationMetrics = itemVendorRelationMetrics.data,
+                            marketPriceIndex = null,
+                            itemMarketPriceIndexRelations = null,
+                            itemMarketPriceIndexRelationMetrics = null,
+                            isLoading = false
+                        )
+                    }
+                    is Error -> {
+                        it.copy(isLoading = false)
+                    }
+                }
+            }
+        }
+    }
+
+    fun getItemMarketPriceIndexRelation(itemId: String, indexId: String) {
+        viewModelScope.launch {
+            val itemMarketPriceIndexRelations = repository.getItemMarketPriceIndexRelation(
+                itemId, indexId
+            )
+            viewModelState.update {
+                when (itemMarketPriceIndexRelations) {
+                    is Success -> {
+                        it.copy(
+                            item = null,
+                            openClosedPOLineQty = null,
+                            savingsOpportunity = null,
+                            suppliers = null,
+                            itemVendorRelations = null,
+                            itemVendorRelationMetrics = null,
+                            marketPriceIndex = null,
+                            itemMarketPriceIndexRelations = itemMarketPriceIndexRelations.data,
+                            itemMarketPriceIndexRelationMetrics = null,
+                            isLoading = false
+                        )
+                    }
+                    is Error -> {
+                        it.copy(isLoading = false)
+                    }
+                }
+            }
+        }
+    }
+
+    fun getItemMarketPriceIndexRelationMetrics(
+        ids: List<String>,
+        expressions: List<String>,
+        startDate: String,
+        endDate: String,
+        interval: String
+    ) {
+        viewModelScope.launch {
+            val itemMarketPriceIndexRelationMetrics = repository.getItemMarketPriceIndexRelationMetrics(
+                ids,
+                expressions,
+                startDate,
+                endDate,
+                interval
+            )
+            viewModelState.update {
+                when (itemMarketPriceIndexRelationMetrics) {
+                    is Success -> {
+                        it.copy(
+                            item = null,
+                            openClosedPOLineQty = null,
+                            savingsOpportunity = null,
+                            suppliers = null,
+                            itemVendorRelations = null,
+                            itemVendorRelationMetrics = null,
+                            marketPriceIndex = null,
+                            itemMarketPriceIndexRelations = null,
+                            itemMarketPriceIndexRelationMetrics = itemMarketPriceIndexRelationMetrics.data,
                             isLoading = false
                         )
                     }

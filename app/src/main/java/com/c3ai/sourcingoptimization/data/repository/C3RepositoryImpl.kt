@@ -76,7 +76,7 @@ class C3RepositoryImpl @Inject constructor(private val api: C3ApiService) : C3Re
     override suspend fun getItemVendorRelation(
         itemId: String,
         supplierIds: List<String>
-    ): C3Result<List<ItemVendorRelation>> =
+    ): C3Result<List<ItemRelation>> =
         C3Result.on {
             api.getItemVendorRelation(
                 ItemVendorRelationParameters(
@@ -94,6 +94,40 @@ class C3RepositoryImpl @Inject constructor(private val api: C3ApiService) : C3Re
         interval: String
     ): C3Result<ItemVendorRelationMetrics> =  C3Result.on {
         api.getItemVendorRelationMetrics(
+            EvalMetricsParameters(
+                ids = ids,
+                expressions = expressions,
+                startDate = startDate,
+                endDate = endDate,
+                interval = interval
+            )
+        )
+    }
+
+    override suspend fun getMarketPriceIndex(): C3Result<List<MarketPriceIndex>>  = C3Result.on {
+        api.getMarketPriceIndex().objs
+    }
+
+    override suspend fun getItemMarketPriceIndexRelation(
+        itemId: String,
+        indexId: String
+    ): C3Result<List<ItemRelation>> = C3Result.on {
+        api.getItemMarketPriceIndexRelation(
+            ItemMarketPriceIndexRelationParameters(
+                itemId = itemId,
+                indexId = indexId
+            )
+        ).objs
+    }
+
+    override suspend fun getItemMarketPriceIndexRelationMetrics(
+        ids: List<String>,
+        expressions: List<String>,
+        startDate: String,
+        endDate: String,
+        interval: String
+    ): C3Result<ItemMarketPriceIndexRelationMetrics> = C3Result.on {
+        api.getItemMarketPriceIndexRelationMetrics(
             EvalMetricsParameters(
                 ids = ids,
                 expressions = expressions,

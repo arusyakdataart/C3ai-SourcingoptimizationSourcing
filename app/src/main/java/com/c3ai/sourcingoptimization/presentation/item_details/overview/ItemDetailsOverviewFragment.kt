@@ -44,6 +44,7 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
     private val itemId = "item0"
     private var selectedSpinnerPosition = 0
     lateinit var suppliers: List<C3Vendor>
+    var indexId = ""
     private val chartColors : Array<Any> = arrayOf("#82B0FF", "#C799FF", "#F2950A", "#49BFA9", "#A7ADC4")
 
 
@@ -75,7 +76,7 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
 
         setSpinnerView()
 
-        var relations = listOf<ItemVendorRelation>()
+        var relations = listOf<ItemRelation>()
 
         viewModel.uiState.asLiveData().observe(viewLifecycleOwner) { result ->
             when (result) {
@@ -102,12 +103,40 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
                         expressions = listOf("OrderLineValue"),
                         startDate = formatDate(date = getYearBackDate(1)),
                         endDate = formatDate(date = getCurrentDate()),
-                        interval = "YEAR")
+                        interval = "YEAR"
+                    )
+                }
+                is ItemDetailsUiState.HasItemVendorRelationMetrics -> {
+                    val metrics = result.relationMetrics
+                    val dataMap = mutableMapOf<String, List<Double>>()
+                    relations.forEach {
+                        dataMap.put(it.to.id, metrics.result.get(it.id)?.OrderLineValue?.data ?: listOf())
+                    }
+                    bindMultiLineChart(dataMap)
                 }
 
                 is ItemDetailsUiState.HasMarketPriceIndex -> {
-                    val indexes = result.indexes
+                    if (result.indexes.isNotEmpty()) {
+                        indexId = result.indexes[0].id
+                        viewModel.getItemMarketPriceIndexRelation(itemId, indexId)
+                    }
+                }
 
+                is ItemDetailsUiState.HasItemMarketPriceIndexRelation -> {
+                    viewModel.getItemMarketPriceIndexRelationMetrics(
+                        ids = listOf(indexId),
+                        expressions = listOf("IndexPrice"),
+                        startDate = formatDate(date = getYearBackDate(1)),
+                        endDate = formatDate(date = getCurrentDate()),
+                        interval = "MONTH"
+                    )
+                }
+
+                is ItemDetailsUiState.HasItemMarketPriceIndexRelationMetrics -> {
+                    val indexPrice = result.relationMetrics.result[indexId]?.IndexPrice
+                    if (indexPrice != null) {
+                        bindDashedLineChart(indexPrice)
+                    }
                 }
                 else -> {
                     // TODO!!! Handle error and loading states
@@ -358,6 +387,45 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
         aaChartModel
             .animationType(AAChartAnimationType.SwingFromTo)
             .series(chartData.toTypedArray())
+        return aaChartModel
+    }
+
+    private fun bindDashedLineChart(data: IndexPrice) {
+        val aaDashedLineChartModel = configureDashedLineChart(data)
+        val dashedLineChart = binding.dashedLineChartView
+        dashedLineChart.aa_drawChartWithChartModel(aaDashedLineChartModel)
+    }
+
+    private fun configureDashedLineChart(data: IndexPrice): AAChartModel {
+        val aaChartModel = AAChartModel.Builder(requireContext())
+            .setChartType(AAChartType.Line)
+            .setBackgroundColor("rgba(0,0,0,0)")
+            .setDataLabelsEnabled(false)
+            .setXAxisGridLineWidth(0f)
+            .setYAxisGridLineWidth(0f)
+            .setLegendEnabled(false)
+            .setXAxisVisible(false)
+            .setXAxisLabelsEnabled(false)
+            .setYAxisLineWidth(0f)
+            .setYAxisTitle("")
+            .setDataLabelsEnabled(false)
+            .setTouchEventEnabled(true)
+            .build()
+
+        aaChartModel
+            .markerSymbolStyle(AAChartSymbolStyleType.InnerBlank)
+            .markerSymbol(AAChartSymbolType.Circle)
+            .markerRadius(3f)
+
+        val element = AASeriesElement()
+            .color("#008066")
+            .name("")
+            .lineWidth(2f)
+            .data(data.data.toTypedArray())
+
+        aaChartModel
+            .animationType(AAChartAnimationType.SwingFromTo)
+            .series(arrayOf(element))
         return aaChartModel
     }
 
