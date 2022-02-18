@@ -14,7 +14,6 @@ import com.c3ai.sourcingoptimization.presentation.item_details.*
 import com.github.aachartmodel.aainfographics.aachartcreator.*
 import com.github.aachartmodel.aainfographics.aaoptionsmodel.AAColumn
 import com.github.aachartmodel.aainfographics.aaoptionsmodel.AACrosshair
-import com.github.aachartmodel.aainfographics.aaoptionsmodel.AAStates
 import com.github.aachartmodel.aainfographics.aaoptionsmodel.AAStyle
 import com.github.aachartmodel.aainfographics.aatools.AAColor
 import com.github.aachartmodel.aainfographics.aatools.AAGradientColor
@@ -43,6 +42,7 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
     private val itemId = "item0"
     private var selectedSpinnerPosition = 0
     lateinit var suppliers: List<C3Vendor>
+    var selectedCrosshairIndex = -1
     var indexId = ""
     private val chartColors : Array<Any> = arrayOf("#82B0FF", "#C799FF", "#F2950A", "#49BFA9", "#A7ADC4")
 
@@ -351,10 +351,12 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
 
     private fun bindMultiLineChart(data: Map<String, List<Double>>) {
         val lineChart = binding.lineChartView
+        lineChart.callBack = ChartCallback()
         lineChart.aa_drawChartWithChartOptions(multiLineChartOptions(data))
     }
 
     private fun configureMultiLineChart(data: Map<String, List<Double>>): AAChartModel {
+
         val chartData = mutableListOf<AASeriesElement>()
         data.values.forEachIndexed { index, d ->
             val element = AASeriesElement()
@@ -378,6 +380,7 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
             .setLegendEnabled(false)
             .setTooltipEnabled(false)
             .setAnimationType(AAChartAnimationType.Bounce)
+            .setTouchEventEnabled(true)
             .build()
 
         aaChartModel
@@ -402,6 +405,7 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
 
     private fun bindDashedLineChart(data: IndexPrice) {
         val dashedLineChart = binding.dashedLineChartView
+        dashedLineChart.callBack = ChartCallback()
         dashedLineChart.aa_drawChartWithChartOptions(dashedLineChartOptions(data))
     }
 
@@ -446,6 +450,36 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
         aaOptions.yAxis?.gridLineColor(AAColor.Clear)?.lineColor(AAColor.Clear)
         aaOptions.xAxis?.gridLineColor(AAColor.Clear)?.lineColor(AAColor.Clear)?.labels?.autoRotationLimit(0f)?.step(3)
         return aaOptions
+    }
+
+    inner class ChartCallback() : AAChartView.AAChartViewCallBack {
+        override fun chartViewDidFinishLoad(aaChartView: AAChartView) {
+
+        }
+
+        override fun chartViewMoveOverEventMessage(
+            aaChartView: AAChartView,
+            messageModel: AAMoveOverEventMessageModel
+        ) {
+            updateCustomCrosshair(messageModel.index ?: -1, aaChartView)
+        }
+
+        private fun updateCustomCrosshair(index: Int, aaChartView: AAChartView) {
+            if (selectedCrosshairIndex == index) {
+                return
+            }
+
+            selectedCrosshairIndex = index
+
+            val addPlotLine1 = "aaGlobalChart.series[0].points[$index].onMouseOver()"
+            binding.lineChartView.post {
+                if (aaChartView == binding.lineChartView) {
+                    binding.dashedLineChartView.aa_evaluateTheJavaScriptStringFunction(addPlotLine1)
+                } else  {
+                    binding.lineChartView.aa_evaluateTheJavaScriptStringFunction(addPlotLine1)
+                }
+            }
+        }
     }
 
 
