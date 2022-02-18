@@ -1,6 +1,7 @@
 package com.c3ai.sourcingoptimization.presentation.item_details.overview
 
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
 import android.widget.AdapterView
 import android.widget.TextView
@@ -21,6 +22,8 @@ import com.github.aachartmodel.aainfographics.aatools.AALinearGradientDirection
 import dagger.hilt.android.AndroidEntryPoint
 import java.text.DecimalFormat
 import javax.inject.Inject
+import android.widget.LinearLayout
+import androidx.appcompat.widget.LinearLayoutCompat
 
 
 /**
@@ -41,7 +44,9 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
 
     private val itemId = "item0"
     private var selectedSpinnerPosition = 0
-    lateinit var suppliers: List<C3Vendor>
+    private lateinit var suppliers: List<C3Vendor>
+    private val suppliersChartData = mutableMapOf<String, List<Double>>()
+    private var marketPriceIndexRelationMetric: ItemMarketPriceIndexRelationMetric? = null
     var selectedCrosshairIndex = -1
     var indexId = ""
     private val chartColors : Array<Any> = arrayOf("#82B0FF", "#C799FF", "#F2950A", "#49BFA9", "#A7ADC4")
@@ -107,11 +112,10 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
                 }
                 is ItemDetailsUiState.HasItemVendorRelationMetrics -> {
                     val metrics = result.relationMetrics
-                    val dataMap = mutableMapOf<String, List<Double>>()
                     relations.forEach {
-                        dataMap.put(it.to.id, metrics.result.get(it.id)?.OrderLineValue?.data ?: listOf())
+                        suppliersChartData.put(it.to.id, metrics.result.get(it.id)?.OrderLineValue?.data ?: listOf())
                     }
-                    bindMultiLineChart(dataMap)
+                    bindMultiLineChart()
                 }
 
                 is ItemDetailsUiState.HasMarketPriceIndex -> {
@@ -132,7 +136,8 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
                 }
 
                 is ItemDetailsUiState.HasItemMarketPriceIndexRelationMetrics -> {
-                    val indexPrice = result.relationMetrics.result[indexId]?.IndexPrice
+                    marketPriceIndexRelationMetric = result.relationMetrics.result[indexId]
+                    val indexPrice = marketPriceIndexRelationMetric?.IndexPrice
                     if (indexPrice != null) {
                         bindDashedLineChart(indexPrice)
                     }
@@ -179,6 +184,7 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
 
     private fun bindC3Item(item: C3Item) {
         binding.description.text = item.description
+        binding.name.text = item.name
         if (item.hasActiveAlerts == true) {
             binding.alertsCount.visibility = View.VISIBLE
             binding.alertsCount.text = item.numberOfActiveAlerts?.toString()
@@ -349,16 +355,16 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
         return formattedNumber.toDouble()
     }
 
-    private fun bindMultiLineChart(data: Map<String, List<Double>>) {
+    private fun bindMultiLineChart() {
         val lineChart = binding.lineChartView
         lineChart.callBack = ChartCallback()
-        lineChart.aa_drawChartWithChartOptions(multiLineChartOptions(data))
+        lineChart.aa_drawChartWithChartOptions(multiLineChartOptions())
     }
 
-    private fun configureMultiLineChart(data: Map<String, List<Double>>): AAChartModel {
+    private fun configureMultiLineChart(): AAChartModel {
 
         val chartData = mutableListOf<AASeriesElement>()
-        data.values.forEachIndexed { index, d ->
+        suppliersChartData.values.forEachIndexed { index, d ->
             val element = AASeriesElement()
                 .color(chartColors[index])
                 .lineWidth(2f)
@@ -393,8 +399,8 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
         return aaChartModel
     }
 
-    private fun multiLineChartOptions(data: Map<String, List<Double>>): AAOptions {
-        val model = configureMultiLineChart(data)
+    private fun multiLineChartOptions(): AAOptions {
+        val model = configureMultiLineChart()
         val aaOptions = model.aa_toAAOptions()
         aaOptions.xAxis?.crosshair(AACrosshair().width(1f))
         aaOptions.yAxis?.lineWidth(0f)?.gridLineColor(AAColor.Clear)?.lineColor(AAColor.Clear)
@@ -478,6 +484,41 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
                 } else  {
                     binding.lineChartView.aa_evaluateTheJavaScriptStringFunction(addPlotLine1)
                 }
+            }
+            aa(index)
+        }
+    }
+
+    private fun aa (index: Int) {
+        activity?.runOnUiThread {
+            binding.suppliersContainer.removeAllViews()
+            val date = marketPriceIndexRelationMetric?.IndexPrice?.dates?.get(index) ?: ""
+            val dateString = getMonth(date) + " " + getYear(date)
+            binding.dateSpp.text = dateString
+            binding.dateIndex.text = dateString
+            val firstYear = getYear(marketPriceIndexRelationMetric?.IndexPrice?.dates?.get(0) ?: "")
+            val lastYear = getYear(marketPriceIndexRelationMetric?.IndexPrice?.dates?.get(
+                marketPriceIndexRelationMetric?.IndexPrice?.dates?.size?.minus(1) ?: 0) ?: ""
+            )
+            binding.year.text = if (firstYear == lastYear) firstYear.toString()
+            else String.format("%s%s%s", firstYear.toString(), " - ", lastYear.toString())
+            binding.price.text = String.format("%s%s", "$", String.format("%.2f",
+                marketPriceIndexRelationMetric?.IndexPrice?.data?.get(index)))
+
+            suppliers.forEach {
+                val supplierView = LayoutInflater.from(requireContext())
+                    .inflate(R.layout.supplier_item_view, binding.suppliersContainer, false)
+
+                val param = LinearLayoutCompat.LayoutParams(LinearLayoutCompat.LayoutParams.MATCH_PARENT,
+                    LinearLayoutCompat.LayoutParams.MATCH_PARENT
+                )
+                param.weight = 1f
+                supplierView.layoutParams = param
+                binding.suppliersContainer.addView(supplierView)
+                supplierView.findViewById<TextView>(R.id.supplier).text = it.name
+                supplierView.findViewById<TextView>(R.id.price).text =
+                    String.format("%s%s", "$", String.format("%.2f",
+                    suppliersChartData[it.id]?.get(index)))
             }
         }
     }
