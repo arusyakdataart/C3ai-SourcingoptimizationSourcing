@@ -137,6 +137,7 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
 
                 is ItemDetailsUiState.HasItemMarketPriceIndexRelationMetrics -> {
                     marketPriceIndexRelationMetric = result.relationMetrics.result[indexId]
+                    setGraphYear()
                     val indexPrice = marketPriceIndexRelationMetric?.IndexPrice
                     if (indexPrice != null) {
                         bindDashedLineChart(indexPrice)
@@ -357,6 +358,7 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
 
     private fun bindMultiLineChart() {
         val lineChart = binding.lineChartView
+        lineChart.isClearBackgroundColor = true
         lineChart.callBack = ChartCallback()
         lineChart.aa_drawChartWithChartOptions(multiLineChartOptions())
     }
@@ -371,30 +373,24 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
                 .data(d.toTypedArray())
             chartData.add(element)
         }
+
         val aaChartModel = AAChartModel.Builder(requireContext())
             .setChartType(AAChartType.Line)
-            .setBackgroundColor("rgba(0,0,0,0)")
-            .setDataLabelsEnabled(false)
-            .setAxesTextColor("#AAAEB5")
-            .setXAxisGridLineWidth(0f)
-            .setYAxisGridLineWidth(0f)
-            .setLegendEnabled(false)
             .setXAxisVisible(false)
-            .setXAxisLabelsEnabled(false)
-            .setYAxisLineWidth(0f)
-            .setYAxisTitle("")
-            .setLegendEnabled(false)
-            .setTooltipEnabled(false)
+            .setDataLabelsEnabled(false)
             .setAnimationType(AAChartAnimationType.Bounce)
             .setTouchEventEnabled(true)
+            .setLegendEnabled(false)
+            .setMarkerSymbolStyle(AAChartSymbolStyleType.InnerBlank)
+            .setMarkerRadius(0f)
+            .setMarkerSymbol(AAChartSymbolType.Circle)
+            .setTooltipEnabled(false)
+            .setCategories(*arrayOf())
+            .setYAxisTitle("")
+            .setAxesTextColor("#AAAEB5")
             .build()
 
         aaChartModel
-            .markerSymbolStyle(AAChartSymbolStyleType.InnerBlank)
-            .markerSymbol(AAChartSymbolType.Circle)
-            .markerRadius(0f)
-        aaChartModel
-            .animationType(AAChartAnimationType.SwingFromTo)
             .series(chartData.toTypedArray())
         return aaChartModel
     }
@@ -404,6 +400,7 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
         val aaOptions = model.aa_toAAOptions()
         aaOptions.xAxis?.crosshair(AACrosshair().width(1f))
         aaOptions.yAxis?.lineWidth(0f)?.gridLineColor(AAColor.Clear)?.lineColor(AAColor.Clear)
+
         //val states = AAStates().inactive(AAInactive().enabled(false))
         //aaOptions.plotOptions?.series?.states(states)
         return aaOptions
@@ -411,30 +408,39 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
 
     private fun bindDashedLineChart(data: IndexPrice) {
         val dashedLineChart = binding.dashedLineChartView
+        dashedLineChart.isClearBackgroundColor = true
         dashedLineChart.callBack = ChartCallback()
         dashedLineChart.aa_drawChartWithChartOptions(dashedLineChartOptions(data))
+    }
+
+    private fun setGraphYear() {
+        val firstYear = getYear(marketPriceIndexRelationMetric?.IndexPrice?.dates?.get(0) ?: "")
+        val lastYear = getYear(marketPriceIndexRelationMetric?.IndexPrice?.dates?.get(
+            marketPriceIndexRelationMetric?.IndexPrice?.dates?.size?.minus(1) ?: 0) ?: ""
+        )
+        binding.year.text = if (firstYear == lastYear) firstYear.toString()
+        else String.format("%s%s%s", firstYear.toString(), " - ", lastYear.toString())
     }
 
     private fun configureDashedLineChart(data: IndexPrice): AAChartModel {
         val max = data.data.toTypedArray().maxOrNull()
         val aaChartModel = AAChartModel.Builder(requireContext())
             .setChartType(AAChartType.Line)
-            .setBackgroundColor("rgba(0,0,0,0)")
+            .setXAxisVisible(false)
             .setDataLabelsEnabled(false)
-            .setCategories(*data.dates.map { getMonth(it) }.toTypedArray())
-            .setAxesTextColor("#AAAEB5")
-            .setYAxisTitle("")
-            .setYAxisMax(if (max == null || max == 0.0) 2f else max.toFloat())
-            .setDataLabelsEnabled(false)
-            .setLegendEnabled(false)
-            .setTooltipEnabled(false)
+            .setAnimationType(AAChartAnimationType.Bounce)
             .setTouchEventEnabled(true)
+            .setLegendEnabled(false)
+            .setMarkerSymbolStyle(AAChartSymbolStyleType.InnerBlank)
+            .setMarkerRadius(3f)
+            .setMarkerSymbol(AAChartSymbolType.Circle)
+            .setTooltipEnabled(false)
+            .setYAxisMax(if (max == null || max == 0.0) 100f else max.toFloat())
+            .setCategories(*data.dates.map { getMonth(it) }.toTypedArray())
+            .setCategories(*arrayOf())
+            .setYAxisTitle("")
+            .setAxesTextColor("#AAAEB5")
             .build()
-
-        aaChartModel
-            .markerSymbolStyle(AAChartSymbolStyleType.InnerBlank)
-            .markerSymbol(AAChartSymbolType.Circle)
-            .markerRadius(3f)
 
         val element = AASeriesElement()
             .color("#008066")
@@ -444,7 +450,6 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
             .dashStyle(AAChartLineDashStyleType.ShortDash)
 
         aaChartModel
-            .animationType(AAChartAnimationType.SwingFromTo)
             .series(arrayOf(element))
         return aaChartModel
     }
@@ -485,26 +490,22 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
                     binding.lineChartView.aa_evaluateTheJavaScriptStringFunction(addPlotLine1)
                 }
             }
-            aa(index)
+            updateData(index)
         }
     }
 
-    private fun aa (index: Int) {
+    private fun updateData (index: Int) {
         activity?.runOnUiThread {
-            binding.suppliersContainer.removeAllViews()
+
             val date = marketPriceIndexRelationMetric?.IndexPrice?.dates?.get(index) ?: ""
             val dateString = getMonth(date) + " " + getYear(date)
             binding.dateSpp.text = dateString
             binding.dateIndex.text = dateString
-            val firstYear = getYear(marketPriceIndexRelationMetric?.IndexPrice?.dates?.get(0) ?: "")
-            val lastYear = getYear(marketPriceIndexRelationMetric?.IndexPrice?.dates?.get(
-                marketPriceIndexRelationMetric?.IndexPrice?.dates?.size?.minus(1) ?: 0) ?: ""
-            )
-            binding.year.text = if (firstYear == lastYear) firstYear.toString()
-            else String.format("%s%s%s", firstYear.toString(), " - ", lastYear.toString())
+
             binding.price.text = String.format("%s%s", "$", String.format("%.2f",
                 marketPriceIndexRelationMetric?.IndexPrice?.data?.get(index)))
 
+            binding.suppliersContainer.removeAllViews()
             suppliers.forEach {
                 val supplierView = LayoutInflater.from(requireContext())
                     .inflate(R.layout.supplier_item_view, binding.suppliersContainer, false)
@@ -522,26 +523,4 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
             }
         }
     }
-
-
-//    private fun setupScrollListener() {
-//
-//        val layoutManager = binding.overviewItemsList.layoutManager as LinearLayoutManager
-//        binding.overviewItemsList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-//            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-//                super.onScrolled(recyclerView, dx, dy)
-//                val totalItemCount = layoutManager.itemCount
-//                val visibleItemCount = layoutManager.childCount
-//                val lastVisibleItem = layoutManager.findLastVisibleItemPosition()
-//
-//                viewModel.accept(
-//                    UiAction.Scroll(
-//                        visibleItemCount = visibleItemCount,
-//                        lastVisibleItemPosition = lastVisibleItem,
-//                        totalItemCount = totalItemCount
-//                    )
-//                )
-//            }
-//        })
-//    }
 }
