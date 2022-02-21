@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.LinearLayoutCompat android="http://schemas.android.com/apk/res/android"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_weight="1"
+    android:orientation="vertical"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <com.c3ai.sourcingoptimization.common.InterTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/text_12"
+        android:id="@+id/supplier"
+        android:textColor="@color/grey"/>
+
+    <com.c3ai.sourcingoptimization.common.InterTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/text_12"
+        android:id="@+id/price"
+        android:textColor="@color/grey_2"
+        android:layout_marginBottom="@dimen/margin_4dp"/>
+
+</androidx.appcompat.widget.LinearLayoutCompat>

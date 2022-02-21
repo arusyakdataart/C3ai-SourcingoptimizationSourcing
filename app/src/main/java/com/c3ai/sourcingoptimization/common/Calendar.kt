@@ -21,3 +21,20 @@ fun getYearBackDate(years: Int): Date {
     calendar.add(Calendar.YEAR, -years)
     return calendar.time
 }
+
+@SuppressLint("SimpleDateFormat")
+fun getMonth(date: String, format: String = "yyyy-MM-dd'T'HH:mm:ss"): String {
+    val convertedDate = SimpleDateFormat(format).parse(date)
+    val calendar = Calendar.getInstance()
+    calendar.time = convertedDate
+    val months = listOf( "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+    return months[calendar.get(Calendar.MONTH)]
+}
+
+@SuppressLint("SimpleDateFormat")
+fun getYear(date: String, format: String = "yyyy-MM-dd'T'HH:mm:ss"): Int {
+    val convertedDate = SimpleDateFormat(format).parse(date)
+    val calendar = Calendar.getInstance()
+    calendar.time = convertedDate
+    return calendar.get(Calendar.YEAR)
+}

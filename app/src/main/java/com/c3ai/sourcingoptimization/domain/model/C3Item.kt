@@ -36,7 +36,7 @@ data class InventoryParams(
 )
 
 data class Id(
-    val id: String?
+    val id: String
 )
 
 data class Value(

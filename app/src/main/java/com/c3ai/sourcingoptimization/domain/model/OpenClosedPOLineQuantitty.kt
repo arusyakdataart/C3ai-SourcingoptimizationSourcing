@@ -1,12 +1,7 @@
 package com.c3ai.sourcingoptimization.domain.model
 
 data class OpenClosedPOLineQtyItem(
-    //val result: Pair<String, OpenClosedPOLineResult>
-    val result: AA?
-)
-
-data class AA(
-    val item0: OpenClosedPOLineResult?
+    val result: Map<String, OpenClosedPOLineResult>
 )
 
 data class OpenClosedPOLineResult(
