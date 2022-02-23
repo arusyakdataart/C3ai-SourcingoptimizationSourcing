@@ -23,8 +23,12 @@ class C3RepositoryImpl @Inject constructor(private val api: C3ApiService) : C3Re
         api.getSupplierDetails(SupplierDetailsParameters(supplierId)).objs[0]
     }
 
-    override suspend fun getPODetails(orderId: String): C3Result<PurchaseOrder.Order> {
-        TODO("Not yet implemented")
+    override suspend fun getPODetails(orderId: String): C3Result<PurchaseOrder.Order> = C3Result.on {
+        api.getDetailedPO(DetailedPOParameters(orderId)).objs[0]
+    }
+
+    override suspend fun getPOLines(orderId: String): C3Result<List<PurchaseOrder.Line>> = C3Result.on {
+        api.getPOLines(POLinesDetailsParameters(orderId)).objs
     }
 
     override suspend fun getSuppliedItems(supplierId: String): C3Result<List<C3Item>> =

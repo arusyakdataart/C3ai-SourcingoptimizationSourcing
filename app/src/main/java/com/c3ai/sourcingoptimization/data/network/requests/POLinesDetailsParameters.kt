@@ -5,7 +5,7 @@ package com.c3ai.sourcingoptimization.data.network.requests
  * @see C3ApiService
  * */
 data class POLinesDetailsParameters(
-    @Transient val itemId: String
+    @Transient val orderId: String
 ) : RequestParameters {
 
     override val spec: C3Spec = C3Spec(
@@ -24,11 +24,25 @@ data class POLinesDetailsParameters(
             "plannedLeadTime",
             "totalCost",
             "totalQuantity",
-            "vendor",
-            "meta",
             "numberOfActiveAlerts",
-            "order"
+            "order.vendor.name",
+            "order.vendor.numberOfActiveAlerts",
+            "order.vendor.location.region",
+            "order.vendor.location.city",
+            "order.vendor.location.address",
+            "order.vendor.location.state",
+            "order.buyer.name",
+            "order.buyer.location",
+            "order.to.name",
+            "order.to.city",
+            "order.to.geometry",
+            "order.to.address",
+            "order.to.address1",
+            "order.to.postal_code",
+            "order.to.state",
+            "order.to.location",
+            "order.to.numberOfActiveAlerts",
         ),
-        filter = "id == '$itemId'"
+        filter = "order.id == '$orderId'"
     )
 }

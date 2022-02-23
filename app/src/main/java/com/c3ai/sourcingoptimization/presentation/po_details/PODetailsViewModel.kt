@@ -2,17 +2,20 @@ package com.c3ai.sourcingoptimization.presentation.po_details
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.c3ai.sourcingoptimization.R
+import com.c3ai.sourcingoptimization.data.C3Result
 import com.c3ai.sourcingoptimization.domain.model.PurchaseOrder
 import com.c3ai.sourcingoptimization.domain.settings.C3AppSettingsProvider
 import com.c3ai.sourcingoptimization.domain.settings.FakeC3AppSettingsProvider
+import com.c3ai.sourcingoptimization.domain.use_case.PODetailsUseCases
 import com.c3ai.sourcingoptimization.presentation.ViewModelState
-import com.c3ai.sourcingoptimization.presentation.supplier_details.SupplierDetailsEvent
 import com.c3ai.sourcingoptimization.presentation.views.UiPurchaseOrder
 import com.c3ai.sourcingoptimization.presentation.views.convert
 import com.c3ai.sourcingoptimization.utilities.ErrorMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import java.util.*
 import javax.inject.Inject
 
 /**
@@ -57,6 +60,7 @@ sealed interface PODetailsUiState {
 private data class PODetailsViewModelState(
     override val settings: C3AppSettingsProvider,
     val order: PurchaseOrder.Order? = null,
+    val poLines: List<PurchaseOrder.Line>? = null,
     val isLoading: Boolean = false,
     val errorMessages: List<ErrorMessage> = emptyList(),
     val searchInput: String = "",
@@ -90,6 +94,7 @@ private data class PODetailsViewModelState(
 @HiltViewModel
 class PODetailsViewModel @Inject constructor(
     settings: C3AppSettingsProvider,
+    private val useCases: PODetailsUseCases
 ) : ViewModel() {
 
     private val viewModelState = MutableStateFlow(
@@ -119,19 +124,35 @@ class PODetailsViewModel @Inject constructor(
         viewModelState.update { it.copy(isLoading = true) }
 
         viewModelScope.launch {
-//            val itemsResult = useCases.getSupplierDetails("supplier0")
-//            viewModelState.update {
-//                when (itemsResult) {
-//                    is C3Result.Success -> it.copy(supplier = itemsResult.data, isLoading = false)
-//                    is C3Result.Error -> {
-//                        val errorMessages = it.errorMessages + ErrorMessage(
-//                            id = UUID.randomUUID().mostSignificantBits,
-//                            messageId = R.string.load_error
-//                        )
-//                        it.copy(errorMessages = errorMessages, isLoading = false)
-//                    }
-//                }
-//            }
+            val poDetails = useCases.getPODetails("po321")
+            viewModelState.update {
+                when (poDetails) {
+                    is C3Result.Success -> it.copy(order = poDetails.data, isLoading = false)
+                    is C3Result.Error -> {
+                        val errorMessages = it.errorMessages + ErrorMessage(
+                            id = UUID.randomUUID().mostSignificantBits,
+                            messageId = R.string.load_error
+                        )
+                        it.copy(errorMessages = errorMessages, isLoading = false)
+                    }
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            val itemsResult = useCases.getPoLines("po321")
+            viewModelState.update {
+                when (itemsResult) {
+                    is C3Result.Success -> it.copy(poLines = itemsResult.data, isLoading = false)
+                    is C3Result.Error -> {
+                        val errorMessages = it.errorMessages + ErrorMessage(
+                            id = UUID.randomUUID().mostSignificantBits,
+                            messageId = R.string.load_error
+                        )
+                        it.copy(errorMessages = errorMessages, isLoading = false)
+                    }
+                }
+            }
         }
     }
 

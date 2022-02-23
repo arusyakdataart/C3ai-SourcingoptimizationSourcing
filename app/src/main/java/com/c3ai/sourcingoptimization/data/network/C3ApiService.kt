@@ -36,7 +36,7 @@ interface C3ApiService {
     suspend fun getSuppliers(@Body request: SuppliersParameters): C3Response<C3Vendor>
 
     @Headers("Accept: application/json")
-    @POST("${MAIN_API_URL}PurchaseOrder?action=fetch")
+    @POST("${MAIN_API_URL}PurchaseOrderLine?action=fetch")
     suspend fun getPOLines(@Body request: POLinesDetailsParameters): C3Response<PurchaseOrder.Line>
 
     @Headers("Accept: application/json")
