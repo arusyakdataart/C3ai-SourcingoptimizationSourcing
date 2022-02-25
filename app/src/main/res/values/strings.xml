@@ -17,6 +17,7 @@
     <string name="supplier_">"Supplier %s"</string>
     <string name="cd_search_clear">CLear search</string>
     <string name="po_lines">PO Lines</string>
+    <string name="po_lines_">"PO Lines (%s)"</string>
     <string name="items_supplied">Items Supplied</string>
     <string name="cd_arrow_up">Arrow up</string>
     <string name="cd_make_call">Make call</string>
@@ -38,7 +39,7 @@
     <string name="opened_date">Opened Date</string>
     <string name="closed_date">Closed Date</string>
     <string name="cd_expandable_arrow">Expandable Arrow</string>
-    <string name="po_line_">PO Line %s</string>
+    <string name="po_line_">PO LINE %s</string>
     <string name="unit_price_">Unit Price %s</string>
     <string name="quantity_">Quantity %s</string>
     <string name="lead_time">Lead Time</string>

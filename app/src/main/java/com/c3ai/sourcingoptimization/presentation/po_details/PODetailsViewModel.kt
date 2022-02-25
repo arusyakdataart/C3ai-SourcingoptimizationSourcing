@@ -49,17 +49,7 @@ sealed interface PODetailsUiState {
      */
     data class HasDetails(
         val order: UiPurchaseOrder.Order,
-        override val isLoading: Boolean,
-        override val errorMessages: List<ErrorMessage>,
-        override val searchInput: String
-    ) : PODetailsUiState
-
-    /**
-     * There are po lines to render, as contained in model[UiPurchaseOrder.Line].
-     *
-     */
-    data class HasPOLines(
-        val poLines: List<PurchaseOrder.Line>,
+        val poLines: List<UiPurchaseOrder.Line>,
         override val isLoading: Boolean,
         override val errorMessages: List<ErrorMessage>,
         override val searchInput: String
@@ -84,16 +74,10 @@ private data class PODetailsViewModelState(
      * a more strongly typed [PODetailsUiState] for driving the ui.
      */
     fun toUiState(): PODetailsUiState =
-        if (order != null) {
+        if (order != null && poLines != null) {
             PODetailsUiState.HasDetails(
                 order = convert(order),
-                isLoading = isLoading,
-                errorMessages = errorMessages,
-                searchInput = searchInput
-            )
-        } else if (poLines != null) {
-            PODetailsUiState.HasPOLines(
-                poLines = poLines,
+                poLines = poLines.map { convert(it) },
                 isLoading = isLoading,
                 errorMessages = errorMessages,
                 searchInput = searchInput
@@ -148,7 +132,7 @@ class PODetailsViewModel @Inject constructor(
             val poDetails = useCases.getPODetails(orderId)
             viewModelState.update {
                 when (poDetails) {
-                    is C3Result.Success -> it.copy(order = poDetails.data, poLines = null, isLoading = false)
+                    is C3Result.Success -> it.copy(order = poDetails.data, isLoading = false)
                     is C3Result.Error -> {
                         val errorMessages = it.errorMessages + ErrorMessage(
                             id = UUID.randomUUID().mostSignificantBits,
@@ -159,19 +143,19 @@ class PODetailsViewModel @Inject constructor(
                 }
             }
 
-//            val itemsResult = useCases.getPoLines(orderId)
-//            viewModelState.update {
-//                when (itemsResult) {
-//                    is C3Result.Success -> it.copy(order = null, poLines = itemsResult.data, isLoading = false)
-//                    is C3Result.Error -> {
-//                        val errorMessages = it.errorMessages + ErrorMessage(
-//                            id = UUID.randomUUID().mostSignificantBits,
-//                            messageId = R.string.load_error
-//                        )
-//                        it.copy(errorMessages = errorMessages, isLoading = false)
-//                    }
-//                }
-//            }
+            val itemsResult = useCases.getPoLines(orderId)
+            viewModelState.update {
+                when (itemsResult) {
+                    is C3Result.Success -> it.copy(poLines = itemsResult.data, isLoading = false)
+                    is C3Result.Error -> {
+                        val errorMessages = it.errorMessages + ErrorMessage(
+                            id = UUID.randomUUID().mostSignificantBits,
+                            messageId = R.string.load_error
+                        )
+                        it.copy(errorMessages = errorMessages, isLoading = false)
+                    }
+                }
+            }
         }
     }
 

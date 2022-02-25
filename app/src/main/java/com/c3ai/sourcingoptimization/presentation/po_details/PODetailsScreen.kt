@@ -60,32 +60,28 @@ fun PODetailsScreen(
         LoadingContent(
             empty = when (uiState) {
                 is PODetailsUiState.HasDetails -> false
-                is PODetailsUiState.HasPOLines -> false
                 is PODetailsUiState.NoDetails -> uiState.isLoading
             },
             emptyContent = { FullScreenLoading() },
             loading = uiState.isLoading,
             onRefresh = onRefreshDetails,
             content = {
-                var order: UiPurchaseOrder.Order? = null
-                var poLines: List<PurchaseOrder.Line>? = null
                 val listState = rememberLazyListState()
                 LazyColumn(modifier = Modifier.fillMaxSize(), listState) {
                     when (uiState) {
                         is PODetailsUiState.HasDetails -> {
-                            order = uiState.order
-                            item("") {
+                            item("PO Detail") {
                                 PODetailsDataScreen(
                                     uiState = uiState,
                                 )
                             }
-                        }
-                        is PODetailsUiState.HasPOLines -> {
-                            poLines = uiState.poLines
-                            items(uiState.poLines) {
-                                POLinesDataScreen(
+                            item("PO Lines Header") {
+                                POLinesHeaderScreen(
                                     uiState = uiState,
                                 )
+                            }
+                            items(uiState.poLines) {
+                                PoLinesListExpanded(it, padding = 16.dp, onPOAlertsClick = { })
                             }
                         }
                         is PODetailsUiState.NoDetails -> {
@@ -105,27 +101,6 @@ fun PODetailsScreen(
                         }
                     }
                 }
-//                when (uiState) {
-//                    is PODetailsUiState.HasDetails -> PODetailsDataScreen(
-//                        uiState = uiState,
-//                    )
-//                    is PODetailsUiState.HasPOLines -> POLinesDataScreen(
-//                        uiState = uiState,
-//                    )
-//                    is PODetailsUiState.NoDetails -> {
-//                        if (uiState.errorMessages.isEmpty()) {
-//                            // if there are no posts, and no error, let the user refresh manually
-//                            PButton(
-//                                modifier = Modifier.fillMaxWidth(),
-//                                text = stringResource(id = R.string.tap_to_load_content),
-//                                onClick = onRefreshDetails,
-//                            )
-//                        } else {
-//                            // there's currently an error showing, don't show any content
-//                            Box(contentModifier.fillMaxSize()) { /* empty screen */ }
-//                        }
-//                    }
-//                }
             }
         )
     }
@@ -234,7 +209,9 @@ private fun PODetailsDataScreen(
                             top.linkTo(divider1.bottom)
                         }
                 )
-                Spacer(modifier = Modifier.height(16.dp).constrainAs(spacer1) { top.linkTo(buyer.bottom) })
+                Spacer(modifier = Modifier
+                    .height(16.dp)
+                    .constrainAs(spacer1) { top.linkTo(buyer.bottom) })
                 ListDivider(Modifier.constrainAs(divider2) { top.linkTo(spacer1.bottom) })
                 BusinessCard(
                     label = stringResource(R.string.supplier_, item.vendor?.id ?: ""),
@@ -247,7 +224,9 @@ private fun PODetailsDataScreen(
                             top.linkTo(divider2.bottom)
                         }
                 )
-                Spacer(modifier = Modifier.height(16.dp).constrainAs(spacer2) { top.linkTo(vendor.bottom) })
+                Spacer(modifier = Modifier
+                    .height(16.dp)
+                    .constrainAs(spacer2) { top.linkTo(vendor.bottom) })
             }
         }
     }
@@ -255,16 +234,20 @@ private fun PODetailsDataScreen(
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalAnimationApi::class)
 @Composable
-private fun POLinesDataScreen(
-    uiState: PODetailsUiState.HasPOLines,
+private fun POLinesHeaderScreen(
+    uiState: PODetailsUiState.HasDetails,
 ) {
-    Text(
-        "supplier.name",
-        style = MaterialTheme.typography.h1,
-        color = MaterialTheme.colors.primary,
+    Box(
         modifier = Modifier
-            .padding(bottom = 10.dp),
-    )
+            .fillMaxWidth()
+            .padding(start = 16.dp, top = 8.dp, end = 16.dp, bottom = 8.dp)
+    ) {
+        Text(
+            text = stringResource(R.string.po_lines_, uiState.poLines.size),
+            style = MaterialTheme.typography.h3,
+            color = MaterialTheme.colors.primary
+        )
+    }
 }
 
 /**

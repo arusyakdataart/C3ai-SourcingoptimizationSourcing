@@ -5,7 +5,7 @@ import com.c3ai.sourcingoptimization.domain.model.C3Facility
 
 sealed interface UiPurchaseOrder {
     val id: String
-    val name: String
+    val name: String?
     val fulfilled: Boolean
     val fulfilledStr: String
     val totalCost: String
@@ -31,7 +31,7 @@ sealed interface UiPurchaseOrder {
 
     data class Line(
         override val id: String,
-        override val name: String,
+        override val name: String?,
         override val fulfilled: Boolean,
         override val fulfilledStr: String,
         override val totalCost: String,

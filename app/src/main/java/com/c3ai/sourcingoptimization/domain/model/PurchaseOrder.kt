@@ -4,7 +4,7 @@ import java.util.*
 
 sealed interface PurchaseOrder {
     val id: String
-    val name: String
+    val name: String?
     val fulfilled: Boolean?
     val fulfilledStr: String?
     val totalCost: C3UnitValue?
@@ -15,7 +15,7 @@ sealed interface PurchaseOrder {
 
     data class Order(
         override val id: String,
-        override val name: String,
+        override val name: String?,
         override val fulfilled: Boolean?,
         override val fulfilledStr: String?,
         override val totalCost: C3UnitValue?,
@@ -35,7 +35,7 @@ sealed interface PurchaseOrder {
 
     data class Line(
         override val id: String,
-        override val name: String,
+        override val name: String?,
         override val fulfilled: Boolean?,
         override val fulfilledStr: String?,
         override val totalCost: C3UnitValue?,
