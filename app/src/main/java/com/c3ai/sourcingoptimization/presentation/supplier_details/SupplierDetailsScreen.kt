@@ -219,34 +219,12 @@ private fun SuppliersDetailsInfo(
                 .padding(bottom = 10.dp),
         )
         Text(
-            stringResource(R.string.open_po_value, supplier.allPOValue),
+            stringResource(R.string.open_po_value, supplier.allPOValue ?: ""),
             style = MaterialTheme.typography.subtitle1,
             color = MaterialTheme.colors.secondary,
             modifier = Modifier
         )
     }
-}
-
-@Composable
-private fun LabeledValue(
-    modifier: Modifier = Modifier,
-    label: String,
-    value: String,
-    valueStyle: TextStyle = MaterialTheme.typography.subtitle2,
-    valueColor: Color = MaterialTheme.colors.primary,
-) {
-    Column(modifier = modifier) {
-        Text(label, style = MaterialTheme.typography.h5, color = MaterialTheme.colors.secondary)
-        Text(value, style = valueStyle, color = valueColor, modifier = Modifier.padding(top = 4.dp))
-    }
-}
-
-@Composable
-private fun ListDivider(modifier: Modifier = Modifier) {
-    Divider(
-        modifier = modifier.padding(vertical = 16.dp),
-        color = DividerColor
-    )
 }
 
 @Composable

@@ -14,7 +14,7 @@
     <string name="retry">Retry</string>
     <string name="cd_settings">Settings</string>
     <string name="cd_navigation_back_button">Back button</string>
-    <string name="supplier_">"S%s"</string>
+    <string name="supplier_">"Supplier %s"</string>
     <string name="cd_search_clear">CLear search</string>
     <string name="po_lines">PO Lines</string>
     <string name="items_supplied">Items Supplied</string>

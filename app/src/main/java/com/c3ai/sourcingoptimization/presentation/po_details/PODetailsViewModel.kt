@@ -1,5 +1,6 @@
 package com.c3ai.sourcingoptimization.presentation.po_details
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.c3ai.sourcingoptimization.R
@@ -52,6 +53,17 @@ sealed interface PODetailsUiState {
         override val errorMessages: List<ErrorMessage>,
         override val searchInput: String
     ) : PODetailsUiState
+
+    /**
+     * There are po lines to render, as contained in model[UiPurchaseOrder.Line].
+     *
+     */
+    data class HasPOLines(
+        val poLines: List<PurchaseOrder.Line>,
+        override val isLoading: Boolean,
+        override val errorMessages: List<ErrorMessage>,
+        override val searchInput: String
+    ) : PODetailsUiState
 }
 
 /**
@@ -72,15 +84,22 @@ private data class PODetailsViewModelState(
      * a more strongly typed [PODetailsUiState] for driving the ui.
      */
     fun toUiState(): PODetailsUiState =
-        if (order == null) {
-            PODetailsUiState.NoDetails(
+        if (order != null) {
+            PODetailsUiState.HasDetails(
+                order = convert(order),
+                isLoading = isLoading,
+                errorMessages = errorMessages,
+                searchInput = searchInput
+            )
+        } else if (poLines != null) {
+            PODetailsUiState.HasPOLines(
+                poLines = poLines,
                 isLoading = isLoading,
                 errorMessages = errorMessages,
                 searchInput = searchInput
             )
         } else {
-            PODetailsUiState.HasDetails(
-                order = convert(order),
+            PODetailsUiState.NoDetails(
                 isLoading = isLoading,
                 errorMessages = errorMessages,
                 searchInput = searchInput
@@ -94,6 +113,7 @@ private data class PODetailsViewModelState(
 @HiltViewModel
 class PODetailsViewModel @Inject constructor(
     settings: C3AppSettingsProvider,
+    private val savedStateHandle: SavedStateHandle,
     private val useCases: PODetailsUseCases
 ) : ViewModel() {
 
@@ -124,10 +144,11 @@ class PODetailsViewModel @Inject constructor(
         viewModelState.update { it.copy(isLoading = true) }
 
         viewModelScope.launch {
-            val poDetails = useCases.getPODetails("po321")
+            val orderId = savedStateHandle.get<String>("orderId") ?: ""
+            val poDetails = useCases.getPODetails(orderId)
             viewModelState.update {
                 when (poDetails) {
-                    is C3Result.Success -> it.copy(order = poDetails.data, isLoading = false)
+                    is C3Result.Success -> it.copy(order = poDetails.data, poLines = null, isLoading = false)
                     is C3Result.Error -> {
                         val errorMessages = it.errorMessages + ErrorMessage(
                             id = UUID.randomUUID().mostSignificantBits,
@@ -137,22 +158,20 @@ class PODetailsViewModel @Inject constructor(
                     }
                 }
             }
-        }
 
-        viewModelScope.launch {
-            val itemsResult = useCases.getPoLines("po321")
-            viewModelState.update {
-                when (itemsResult) {
-                    is C3Result.Success -> it.copy(poLines = itemsResult.data, isLoading = false)
-                    is C3Result.Error -> {
-                        val errorMessages = it.errorMessages + ErrorMessage(
-                            id = UUID.randomUUID().mostSignificantBits,
-                            messageId = R.string.load_error
-                        )
-                        it.copy(errorMessages = errorMessages, isLoading = false)
-                    }
-                }
-            }
+//            val itemsResult = useCases.getPoLines(orderId)
+//            viewModelState.update {
+//                when (itemsResult) {
+//                    is C3Result.Success -> it.copy(order = null, poLines = itemsResult.data, isLoading = false)
+//                    is C3Result.Error -> {
+//                        val errorMessages = it.errorMessages + ErrorMessage(
+//                            id = UUID.randomUUID().mostSignificantBits,
+//                            messageId = R.string.load_error
+//                        )
+//                        it.copy(errorMessages = errorMessages, isLoading = false)
+//                    }
+//                }
+//            }
         }
     }
 

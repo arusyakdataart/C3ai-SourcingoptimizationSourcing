@@ -2,10 +2,10 @@ package com.c3ai.sourcingoptimization.domain.model
 
 data class C3Location(
     val id: String,
-    val region: C3Unit,
-    val city: String,
+    val region: C3Unit?,
+    val city: String?,
     val address: Address?,
-    val state: String,
+    val state: String?,
 ) {
 
     override fun toString(): String {
@@ -21,13 +21,13 @@ data class Address(
 ) {
 
     override fun toString(): String {
-        return components.joinToString { it.name }
+        return components.joinToString { it.name ?: ""}
     }
 }
 
 data class AddressComponent(
-    val abbr: String,
-    val name: String,
+    val abbr: String?,
+    val name: String?,
 )
 
 data class Geometry(

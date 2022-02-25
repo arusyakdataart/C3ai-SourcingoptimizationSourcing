@@ -2,6 +2,9 @@ package com.c3ai.sourcingoptimization.presentation.po_details
 
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -10,12 +13,18 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.common.components.*
 import com.c3ai.sourcingoptimization.data.C3Result
 import com.c3ai.sourcingoptimization.data.repository.C3MockRepositoryImpl
+import com.c3ai.sourcingoptimization.domain.model.PurchaseOrder
 import com.c3ai.sourcingoptimization.presentation.supplier_details.SupplierDetailsScreen
+import com.c3ai.sourcingoptimization.presentation.views.UiPurchaseOrder
 import com.c3ai.sourcingoptimization.ui.theme.C3AppTheme
+import com.c3ai.sourcingoptimization.ui.theme.Green40
 import kotlinx.coroutines.runBlocking
 
 /**
@@ -51,30 +60,72 @@ fun PODetailsScreen(
         LoadingContent(
             empty = when (uiState) {
                 is PODetailsUiState.HasDetails -> false
+                is PODetailsUiState.HasPOLines -> false
                 is PODetailsUiState.NoDetails -> uiState.isLoading
             },
             emptyContent = { FullScreenLoading() },
             loading = uiState.isLoading,
             onRefresh = onRefreshDetails,
             content = {
-                when (uiState) {
-                    is PODetailsUiState.HasDetails -> PODetailsDataScreen(
-                        uiState = uiState,
-                    )
-                    is PODetailsUiState.NoDetails -> {
-                        if (uiState.errorMessages.isEmpty()) {
-                            // if there are no posts, and no error, let the user refresh manually
-                            PButton(
-                                modifier = Modifier.fillMaxWidth(),
-                                text = stringResource(id = R.string.tap_to_load_content),
-                                onClick = onRefreshDetails,
-                            )
-                        } else {
-                            // there's currently an error showing, don't show any content
-                            Box(contentModifier.fillMaxSize()) { /* empty screen */ }
+                var order: UiPurchaseOrder.Order? = null
+                var poLines: List<PurchaseOrder.Line>? = null
+                val listState = rememberLazyListState()
+                LazyColumn(modifier = Modifier.fillMaxSize(), listState) {
+                    when (uiState) {
+                        is PODetailsUiState.HasDetails -> {
+                            order = uiState.order
+                            item("") {
+                                PODetailsDataScreen(
+                                    uiState = uiState,
+                                )
+                            }
+                        }
+                        is PODetailsUiState.HasPOLines -> {
+                            poLines = uiState.poLines
+                            items(uiState.poLines) {
+                                POLinesDataScreen(
+                                    uiState = uiState,
+                                )
+                            }
+                        }
+                        is PODetailsUiState.NoDetails -> {
+                            item("") {
+                                if (uiState.errorMessages.isEmpty()) {
+                                    // if there are no posts, and no error, let the user refresh manually
+                                    PButton(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        text = stringResource(id = R.string.tap_to_load_content),
+                                        onClick = onRefreshDetails,
+                                    )
+                                } else {
+                                    // there's currently an error showing, don't show any content
+                                    Box(contentModifier.fillMaxSize()) { /* empty screen */ }
+                                }
+                            }
                         }
                     }
                 }
+//                when (uiState) {
+//                    is PODetailsUiState.HasDetails -> PODetailsDataScreen(
+//                        uiState = uiState,
+//                    )
+//                    is PODetailsUiState.HasPOLines -> POLinesDataScreen(
+//                        uiState = uiState,
+//                    )
+//                    is PODetailsUiState.NoDetails -> {
+//                        if (uiState.errorMessages.isEmpty()) {
+//                            // if there are no posts, and no error, let the user refresh manually
+//                            PButton(
+//                                modifier = Modifier.fillMaxWidth(),
+//                                text = stringResource(id = R.string.tap_to_load_content),
+//                                onClick = onRefreshDetails,
+//                            )
+//                        } else {
+//                            // there's currently an error showing, don't show any content
+//                            Box(contentModifier.fillMaxSize()) { /* empty screen */ }
+//                        }
+//                    }
+//                }
             }
         )
     }
@@ -115,6 +166,105 @@ fun PODetailsScreen(
 private fun PODetailsDataScreen(
     uiState: PODetailsUiState.HasDetails,
 ) {
+    val item = uiState.order
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 16.dp)
+    ) {
+        C3SimpleCard {
+            ConstraintLayout(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth()
+            ) {
+                // Create references for the composables to constrain
+                val (status, totalCost, openedDate, closedDate, divider1, buyer, spacer1, divider2, vendor, spacer2) = createRefs()
+                Text(
+                    item.fulfilledStr,
+                    style = MaterialTheme.typography.subtitle1,
+                    color = Green40,
+                    modifier = Modifier.constrainAs(status) {
+                        top.linkTo(parent.top)
+                    }
+                )
+                LabeledValue(
+                    label = stringResource(R.string.total_cost),
+                    value = item.totalCost,
+                    valueStyle = MaterialTheme.typography.h2,
+                    modifier = Modifier
+                        .constrainAs(totalCost) {
+                            top.linkTo(status.bottom, margin = 16.dp)
+                            start.linkTo(parent.start)
+                            end.linkTo(openedDate.start)
+                            width = Dimension.fillToConstraints
+                        },
+                )
+                LabeledValue(
+                    label = stringResource(R.string.opened_date),
+                    value = item.orderCreationDate,
+                    modifier = Modifier
+                        .constrainAs(openedDate) {
+                            top.linkTo(status.bottom, margin = 16.dp)
+                            start.linkTo(totalCost.end, margin = 8.dp)
+                            end.linkTo(closedDate.start)
+                            width = Dimension.fillToConstraints
+                        },
+                )
+                LabeledValue(
+                    label = stringResource(R.string.closed_date),
+                    value = item.closedDate,
+                    modifier = Modifier
+                        .constrainAs(closedDate) {
+                            top.linkTo(status.bottom, margin = 16.dp)
+                            start.linkTo(openedDate.end, margin = 8.dp)
+                            end.linkTo(parent.end)
+                            width = Dimension.fillToConstraints
+                        },
+                )
+                ListDivider(Modifier.constrainAs(divider1) { top.linkTo(totalCost.bottom) })
+                BusinessCard(
+                    label = stringResource(R.string.buyer_, item.buyer?.id ?: ""),
+                    title = item.buyer?.name ?: "",
+                    subtitle = "",
+                    image1 = R.drawable.alert,
+                    image2 = R.drawable.person_card,
+                    modifier = Modifier
+                        .constrainAs(buyer) {
+                            top.linkTo(divider1.bottom)
+                        }
+                )
+                Spacer(modifier = Modifier.height(16.dp).constrainAs(spacer1) { top.linkTo(buyer.bottom) })
+                ListDivider(Modifier.constrainAs(divider2) { top.linkTo(spacer1.bottom) })
+                BusinessCard(
+                    label = stringResource(R.string.supplier_, item.vendor?.id ?: ""),
+                    title = item.vendor?.name ?: "",
+                    subtitle = item.vendor?.location?.address?.components?.joinToString { it.name ?: ""} ?: "",
+                    image1 = R.drawable.alert,
+                    image2 = R.drawable.person_card,
+                    modifier = Modifier
+                        .constrainAs(vendor) {
+                            top.linkTo(divider2.bottom)
+                        }
+                )
+                Spacer(modifier = Modifier.height(16.dp).constrainAs(spacer2) { top.linkTo(vendor.bottom) })
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalAnimationApi::class)
+@Composable
+private fun POLinesDataScreen(
+    uiState: PODetailsUiState.HasPOLines,
+) {
+    Text(
+        "supplier.name",
+        style = MaterialTheme.typography.h1,
+        color = MaterialTheme.colors.primary,
+        modifier = Modifier
+            .padding(bottom = 10.dp),
+    )
 }
 
 /**
