@@ -40,16 +40,21 @@ interface C3Repository {
         expressions: List<String>,
         startDate: String,
         endDate: String,
-        interval: String): C3Result<ItemVendorRelationMetrics>
+        interval: String
+    ): C3Result<ItemVendorRelationMetrics>
 
     suspend fun getMarketPriceIndex(): C3Result<List<MarketPriceIndex>>
 
-    suspend fun getItemMarketPriceIndexRelation(itemId: String, indexId: String): C3Result<List<ItemRelation>>
+    suspend fun getItemMarketPriceIndexRelation(
+        itemId: String,
+        indexId: String
+    ): C3Result<List<ItemRelation>>
 
     suspend fun getItemMarketPriceIndexRelationMetrics(
         ids: List<String>,
         expressions: List<String>,
         startDate: String,
         endDate: String,
-        interval: String): C3Result<ItemMarketPriceIndexRelationMetrics>
+        interval: String
+    ): C3Result<ItemMarketPriceIndexRelationMetrics>
 }

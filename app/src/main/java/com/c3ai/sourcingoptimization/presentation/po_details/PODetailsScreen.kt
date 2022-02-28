@@ -216,7 +216,9 @@ private fun PODetailsDataScreen(
                 BusinessCard(
                     label = stringResource(R.string.supplier_, item.vendor?.id ?: ""),
                     title = item.vendor?.name ?: "",
-                    subtitle = item.vendor?.location?.address?.components?.joinToString { it.name ?: ""} ?: "",
+                    subtitle = item.vendor?.location?.address?.components?.joinToString {
+                        it.name ?: ""
+                    } ?: "",
                     image1 = R.drawable.alert,
                     image2 = R.drawable.person_card,
                     modifier = Modifier

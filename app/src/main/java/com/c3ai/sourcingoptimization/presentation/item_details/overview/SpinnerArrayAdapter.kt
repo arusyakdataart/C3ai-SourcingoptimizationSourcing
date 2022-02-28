@@ -11,8 +11,8 @@ import com.c3ai.sourcingoptimization.R
 /**
  * The adapter populating Spinner dropdown list
  * */
-class SpinnerArrayAdapter(context: Context, data: List<String>)
-    : ArrayAdapter<String>(context, 0, data) {
+class SpinnerArrayAdapter(context: Context, data: List<String>) :
+    ArrayAdapter<String>(context, 0, data) {
 
     var selectedPosition = 0
 
@@ -27,7 +27,8 @@ class SpinnerArrayAdapter(context: Context, data: List<String>)
 
     private fun createView(position: Int, convertView: View?, parent: ViewGroup): View {
         val item = getItem(position)
-        val view = convertView ?: LayoutInflater.from(context).inflate(R.layout.spinner_item_view, parent, false)
+        val view = convertView ?: LayoutInflater.from(context)
+            .inflate(R.layout.spinner_item_view, parent, false)
         view.findViewById<TextView>(R.id.title).text = item
 
         if (selectedPosition == position) {
