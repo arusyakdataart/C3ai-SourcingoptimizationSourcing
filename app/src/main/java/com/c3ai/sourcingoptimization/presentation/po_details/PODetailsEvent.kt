@@ -1,4 +1,6 @@
 package com.c3ai.sourcingoptimization.presentation.po_details
 
-class PODetailsEvent {
+sealed class PODetailsEvent {
+    data class OnSearchInputChanged(val searchInput: String) : PODetailsEvent()
+    data class OnSortChanged(val sortOption: String) : PODetailsEvent()
 }

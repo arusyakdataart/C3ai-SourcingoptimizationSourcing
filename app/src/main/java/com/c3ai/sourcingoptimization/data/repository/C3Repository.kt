@@ -16,7 +16,7 @@ interface C3Repository {
 
     suspend fun getPODetails(orderId: String): C3Result<PurchaseOrder.Order>
 
-    suspend fun getPOLines(orderId: String): C3Result<List<PurchaseOrder.Line>>
+    suspend fun getPOLines(orderId: String, order: String): C3Result<List<PurchaseOrder.Line>>
 
     suspend fun getSuppliedItems(supplierId: String): C3Result<List<C3Item>>
 

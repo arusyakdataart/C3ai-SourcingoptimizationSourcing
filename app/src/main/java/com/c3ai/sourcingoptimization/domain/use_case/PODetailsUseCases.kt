@@ -13,8 +13,11 @@ class GetPODetails(private val repository: C3Repository) {
 
 class GetPOLines(private val repository: C3Repository) {
 
-    suspend operator fun invoke(orderId: String): C3Result<List<PurchaseOrder.Line>> {
-        return repository.getPOLines(orderId)
+    suspend operator fun invoke(
+        orderId: String,
+        order: String
+    ): C3Result<List<PurchaseOrder.Line>> {
+        return repository.getPOLines(orderId, order)
     }
 }
 

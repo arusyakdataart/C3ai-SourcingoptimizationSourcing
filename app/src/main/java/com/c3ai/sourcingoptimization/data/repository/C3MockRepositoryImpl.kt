@@ -24,7 +24,10 @@ class C3MockRepositoryImpl : C3Repository {
     override suspend fun getPODetails(orderId: String): C3Result<PurchaseOrder.Order> =
         C3Result.on { PurchaseOrder.Order.fake() }
 
-    override suspend fun getPOLines(orderId: String): C3Result<List<PurchaseOrder.Line>> =
+    override suspend fun getPOLines(
+        orderId: String,
+        order: String
+    ): C3Result<List<PurchaseOrder.Line>> =
         C3Result.on {
             emptyList()
         }

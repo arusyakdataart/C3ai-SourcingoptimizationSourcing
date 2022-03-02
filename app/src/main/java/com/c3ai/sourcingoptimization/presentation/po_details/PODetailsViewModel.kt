@@ -143,7 +143,27 @@ class PODetailsViewModel @Inject constructor(
                 }
             }
 
-            val itemsResult = useCases.getPoLines(orderId)
+            val itemsResult = useCases.getPoLines(orderId, "")
+            viewModelState.update {
+                when (itemsResult) {
+                    is C3Result.Success -> it.copy(poLines = itemsResult.data, isLoading = false)
+                    is C3Result.Error -> {
+                        val errorMessages = it.errorMessages + ErrorMessage(
+                            id = UUID.randomUUID().mostSignificantBits,
+                            messageId = R.string.load_error
+                        )
+                        it.copy(errorMessages = errorMessages, isLoading = false)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun reloadPOLines(sortOption: String) {
+        val orderId = savedStateHandle.get<String>("orderId") ?: ""
+        viewModelState.update { it.copy(isLoading = true) }
+        viewModelScope.launch {
+            val itemsResult = useCases.getPoLines(orderId, sortOption)
             viewModelState.update {
                 when (itemsResult) {
                     is C3Result.Success -> it.copy(poLines = itemsResult.data, isLoading = false)
@@ -160,9 +180,12 @@ class PODetailsViewModel @Inject constructor(
     }
 
     fun onEvent(event: PODetailsEvent) {
-
+        when (event) {
+            is PODetailsEvent.OnSortChanged -> {
+                reloadPOLines(event.sortOption)
+            }
+        }
     }
-
 }
 
 @Suppress("FunctionName")

@@ -29,8 +29,10 @@ fun PODetailsRoute(
     PODetailsScreen(
         scaffoldState = scaffoldState,
         uiState = uiState,
-        onRefreshDetails = { viewModel.refreshDetails() },
         orderId = orderId ?: "",
+        onRefreshDetails = { viewModel.refreshDetails() },
+        onSearchInputChanged = { viewModel.onEvent(PODetailsEvent.OnSearchInputChanged(it)) },
+        onSortChanged = { viewModel.onEvent(PODetailsEvent.OnSortChanged(it)) },
         onBackButtonClick = { navController.navigateUp() },
     )
 }
