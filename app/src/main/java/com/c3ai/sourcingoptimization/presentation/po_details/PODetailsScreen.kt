@@ -25,6 +25,8 @@ import com.c3ai.sourcingoptimization.data.C3Result
 import com.c3ai.sourcingoptimization.data.repository.C3MockRepositoryImpl
 import com.c3ai.sourcingoptimization.ui.theme.C3AppTheme
 import com.c3ai.sourcingoptimization.ui.theme.Green40
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 /**
@@ -36,6 +38,7 @@ import kotlinx.coroutines.runBlocking
  * This helper function exists because [PODetailsScreen] is big and have two states,
  * so we need to decompose it with additional function [PODetailsDataScreen].
  */
+@ExperimentalMaterialApi
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalAnimationApi::class)
 @Composable
 fun PODetailsScreen(
@@ -47,79 +50,82 @@ fun PODetailsScreen(
     onSortChanged: (String) -> Unit,
     onBackButtonClick: () -> Unit,
 ) {
-    // val coroutineScope = rememberCoroutineScope()
-    Scaffold(
-        scaffoldState = scaffoldState,
-        snackbarHost = { C3SnackbarHost(hostState = it) },
-        topBar = {
-            PODetailsAppBar(
-                title = stringResource(R.string.po_, orderId),
-                searchInput = uiState.searchInput,
-                onBackButtonClick = onBackButtonClick,
-                onSearchInputChanged = onSearchInputChanged,
-                onSortChanged = onSortChanged,
-                onClearClick = { onSearchInputChanged("") },
-                onContactsClick = {
-//                    coroutineScope.launch {
-//                        if (scaffoldState.bottomSheetState.isCollapsed) {
-//                            scaffoldState.bottomSheetState.expand()
-//                        } else {
-//                            scaffoldState.bottomSheetState.collapse()
-//                        }
-//                    }
-                }
-            )
-        },
-    ) { innerPadding ->
-        val contentModifier = Modifier.padding(innerPadding)
-
-        LoadingContent(
-            empty = when (uiState) {
-                is PODetailsUiState.HasDetails -> false
-                is PODetailsUiState.NoDetails -> uiState.isLoading
+    val coroutineScope = rememberCoroutineScope()
+    val bottomState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+    ModalBottomSheetLayout(
+        sheetState = bottomState,
+        sheetContent = {
+            ContactBuyerBottomSheetContent()
+        }
+    ) {
+        Scaffold(
+            scaffoldState = scaffoldState,
+            snackbarHost = { C3SnackbarHost(hostState = it) },
+            topBar = {
+                PODetailsAppBar(
+                    title = stringResource(R.string.po_, orderId),
+                    searchInput = uiState.searchInput,
+                    onBackButtonClick = onBackButtonClick,
+                    onSearchInputChanged = onSearchInputChanged,
+                    onSortChanged = onSortChanged,
+                    onClearClick = { onSearchInputChanged("") }
+                )
             },
-            emptyContent = { FullScreenLoading() },
-            loading = uiState.isLoading,
-            onRefresh = onRefreshDetails,
-            content = {
-                val listState = rememberLazyListState()
-                LazyColumn(modifier = Modifier.fillMaxSize(), listState) {
-                    when (uiState) {
-                        is PODetailsUiState.HasDetails -> {
-                            item("PO Detail") {
-                                PODetailsDataScreen(
-                                    uiState = uiState,
-                                )
-                            }
-                            item("PO Lines Header") {
-                                POLinesHeaderScreen(
-                                    uiState = uiState,
-                                )
-                            }
-                            items(uiState.poLines) {
-                                PoLinesListExpanded(it, padding = 16.dp, onPOAlertsClick = { })
-                            }
-                        }
-                        is PODetailsUiState.NoDetails -> {
-                            item("") {
-                                if (uiState.errorMessages.isEmpty()) {
-                                    // if there are no posts, and no error, let the user refresh manually
-                                    PButton(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        text = stringResource(id = R.string.tap_to_load_content),
-                                        onClick = onRefreshDetails,
+        ) { innerPadding ->
+            val contentModifier = Modifier.padding(innerPadding)
+
+            LoadingContent(
+                empty = when (uiState) {
+                    is PODetailsUiState.HasDetails -> false
+                    is PODetailsUiState.NoDetails -> uiState.isLoading
+                },
+                emptyContent = { FullScreenLoading() },
+                loading = uiState.isLoading,
+                onRefresh = onRefreshDetails,
+                content = {
+                    val listState = rememberLazyListState()
+                    LazyColumn(modifier = Modifier.fillMaxSize(), listState) {
+                        when (uiState) {
+                            is PODetailsUiState.HasDetails -> {
+                                item("PO Detail") {
+                                    PODetailsDataScreen(
+                                        uiState = uiState,
+                                        coroutineScope,
+                                        bottomState
                                     )
-                                } else {
-                                    // there's currently an error showing, don't show any content
-                                    Box(contentModifier.fillMaxSize()) { /* empty screen */ }
+                                }
+                                item("PO Lines Header") {
+                                    POLinesHeaderScreen(
+                                        uiState = uiState,
+                                    )
+                                }
+                                items(uiState.poLines) {
+                                    PoLinesListExpanded(it, padding = 16.dp, onPOAlertsClick = { })
+                                }
+                            }
+                            is PODetailsUiState.NoDetails -> {
+                                item("") {
+                                    if (uiState.errorMessages.isEmpty()) {
+                                        // if there are no posts, and no error, let the user refresh manually
+                                        PButton(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            text = stringResource(id = R.string.tap_to_load_content),
+                                            onClick = onRefreshDetails,
+                                        )
+                                    } else {
+                                        // there's currently an error showing, don't show any content
+                                        Box(contentModifier.fillMaxSize()) { /* empty screen */ }
+                                    }
                                 }
                             }
                         }
                     }
                 }
-            }
-        )
+            )
+        }
+
     }
+
 
     // Process one error message at a time and show them as Snackbars in the UI
     if (uiState.errorMessages.isNotEmpty()) {
@@ -152,10 +158,13 @@ fun PODetailsScreen(
     }
 }
 
+@ExperimentalMaterialApi
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalAnimationApi::class)
 @Composable
 private fun PODetailsDataScreen(
     uiState: PODetailsUiState.HasDetails,
+    coroutineScope: CoroutineScope,
+    bottomState: ModalBottomSheetState
 ) {
     val item = uiState.order
     Box(
@@ -220,6 +229,9 @@ private fun PODetailsDataScreen(
                     subtitle = "",
                     image1 = R.drawable.alert,
                     image2 = R.drawable.person_card,
+                    onIcon2Click = {
+                        coroutineScope.launch { bottomState.show() }
+                    },
                     modifier = Modifier
                         .constrainAs(buyer) {
                             top.linkTo(divider1.bottom)
@@ -237,6 +249,9 @@ private fun PODetailsDataScreen(
                     } ?: "",
                     image1 = R.drawable.alert,
                     image2 = R.drawable.person_card,
+                    onIcon2Click = {
+                        coroutineScope.launch { bottomState.show() }
+                    },
                     modifier = Modifier
                         .constrainAs(vendor) {
                             top.linkTo(divider2.bottom)
@@ -280,8 +295,7 @@ private fun PODetailsAppBar(
     onBackButtonClick: () -> Unit,
     onSearchInputChanged: (String) -> Unit = {},
     onSortChanged: (String) -> Unit = {},
-    onClearClick: () -> Unit = {},
-    onContactsClick: () -> Unit,
+    onClearClick: () -> Unit = {}
 ) {
     var showClearButton by remember { mutableStateOf(false) }
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -339,6 +353,7 @@ private fun PODetailsAppBar(
     )
 }
 
+@ExperimentalMaterialApi
 @Preview
 @Composable
 fun ComposablePreview() {

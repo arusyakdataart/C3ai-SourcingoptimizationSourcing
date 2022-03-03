@@ -26,7 +26,6 @@ import javax.inject.Inject
  * precisely represent the state available to render the UI.
  */
 sealed interface PODetailsUiState {
-
     val isLoading: Boolean
     val errorMessages: List<ErrorMessage>
     val searchInput: String

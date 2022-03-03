@@ -80,7 +80,7 @@ fun SupplierDetailsScreen(
             )
         },
         snackbarHost = { C3SnackbarHost(hostState = it) },
-        sheetContent = { ContactsBottomSheetContent() },
+        sheetContent = { ContactSupplierBottomSheetContent() },
         sheetPeekHeight = 0.dp
     ) { innerPadding ->
         val contentModifier = Modifier.padding(innerPadding)
@@ -431,27 +431,6 @@ private fun ItemsSuppliedList(
             }
         }
     }
-}
-
-@Composable
-private fun ContactsBottomSheetContent() {
-    BottomSheetContent(
-        BottomSheetItem(
-            image = Icons.Filled.Call,
-            contentDescription = stringResource(R.string.cd_make_call),
-            text = stringResource(R.string.make_call),
-        ),
-        BottomSheetItem(
-            image = Icons.Filled.Sms,
-            contentDescription = stringResource(R.string.cd_send_sms),
-            text = stringResource(R.string.send_sms),
-        ),
-        BottomSheetItem(
-            image = Icons.Filled.Email,
-            contentDescription = stringResource(R.string.cd_send_email),
-            text = stringResource(R.string.send_email),
-        ),
-    )
 }
 
 /**

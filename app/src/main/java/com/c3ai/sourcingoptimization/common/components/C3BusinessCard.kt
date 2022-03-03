@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -27,8 +28,9 @@ fun BusinessCard(
     title: String,
     subtitle: String,
     image1: Int? = null,
-    image2: Int? = null
-
+    image2: Int? = null,
+    onIcon1Click: () -> Unit = { },
+    onIcon2Click: () -> Unit = { },
 ) {
     ConstraintLayout(modifier = modifier.fillMaxWidth()) {
         val (header, image, titleText, subtitleText, icon1, icon2) = createRefs()
@@ -86,8 +88,8 @@ fun BusinessCard(
                 }
         )
         if (image1 != null) {
-            Box(
-                contentAlignment = Alignment.Center,
+            IconButton(
+                onClick = { onIcon1Click() },
                 modifier = Modifier
                     .padding(start = 16.dp)
                     .size(24.dp)
@@ -103,8 +105,8 @@ fun BusinessCard(
         }
 
         if (image2 != null) {
-            Box(
-                contentAlignment = Alignment.Center,
+            IconButton(
+                onClick = { onIcon2Click() },
                 modifier = Modifier
                     .size(24.dp)
                     .constrainAs(icon2) {
