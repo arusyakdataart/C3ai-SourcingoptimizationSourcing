@@ -1,7 +1,6 @@
 package com.c3ai.sourcingoptimization.common.components
 
 import android.Manifest
-import android.R.attr
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.material.icons.Icons
@@ -16,11 +15,9 @@ import com.c3ai.sourcingoptimization.R
 
 import android.content.pm.PackageManager
 
-import android.telephony.SmsManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat.checkSelfPermission
-import android.R.attr.phoneNumber
 import android.content.ActivityNotFoundException
 import android.provider.Telephony
 import android.widget.Toast
@@ -44,25 +41,25 @@ fun ContactSupplierBottomSheetContent(phoneNumber: String, email: String) {
     emailIntent.putExtra(Intent.EXTRA_EMAIL, arrayOf(email))
     emailIntent.type = "message/rfc822"
 
+    var isCallPermissionAsked = false
+
     val launcher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
         if (isGranted) {
             // Permission Accepted: Do something
-            startActivity(context, callIntent, null)
-
-//            try {
-//                startActivity(context, smsIntent, null)
-//            } catch (ex: ActivityNotFoundException) {
-//                Toast.makeText(context, "No activity found to send message", Toast.LENGTH_LONG).show()
-//            }
-
-           // startActivity(context, Intent.createChooser(emailIntent, "Choose an Email client :"), null)
-        } else {
-            // Permission Denied: Do something
+            if (isCallPermissionAsked) {
+                startActivity(context, callIntent, null)
+            } else {
+                try {
+                    startActivity(context, smsIntent, null)
+                } catch (ex: ActivityNotFoundException) {
+                    Toast.makeText(context, "No activity found to send message", Toast.LENGTH_LONG)
+                        .show()
+                }
+            }
         }
     }
-
 
     BottomSheetContent(
         BottomSheetItem(
@@ -72,10 +69,11 @@ fun ContactSupplierBottomSheetContent(phoneNumber: String, email: String) {
             onClick = {
                 when (PackageManager.PERMISSION_GRANTED) {
                     checkSelfPermission(context, Manifest.permission.CALL_PHONE) -> {
-                        startActivity(context, smsIntent, null)
+                        startActivity(context, callIntent, null)
                     }
                     else -> {
                         // Asking for permission
+                        isCallPermissionAsked = true
                         launcher.launch(Manifest.permission.CALL_PHONE)
                     }
                 }
@@ -96,6 +94,7 @@ fun ContactSupplierBottomSheetContent(phoneNumber: String, email: String) {
                     }
                     else -> {
                         // Asking for permission
+                        isCallPermissionAsked = false
                         launcher.launch(Manifest.permission.SEND_SMS)
                     }
                 }
