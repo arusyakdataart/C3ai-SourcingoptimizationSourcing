@@ -8,17 +8,19 @@ import androidx.compose.ui.res.stringResource
 import com.c3ai.sourcingoptimization.R
 
 @Composable
-fun ContactBuyerBottomSheetContent() {
+fun ContactBuyerBottomSheetContent(phoneNumber: String, email: String) {
     BottomSheetContent(
         BottomSheetItem(
             image = Icons.Filled.Call,
             contentDescription = stringResource(R.string.cd_make_call),
             text = stringResource(R.string.make_call),
+            onClick = {}
         ),
         BottomSheetItem(
             image = Icons.Filled.Email,
             contentDescription = stringResource(R.string.cd_send_email),
             text = stringResource(R.string.send_email),
+            onClick = {}
         ),
     )
 }

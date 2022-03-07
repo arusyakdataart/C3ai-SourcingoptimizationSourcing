@@ -80,7 +80,7 @@ fun SupplierDetailsScreen(
             )
         },
         snackbarHost = { C3SnackbarHost(hostState = it) },
-        sheetContent = { ContactSupplierBottomSheetContent() },
+        sheetContent = { ContactSupplierBottomSheetContent("", "") },
         sheetPeekHeight = 0.dp
     ) { innerPadding ->
         val contentModifier = Modifier.padding(innerPadding)

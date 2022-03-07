@@ -1,6 +1,7 @@
 package com.c3ai.sourcingoptimization.common.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -21,14 +22,17 @@ fun BottomSheetContent(
             .fillMaxWidth()
             .height(144.dp)
             .background(BackgroundVariantColor)
-            .padding(horizontal = 16.dp)
     ) {
         items.map {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
+                modifier = Modifier.clickable {
+                    it.onClick()
+                }
                     .weight(1f)
+                    .fillMaxWidth()
                     .height(48.dp)
+                    .padding(horizontal = 16.dp)
             ) {
                 Icon(
                     imageVector = it.image,
@@ -49,4 +53,5 @@ data class BottomSheetItem(
     val image: ImageVector,
     val contentDescription: String,
     val text: String,
+    val onClick: () -> Unit
 )
