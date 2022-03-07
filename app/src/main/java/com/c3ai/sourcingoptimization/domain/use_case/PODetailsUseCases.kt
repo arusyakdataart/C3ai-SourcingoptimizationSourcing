@@ -23,5 +23,7 @@ class GetPOLines(private val repository: C3Repository) {
 
 data class PODetailsUseCases(
     val getPODetails: GetPODetails,
-    val getPoLines: GetPOLines
+    val getPoLines: GetPOLines,
+    val getBuyerContacts: GetBuyerContacts,
+    val getSupplierContacts: GetSupplierContacts
 )

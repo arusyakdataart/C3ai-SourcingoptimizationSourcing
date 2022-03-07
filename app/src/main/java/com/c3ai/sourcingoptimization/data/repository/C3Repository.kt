@@ -18,6 +18,10 @@ interface C3Repository {
 
     suspend fun getPOLines(orderId: String, order: String): C3Result<List<PurchaseOrder.Line>>
 
+    suspend fun getSupplierContacts(id: String): C3Result<C3VendorContact>
+
+    suspend fun getBuyerContacts(id: String): C3Result<C3BuyerContact>
+
     suspend fun getSuppliedItems(supplierId: String): C3Result<List<C3Item>>
 
     suspend fun getEvalMetricsForPOLineQty(

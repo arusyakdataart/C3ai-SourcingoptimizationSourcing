@@ -24,9 +24,11 @@ sealed interface PurchaseOrder {
         override val closedDate: Date?,
         override val numberOfActiveAlerts: Int,
         val buyer: C3Buyer?,
+        var buyerContact: C3BuyerContact?,
         val to: C3Facility?,
         val from: C3Facility?,
         val vendor: C3Vendor?,
+        var vendorContract: C3VendorContact?,
         val orderLines: List<Line>?,
     ) : PurchaseOrder {
 

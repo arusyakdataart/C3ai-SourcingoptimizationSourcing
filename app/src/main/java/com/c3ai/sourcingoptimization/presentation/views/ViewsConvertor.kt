@@ -54,9 +54,11 @@ fun ViewModelState.convert(order: PurchaseOrder.Order): UiPurchaseOrder.Order =
         closedDate = settings.format(order.closedDate),
         numberOfActiveAlerts = order.numberOfActiveAlerts.numberOfActiveAlertsString(),
         buyer = order.buyer,
+        buyerContact = order.buyerContact,
         to = order.to,
         from = order.from,
         vendor = order.vendor?.let { convert(it) },
+        vendorContact = order.vendorContract,
         orderLines = order.orderLines?.map { convert(it) } ?: emptyList(),
     )
 

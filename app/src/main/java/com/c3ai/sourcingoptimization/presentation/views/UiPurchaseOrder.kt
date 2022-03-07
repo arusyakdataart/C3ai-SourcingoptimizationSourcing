@@ -1,7 +1,9 @@
 package com.c3ai.sourcingoptimization.presentation.views
 
 import com.c3ai.sourcingoptimization.domain.model.C3Buyer
+import com.c3ai.sourcingoptimization.domain.model.C3BuyerContact
 import com.c3ai.sourcingoptimization.domain.model.C3Facility
+import com.c3ai.sourcingoptimization.domain.model.C3VendorContact
 
 sealed interface UiPurchaseOrder {
     val id: String
@@ -23,9 +25,11 @@ sealed interface UiPurchaseOrder {
         override val closedDate: String,
         override val numberOfActiveAlerts: String,
         val buyer: C3Buyer?,
+        val buyerContact: C3BuyerContact?,
         val to: C3Facility?,
         val from: C3Facility?,
         val vendor: UiVendor?,
+        val vendorContact: C3VendorContact?,
         val orderLines: List<Line>,
     ) : UiPurchaseOrder
 

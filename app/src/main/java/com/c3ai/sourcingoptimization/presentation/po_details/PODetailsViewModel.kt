@@ -131,7 +131,10 @@ class PODetailsViewModel @Inject constructor(
             val poDetails = useCases.getPODetails(orderId)
             viewModelState.update {
                 when (poDetails) {
-                    is C3Result.Success -> it.copy(order = poDetails.data, isLoading = false)
+                    is C3Result.Success -> {
+                        getContacts(poDetails.data)
+                        it.copy()
+                    }
                     is C3Result.Error -> {
                         val errorMessages = it.errorMessages + ErrorMessage(
                             id = UUID.randomUUID().mostSignificantBits,
@@ -146,6 +149,52 @@ class PODetailsViewModel @Inject constructor(
             viewModelState.update {
                 when (itemsResult) {
                     is C3Result.Success -> it.copy(poLines = itemsResult.data, isLoading = false)
+                    is C3Result.Error -> {
+                        val errorMessages = it.errorMessages + ErrorMessage(
+                            id = UUID.randomUUID().mostSignificantBits,
+                            messageId = R.string.load_error
+                        )
+                        it.copy(errorMessages = errorMessages, isLoading = false)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun getContacts(poDetails: PurchaseOrder.Order) {
+        viewModelScope.launch {
+            val supplierContactsResult = useCases.getSupplierContacts(poDetails.vendor?.id ?: "")
+            viewModelState.update {
+                when (supplierContactsResult) {
+                    is C3Result.Success -> {
+                        poDetails.vendorContract = supplierContactsResult.data
+                        if (poDetails.buyerContact != null) {
+                            it.copy(order = poDetails, isLoading = false)
+                        } else {
+                            it.copy()
+                        }
+                    }
+                    is C3Result.Error -> {
+                        val errorMessages = it.errorMessages + ErrorMessage(
+                            id = UUID.randomUUID().mostSignificantBits,
+                            messageId = R.string.load_error
+                        )
+                        it.copy(errorMessages = errorMessages, isLoading = false)
+                    }
+                }
+            }
+
+            val buyerContactsResult = useCases.getBuyerContacts("buyer5")
+            viewModelState.update {
+                when (buyerContactsResult) {
+                    is C3Result.Success -> {
+                        poDetails.buyerContact = buyerContactsResult.data
+                        if (poDetails.vendorContract != null) {
+                            it.copy(order = poDetails, isLoading = false)
+                        } else {
+                            it.copy()
+                        }
+                    }
                     is C3Result.Error -> {
                         val errorMessages = it.errorMessages + ErrorMessage(
                             id = UUID.randomUUID().mostSignificantBits,

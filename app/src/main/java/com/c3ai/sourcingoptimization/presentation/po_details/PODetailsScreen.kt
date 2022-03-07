@@ -165,11 +165,15 @@ fun PODetailsScreen(
                                                 BusinessCard(
                                                     label = stringResource(R.string.buyer_, item.buyer?.id ?: ""),
                                                     title = item.buyer?.name ?: "",
-                                                    subtitle = "",
+                                                    subtitle = item.buyerContact?.currentAddress?.address?.components?.joinToString {
+                                                        it.name ?: ""
+                                                    } ?: "",
                                                     image1 = R.drawable.alert,
                                                     image2 = R.drawable.person_card,
                                                     onIcon2Click = {
                                                         currentBottomSheet = BottomSheetType.CONTACT_BUYER
+                                                        phoneNumber = item.buyerContact?.preferredPhoneNumber?.number ?: ""
+                                                        emailAddress = item.buyerContact?.preferredEmail?.communicationIdentifier ?: ""
                                                         coroutineScope.launch { bottomState.show() }
                                                     },
                                                     modifier = Modifier
@@ -191,6 +195,8 @@ fun PODetailsScreen(
                                                     image2 = R.drawable.person_card,
                                                     onIcon2Click = {
                                                         currentBottomSheet = BottomSheetType.CONTACT_SUPPLIER
+                                                        phoneNumber = item.vendorContact?.preferredPhoneNumber?.number ?: ""
+                                                        emailAddress = item.vendorContact?.preferredEmail?.communicationIdentifier ?: ""
                                                         coroutineScope.launch { bottomState.show() }
                                                     },
                                                     modifier = Modifier

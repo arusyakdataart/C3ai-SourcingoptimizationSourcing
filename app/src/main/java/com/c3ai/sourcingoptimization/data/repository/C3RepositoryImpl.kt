@@ -36,6 +36,14 @@ class C3RepositoryImpl @Inject constructor(private val api: C3ApiService) : C3Re
             api.getPOLines(POLinesDetailsParameters(orderId, order)).objs
         }
 
+    override suspend fun getSupplierContacts(id: String): C3Result<C3VendorContact> = C3Result.on {
+        api.getSupplierContacts(SupplierContactsParameters(id)).objs[0]
+    }
+
+    override suspend fun getBuyerContacts(id: String): C3Result<C3BuyerContact> = C3Result.on {
+        api.getBuyerContacts(BuyerContactsParameters(id)).objs[0]
+    }
+
     override suspend fun getSuppliedItems(supplierId: String): C3Result<List<C3Item>> =
         C3Result.on {
             api.getSuppliedItems(SuppliedItemsParameters(supplierId))

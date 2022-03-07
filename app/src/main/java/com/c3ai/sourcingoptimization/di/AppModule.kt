@@ -60,7 +60,9 @@ object AppModule {
     fun providePODetailsUseCases(repository: C3Repository): PODetailsUseCases {
         return PODetailsUseCases(
             getPODetails = GetPODetails(repository),
-            getPoLines = GetPOLines(repository)
+            getPoLines = GetPOLines(repository),
+            getSupplierContacts = GetSupplierContacts(repository),
+            getBuyerContacts = GetBuyerContacts(repository)
         )
     }
 }

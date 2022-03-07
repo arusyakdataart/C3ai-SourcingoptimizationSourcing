@@ -29,24 +29,19 @@ import android.widget.Toast
 @Composable
 fun ContactSupplierBottomSheetContent(phoneNumber: String, email: String) {
     val context = LocalContext.current
-    val callIntent = Intent(Intent.ACTION_CALL, Uri.parse("tel:" + 8802177690))
-
-//    val smsUri = Uri.parse("smsto:" + phoneNumber)
-//    val intent = Intent(Intent.ACTION_VIEW, smsUri)
-//    intent.putExtra("sms_body", "sms text")
-//    intent.type = "vnd.android-dir/mms-sms"
+    val callIntent = Intent(Intent.ACTION_CALL, Uri.parse("tel:" + phoneNumber))
 
     val defaultSmsPackageName = Telephony.Sms.getDefaultSmsPackage(context)
     val smsIntent = Intent(Intent.ACTION_VIEW)
     smsIntent.data = Uri.parse("smsto:")
-    smsIntent.putExtra("address", "8802177690")
+    smsIntent.putExtra("address", phoneNumber)
     smsIntent.type = "vnd.android-dir/mms-sms"
     if (defaultSmsPackageName != null) {
         smsIntent.setPackage(defaultSmsPackageName);
     }
 
     val emailIntent = Intent(Intent.ACTION_SEND)
-    emailIntent.putExtra(Intent.EXTRA_EMAIL, arrayOf<String>("arusyak@dataaty.com"))
+    emailIntent.putExtra(Intent.EXTRA_EMAIL, arrayOf(email))
     emailIntent.type = "message/rfc822"
 
     val launcher = rememberLauncherForActivityResult(
@@ -54,7 +49,7 @@ fun ContactSupplierBottomSheetContent(phoneNumber: String, email: String) {
     ) { isGranted: Boolean ->
         if (isGranted) {
             // Permission Accepted: Do something
-            //startActivity(context, callIntent, null)
+            startActivity(context, callIntent, null)
 
 //            try {
 //                startActivity(context, smsIntent, null)
@@ -62,7 +57,7 @@ fun ContactSupplierBottomSheetContent(phoneNumber: String, email: String) {
 //                Toast.makeText(context, "No activity found to send message", Toast.LENGTH_LONG).show()
 //            }
 
-            startActivity(context, Intent.createChooser(emailIntent, "Choose an Email client :"), null)
+           // startActivity(context, Intent.createChooser(emailIntent, "Choose an Email client :"), null)
         } else {
             // Permission Denied: Do something
         }
