@@ -174,24 +174,24 @@ fun PoLinesListExpanded(
                             top.linkTo(divider.bottom)
                         }
                 )
-                var expanded by remember { mutableStateOf(false) }
-                IconButton(
-                    onClick = { expanded = true },
-                    Modifier
-                        .size(40.dp)
-                        .constrainAs(readMore) {
-                            top.linkTo(facility.bottom)
-                            end.linkTo(parent.end)
-                        }
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.ReadMore,
-                        contentDescription = stringResource(R.string.cd_read_more)
-                    )
-                    PoLinesListReadMore(item = item, expanded = expanded) {
-                        expanded = false
-                    }
-                }
+//                var expanded by remember { mutableStateOf(false) }
+//                IconButton(
+//                    onClick = { expanded = true },
+//                    Modifier
+//                        .size(40.dp)
+//                        .constrainAs(readMore) {
+//                            top.linkTo(facility.bottom)
+//                            end.linkTo(parent.end)
+//                        }
+//                ) {
+//                    Icon(
+//                        imageVector = Icons.Filled.ReadMore,
+//                        contentDescription = stringResource(R.string.cd_read_more)
+//                    )
+//                    PoLinesListReadMore(item = item, expanded = expanded) {
+//                        expanded = false
+//                    }
+//                }
             }
         }
     }
