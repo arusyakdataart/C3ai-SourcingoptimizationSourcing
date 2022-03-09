@@ -1,5 +1,6 @@
 package com.c3ai.sourcingoptimization.presentation.po_details
 
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Scaffold
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.rememberScaffoldState
@@ -17,6 +18,7 @@ import androidx.navigation.NavController
  * @param viewModel ViewModel that handles the business logic of this screen
  * @param scaffoldState (state) state for the [Scaffold] component on this screen
  */
+@ExperimentalMaterialApi
 @Composable
 fun PODetailsRoute(
     navController: NavController,
@@ -29,8 +31,10 @@ fun PODetailsRoute(
     PODetailsScreen(
         scaffoldState = scaffoldState,
         uiState = uiState,
-        onRefreshDetails = { viewModel.refreshDetails() },
         orderId = orderId ?: "",
+        onRefreshDetails = { viewModel.refreshDetails() },
+        onSearchInputChanged = { viewModel.onEvent(PODetailsEvent.OnSearchInputChanged(it)) },
+        onSortChanged = { viewModel.onEvent(PODetailsEvent.OnSortChanged(it)) },
         onBackButtonClick = { navController.navigateUp() },
     )
 }

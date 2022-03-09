@@ -5,29 +5,24 @@ package com.c3ai.sourcingoptimization.data.network.requests
  * @see C3ApiService
  * */
 data class DetailedPOParameters(
-    @Transient val itemIds: List<String>
+    @Transient val itemId: String
 ) : RequestParameters {
 
     override val spec: C3Spec = C3Spec(
         include = listOf(
+            "id",
+            "name",
+            "totalCost",
+            "orderCreationDate",
+            "closedDate",
+            "fulfilledStr",
+            "buyer.id",
+            "buyer.name",
             "vendor.id",
             "vendor.name",
             "vendor.numberOfActiveAlerts",
-            "vendor.location.region",
-            "vendor.location.city",
-            "vendor.location.address",
-            "vendor.location.state",
-            "buyer.id",
-            "buyer.name",
-            "to.name",
-            "to.id",
-            "to.city",
-            "to.geometry",
-            "to.address",
-            "to.address1",
-            "to.postal_code",
-            "to.state"
+            "vendor.location.address"
         ),
-        filter = itemIds.joinToString { "id == '$it'||" }
+        filter = "id == '$itemId'"
     )
 }

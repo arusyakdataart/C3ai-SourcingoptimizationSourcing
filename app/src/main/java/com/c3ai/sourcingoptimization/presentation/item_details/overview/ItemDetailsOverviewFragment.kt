@@ -49,7 +49,8 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
     private var marketPriceIndexRelationMetric: ItemMarketPriceIndexRelationMetric? = null
     var selectedCrosshairIndex = -1
     var indexId = ""
-    private val chartColors : Array<Any> = arrayOf("#82B0FF", "#C799FF", "#F2950A", "#49BFA9", "#A7ADC4")
+    private val chartColors: Array<Any> =
+        arrayOf("#82B0FF", "#C799FF", "#F2950A", "#49BFA9", "#A7ADC4")
 
 
     private val viewModel: ItemDetailsViewModel by viewModels {
@@ -113,7 +114,10 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
                 is ItemDetailsUiState.HasItemVendorRelationMetrics -> {
                     val metrics = result.relationMetrics
                     relations.forEach {
-                        suppliersChartData.put(it.to.id, metrics.result.get(it.id)?.OrderLineValue?.data ?: listOf())
+                        suppliersChartData.put(
+                            it.to.id,
+                            metrics.result.get(it.id)?.OrderLineValue?.data ?: listOf()
+                        )
                     }
                     bindMultiLineChart()
                 }
@@ -297,7 +301,7 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
         aaOptions.plotOptions?.column = aaColumn
         model.aa_toAAOptions()
         aaOptions.plotOptions?.series?.dataLabels?.format(
-            if (selectedSpinnerPosition == TOTAL_SPENT ) "{point.y:,.2f}M" else "{point.y:,.0f} %"
+            if (selectedSpinnerPosition == TOTAL_SPENT) "{point.y:,.2f}M" else "{point.y:,.0f} %"
         )
         return aaOptions
     }
@@ -415,8 +419,10 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
 
     private fun setGraphYear() {
         val firstYear = getYear(marketPriceIndexRelationMetric?.IndexPrice?.dates?.get(0) ?: "")
-        val lastYear = getYear(marketPriceIndexRelationMetric?.IndexPrice?.dates?.get(
-            marketPriceIndexRelationMetric?.IndexPrice?.dates?.size?.minus(1) ?: 0) ?: ""
+        val lastYear = getYear(
+            marketPriceIndexRelationMetric?.IndexPrice?.dates?.get(
+                marketPriceIndexRelationMetric?.IndexPrice?.dates?.size?.minus(1) ?: 0
+            ) ?: ""
         )
         binding.year.text = if (firstYear == lastYear) firstYear.toString()
         else String.format("%s%s%s", firstYear.toString(), " - ", lastYear.toString())
@@ -459,7 +465,8 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
         val aaOptions = model.aa_toAAOptions()
         aaOptions.xAxis?.crosshair(AACrosshair().width(1f))
         aaOptions.yAxis?.gridLineColor(AAColor.Clear)?.lineColor(AAColor.Clear)
-        aaOptions.xAxis?.gridLineColor(AAColor.Clear)?.lineColor(AAColor.Clear)?.labels?.autoRotationLimit(0f)?.step(3)
+        aaOptions.xAxis?.gridLineColor(AAColor.Clear)
+            ?.lineColor(AAColor.Clear)?.labels?.autoRotationLimit(0f)?.step(3)
         return aaOptions
     }
 
@@ -486,7 +493,7 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
             binding.lineChartView.post {
                 if (aaChartView == binding.lineChartView) {
                     binding.dashedLineChartView.aa_evaluateTheJavaScriptStringFunction(addPlotLine1)
-                } else  {
+                } else {
                     binding.lineChartView.aa_evaluateTheJavaScriptStringFunction(addPlotLine1)
                 }
             }
@@ -494,7 +501,7 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
         }
     }
 
-    private fun updateData (index: Int) {
+    private fun updateData(index: Int) {
         activity?.runOnUiThread {
 
             val date = marketPriceIndexRelationMetric?.IndexPrice?.dates?.get(index) ?: ""
@@ -502,15 +509,20 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
             binding.dateSpp.text = dateString
             binding.dateIndex.text = dateString
 
-            binding.price.text = String.format("%s%s", "$", String.format("%.2f",
-                marketPriceIndexRelationMetric?.IndexPrice?.data?.get(index)))
+            binding.price.text = String.format(
+                "%s%s", "$", String.format(
+                    "%.2f",
+                    marketPriceIndexRelationMetric?.IndexPrice?.data?.get(index)
+                )
+            )
 
             binding.suppliersContainer.removeAllViews()
             suppliers.forEach {
                 val supplierView = LayoutInflater.from(requireContext())
                     .inflate(R.layout.supplier_item_view, binding.suppliersContainer, false)
 
-                val param = LinearLayoutCompat.LayoutParams(LinearLayoutCompat.LayoutParams.MATCH_PARENT,
+                val param = LinearLayoutCompat.LayoutParams(
+                    LinearLayoutCompat.LayoutParams.MATCH_PARENT,
                     LinearLayoutCompat.LayoutParams.MATCH_PARENT
                 )
                 param.weight = 1f
@@ -518,8 +530,12 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
                 binding.suppliersContainer.addView(supplierView)
                 supplierView.findViewById<TextView>(R.id.supplier).text = it.name
                 supplierView.findViewById<TextView>(R.id.price).text =
-                    String.format("%s%s", "$", String.format("%.2f",
-                    suppliersChartData[it.id]?.get(index)))
+                    String.format(
+                        "%s%s", "$", String.format(
+                            "%.2f",
+                            suppliersChartData[it.id]?.get(index)
+                        )
+                    )
             }
         }
     }

@@ -46,7 +46,7 @@ fun ViewModelState.convert(vendor: C3Vendor): UiVendor = UiVendor(
 fun ViewModelState.convert(order: PurchaseOrder.Order): UiPurchaseOrder.Order =
     UiPurchaseOrder.Order(
         id = order.id,
-        name = order.name,
+        name = order.name ?: "",
         fulfilled = order.fulfilled ?: false,
         fulfilledStr = order.fulfilledStr ?: "",
         totalCost = settings.formatTotalCost(order),
@@ -54,16 +54,18 @@ fun ViewModelState.convert(order: PurchaseOrder.Order): UiPurchaseOrder.Order =
         closedDate = settings.format(order.closedDate),
         numberOfActiveAlerts = order.numberOfActiveAlerts.numberOfActiveAlertsString(),
         buyer = order.buyer,
+        buyerContact = order.buyerContact,
         to = order.to,
         from = order.from,
         vendor = order.vendor?.let { convert(it) },
+        vendorContact = order.vendorContract,
         orderLines = order.orderLines?.map { convert(it) } ?: emptyList(),
     )
 
 fun ViewModelState.convert(line: PurchaseOrder.Line): UiPurchaseOrder.Line =
     UiPurchaseOrder.Line(
         id = line.id,
-        name = line.name,
+        name = line.name ?: "",
         fulfilled = line.fulfilled ?: false,
         fulfilledStr = line.fulfilledStr ?: "",
         totalCost = settings.formatTotalCost(line),

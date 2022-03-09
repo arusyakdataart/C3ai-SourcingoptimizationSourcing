@@ -24,6 +24,22 @@ class C3MockRepositoryImpl : C3Repository {
     override suspend fun getPODetails(orderId: String): C3Result<PurchaseOrder.Order> =
         C3Result.on { PurchaseOrder.Order.fake() }
 
+    override suspend fun getPOLines(
+        orderId: String,
+        order: String
+    ): C3Result<List<PurchaseOrder.Line>> =
+        C3Result.on {
+            emptyList()
+        }
+
+    override suspend fun getSupplierContacts(id: String): C3Result<C3VendorContact> = C3Result.on {
+        C3VendorContact.fake()
+    }
+
+    override suspend fun getBuyerContacts(id: String): C3Result<C3BuyerContact> = C3Result.on {
+        C3BuyerContact.fake()
+    }
+
     override suspend fun getSuppliedItems(supplierId: String): C3Result<List<C3Item>> =
         C3Result.on {
             (1..20).map { C3Item.fake() }

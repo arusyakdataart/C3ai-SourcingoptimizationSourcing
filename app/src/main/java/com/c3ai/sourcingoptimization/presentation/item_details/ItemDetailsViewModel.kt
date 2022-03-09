@@ -378,7 +378,8 @@ class ItemDetailsViewModel @AssistedInject constructor(
 
     fun getItemVendorRelation(itemId: String, supplierIds: List<String>) {
         viewModelScope.launch {
-            val itemVendorRelations = repository.getItemVendorRelation(itemId, supplierIds = supplierIds)
+            val itemVendorRelations =
+                repository.getItemVendorRelation(itemId, supplierIds = supplierIds)
             viewModelState.update {
                 when (itemVendorRelations) {
                     is Success -> {
@@ -479,13 +480,14 @@ class ItemDetailsViewModel @AssistedInject constructor(
         interval: String
     ) {
         viewModelScope.launch {
-            val itemMarketPriceIndexRelationMetrics = repository.getItemMarketPriceIndexRelationMetrics(
-                ids,
-                expressions,
-                startDate,
-                endDate,
-                interval
-            )
+            val itemMarketPriceIndexRelationMetrics =
+                repository.getItemMarketPriceIndexRelationMetrics(
+                    ids,
+                    expressions,
+                    startDate,
+                    endDate,
+                    interval
+                )
             viewModelState.update {
                 when (itemMarketPriceIndexRelationMetrics) {
                     is Success -> {

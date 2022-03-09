@@ -6,10 +6,7 @@ import com.c3ai.sourcingoptimization.data.repository.C3Repository
 import com.c3ai.sourcingoptimization.data.repository.C3RepositoryImpl
 import com.c3ai.sourcingoptimization.domain.settings.C3AppSettingsProvider
 import com.c3ai.sourcingoptimization.domain.settings.C3AppSettingsProviderImpl
-import com.c3ai.sourcingoptimization.domain.use_case.GetSupplierDetails
-import com.c3ai.sourcingoptimization.domain.use_case.Search
-import com.c3ai.sourcingoptimization.domain.use_case.SearchUseCases
-import com.c3ai.sourcingoptimization.domain.use_case.SuppliersDetailsUseCases
+import com.c3ai.sourcingoptimization.domain.use_case.*
 import com.c3ai.sourcingoptimization.utilities.AuthInterceptorOkHttpClient
 import dagger.Module
 import dagger.Provides
@@ -56,6 +53,16 @@ object AppModule {
     fun provideSuppliersDetailsUseCases(repository: C3Repository): SuppliersDetailsUseCases {
         return SuppliersDetailsUseCases(
             GetSupplierDetails(repository)
+        )
+    }
+
+    @Provides
+    fun providePODetailsUseCases(repository: C3Repository): PODetailsUseCases {
+        return PODetailsUseCases(
+            getPODetails = GetPODetails(repository),
+            getPoLines = GetPOLines(repository),
+            getSupplierContacts = GetSupplierContacts(repository),
+            getBuyerContacts = GetBuyerContacts(repository)
         )
     }
 }

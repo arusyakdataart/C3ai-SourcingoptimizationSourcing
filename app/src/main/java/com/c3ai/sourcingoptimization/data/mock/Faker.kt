@@ -49,6 +49,40 @@ fun C3Vendor.Companion.fake(): C3Vendor {
     )
 }
 
+fun C3VendorContact.Companion.fake(): C3VendorContact {
+    return C3VendorContact(
+        id = id(),
+        name = name(),
+        location = C3Location.fake(),
+        preferredPhoneNumber = C3Number.fake(),
+        preferredEmail = C3CommunicationIdentifier.fake()
+    )
+}
+
+fun C3BuyerContact.Companion.fake(): C3BuyerContact {
+    return C3BuyerContact(
+        id = id(),
+        name = name(),
+        currentAddress = C3Location.fake(),
+        preferredPhoneNumber = C3Number.fake(),
+        preferredEmail = C3CommunicationIdentifier.fake()
+    )
+}
+
+fun C3Number.Companion.fake(): C3Number {
+    return C3Number(
+        id = id(),
+        number = code()
+    )
+}
+
+fun C3CommunicationIdentifier.Companion.fake(): C3CommunicationIdentifier {
+    return C3CommunicationIdentifier(
+        id = id(),
+        communicationIdentifier = code()
+    )
+}
+
 fun C3Location.Companion.fake(): C3Location = C3Location(
     id = id(),
     region = C3Unit.fake(),
@@ -111,6 +145,8 @@ fun PurchaseOrder.Order.Companion.fake(): PurchaseOrder.Order = PurchaseOrder.Or
         items = emptyList(),
         purchaseOrders = emptyList()
     ),
+    buyerContact = C3BuyerContact.fake(),
+    vendorContract = C3VendorContact.fake(),
     orderLines = listOf(PurchaseOrder.Line.fake())
 )
 
@@ -155,6 +191,8 @@ fun PurchaseOrder.Line.Companion.fake(): PurchaseOrder.Line = PurchaseOrder.Line
             items = emptyList(),
             purchaseOrders = emptyList()
         ),
+        buyerContact = C3BuyerContact.fake(),
+        vendorContract = C3VendorContact.fake(),
         orderLines = emptyList()
     ),
 )
