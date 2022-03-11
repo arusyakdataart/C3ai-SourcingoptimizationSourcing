@@ -71,14 +71,6 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-//        val adapter = OverviewItemsAdapter()
-//        binding.overviewItemsList.adapter = adapter
-//        setupScrollListener()
-
-//        var items: List<C3Item>? = null
-//        var poLines: OpenClosedPOLineQtyItem? = null
-//        var savingOpportunities: SavingOpportunityItem? = null
-
         setSpinnerView()
 
         var relations = listOf<ItemRelation>()
@@ -151,12 +143,6 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
                     // TODO!!! Handle error and loading states
                 }
             }
-//            if (result is ItemDetailsUiState.HasItems) {
-//                adapter.submitList(result.items)
-//
-//            } else {
-//                    // TODO!!! Handle error and loading states
-//                }
         }
     }
 
@@ -192,7 +178,7 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
         binding.name.text = item.name
         if (item.hasActiveAlerts == true) {
             binding.alertsCount.visibility = View.VISIBLE
-            binding.alertsCount.text = item.numberOfActiveAlerts?.toString()
+            binding.alertsCount.text = item.numberOfActiveAlerts.toString()
         }
         binding.suppliers.text = item.numberOfVendors?.toString()
         binding.inventory.text = String.format("%s%s", item.currentInventory?.value, " Cases")

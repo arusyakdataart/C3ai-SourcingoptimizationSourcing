@@ -1,12 +1,17 @@
 package com.c3ai.sourcingoptimization.data.network.requests
 
+import com.c3ai.sourcingoptimization.utilities.PAGINATED_RESPONSE_LIMIT
+
 /**
  * Data class with parameters for PurchaseOrder[getPOLines] request
  * @see C3ApiService
  * */
 data class POLinesDetailsParameters(
-    @Transient val orderId: String,
-    @Transient val order: String,
+    @Transient val itemId: String? = null,
+    @Transient val orderId: String? = null,
+    @Transient val order: String = "",
+    @Transient val limit: Int = PAGINATED_RESPONSE_LIMIT,
+    @Transient val offset: Int = 0
 ) : RequestParameters {
 
     override val spec: C3Spec = C3Spec(
@@ -42,9 +47,11 @@ data class POLinesDetailsParameters(
             "order.to.postal_code",
             "order.to.state",
             "order.to.location",
-            "order.to.numberOfActiveAlerts",
+            "order.to.numberOfActiveAlerts"
         ),
+        limit = limit,
+        offset = offset,
         order = order,
-        filter = "order.id == '$orderId'"
+        filter = if (itemId != null) "item.id == '$itemId'" else "order.id == '$orderId'"
     )
 }

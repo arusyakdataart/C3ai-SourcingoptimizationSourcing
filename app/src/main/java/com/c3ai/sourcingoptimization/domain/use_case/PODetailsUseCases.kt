@@ -17,7 +17,7 @@ class GetPOLines(private val repository: C3Repository) {
         orderId: String,
         order: String
     ): C3Result<List<PurchaseOrder.Line>> {
-        return repository.getPOLines(orderId, order)
+        return repository.getPOLines(itemId = null, orderId = orderId, order = order)
     }
 }
 
