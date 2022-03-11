@@ -124,11 +124,6 @@ class SuppliersDetailsViewModel @Inject constructor(
             viewModelState.value.toUiState()
         )
 
-    val sortPOItems = listOf(
-        "",
-        ""
-    )
-
     init {
         refreshDetails()
     }
@@ -136,7 +131,7 @@ class SuppliersDetailsViewModel @Inject constructor(
     /**
      * Refresh supplier details and update the UI state accordingly
      */
-    fun refreshDetails() {
+    fun refreshDetails(order: String = "") {
         viewModelState.update { it.copy(isLoading = true) }
 
         viewModelScope.launch {
@@ -174,6 +169,9 @@ class SuppliersDetailsViewModel @Inject constructor(
                             val isRemoved = remove(event.itemId)
                             isRemoved || add((event.itemId))
                         })
+                }
+                else -> {
+                    state.copy()
                 }
             }
         }

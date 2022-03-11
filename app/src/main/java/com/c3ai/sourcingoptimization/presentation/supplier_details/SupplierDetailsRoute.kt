@@ -44,6 +44,7 @@ fun SupplierDetailsRoute(
         onC3ItemClick = {
             context.startActivity(Intent(context, ItemDetailsActivity::class.java))
         },
+        onSortChanged = {viewModel.onEvent(SupplierDetailsEvent.OnSortChanged(it))},
         onBackButtonClick = { navController.navigateUp() },
     )
 }
