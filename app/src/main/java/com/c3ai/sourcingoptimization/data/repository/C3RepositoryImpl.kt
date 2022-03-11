@@ -29,11 +29,12 @@ class C3RepositoryImpl @Inject constructor(private val api: C3ApiService) : C3Re
         }
 
     override suspend fun getPOLines(
-        orderId: String,
+        itemId: String?,
+        orderId: String?,
         order: String
     ): C3Result<List<PurchaseOrder.Line>> =
         C3Result.on {
-            api.getPOLines(POLinesDetailsParameters(orderId, order)).objs
+            api.getPOLines(POLinesDetailsParameters(itemId, orderId, order)).objs
         }
 
     override suspend fun getSupplierContacts(id: String): C3Result<C3VendorContact> = C3Result.on {

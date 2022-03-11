@@ -1,4 +1,4 @@
-package com.c3ai.sourcingoptimization.presentation.item_details
+package com.c3ai.sourcingoptimization.presentation.item_details.overview
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
