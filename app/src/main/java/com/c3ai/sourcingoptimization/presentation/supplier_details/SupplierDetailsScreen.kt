@@ -12,7 +12,6 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.style.TextOverflow
@@ -56,6 +55,7 @@ fun SupplierDetailsScreen(
     onPOItemClick: (String) -> Unit,
     onC3ItemClick: (String) -> Unit,
     onAlertsClick: (String) -> Unit,
+    onSortChanged: (String) -> Unit,
     onBackButtonClick: () -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -68,6 +68,7 @@ fun SupplierDetailsScreen(
                 onBackButtonClick = onBackButtonClick,
                 onSearchInputChanged = onSearchInputChanged,
                 onClearClick = { onSearchInputChanged("") },
+                onSortChanged = { onSortChanged(it) },
                 onContactsClick = {
                     coroutineScope.launch {
                         if (scaffoldState.bottomSheetState.isCollapsed) {
@@ -446,6 +447,7 @@ private fun TopAppBar(
     onSearchInputChanged: (String) -> Unit = {},
     onClearClick: () -> Unit = {},
     onContactsClick: () -> Unit,
+    onSortChanged: (String) -> Unit = {}
 ) {
     var showClearButton by remember { mutableStateOf(false) }
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -514,12 +516,27 @@ private fun TopAppBar(
                 expanded = sortMenuExpanded,
                 onDismissRequest = { sortMenuExpanded = false }
             ) {
-                stringArrayResource(R.array.sort_po).map { title ->
+                val resources = listOf(
+                    "totalCost.value" to "Total Cost",
+                    "unitPrice.value" to "Unit Price",
+                    "totalQuantity.value" to "Quantity",
+                    "orderCreationDate" to "Opened Date",
+                    "closedDate" to "Closed Date",
+                    "requestedDeliveryDate" to "Requested Delivery Date",
+                    "promisedDeliveryDate" to "Promised Delivery Date",
+                    "actualLeadTime" to "Actual Lead Time",
+                    "plannedLeadTime" to "Planned Lead Time"
+                )
+
+                resources.map { it ->
                     DropdownMenuItem(
-                        onClick = {},
+                        onClick = {
+                            sortMenuExpanded = false
+                            onSortChanged(it.first)
+                        },
                     ) {
                         Text(
-                            title,
+                            it.second,
                             style = MaterialTheme.typography.subtitle1,
                             color = MaterialTheme.colors.secondaryVariant,
                         )
@@ -555,6 +572,7 @@ fun SupplierDetailsPreview() {
             onPOItemClick = {},
             onC3ItemClick = {},
             onAlertsClick = {},
+            onSortChanged = {},
             onBackButtonClick = {},
         )
     }
@@ -579,6 +597,7 @@ fun SupplierDetailsItemsSuppliedTabPreview() {
             onPOItemClick = {},
             onC3ItemClick = {},
             onAlertsClick = {},
+            onSortChanged = {},
             onBackButtonClick = {},
         )
     }
