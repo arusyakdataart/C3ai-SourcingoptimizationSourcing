@@ -2,9 +2,11 @@ package com.c3ai.sourcingoptimization.presentation.item_details.po_lines
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.compose.ui.res.stringResource
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.databinding.PoLineItemViewBinding
 import com.c3ai.sourcingoptimization.domain.model.PurchaseOrder
 
@@ -26,6 +28,12 @@ class ItemPOLinesAdapter :
 
         fun bind(item: PurchaseOrder.Line?) {
             item ?: return
+            itemBinding.id.text = String.format(
+                itemBinding.id.context.resources.getString(
+                    R.string.po_line_,
+                    item.id
+                )
+            )
         }
     }
 }

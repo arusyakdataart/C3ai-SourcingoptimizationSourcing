@@ -28,7 +28,7 @@ class ItemDetailsPOLinesFragment : BaseFragment<FragmentItemDetailsPoLinesBindin
     lateinit var assistedFactory: ItemPOLinesViewModelAssistedFactory
 
     private val viewModel: ItemPOLinesViewModel by viewModels {
-        ItemPOLinesViewModel.Factory(assistedFactory, "item0"    )
+        ItemPOLinesViewModel.Factory(assistedFactory, "item0")
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
