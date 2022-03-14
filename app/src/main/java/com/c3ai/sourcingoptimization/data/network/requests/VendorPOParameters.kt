@@ -1,12 +1,16 @@
 package com.c3ai.sourcingoptimization.data.network.requests
 
+import com.c3ai.sourcingoptimization.utilities.PAGINATED_RESPONSE_LIMIT
+
 /**
- * Data class with parameters for PurchaseOrder[getPOForVendor] request
+ * Data class with parameters for PurchaseOrder[getPOsForVendor] request
  * @see C3ApiService
  * */
 data class VendorPOParameters(
     @Transient val vendorId: String,
-    @Transient val order: String?
+    @Transient val order: String?,
+    @Transient val limit: Int = PAGINATED_RESPONSE_LIMIT,
+    @Transient val offset: Int = 0
 ) : RequestParameters {
 
     override val spec: C3Spec = C3Spec(
@@ -57,6 +61,8 @@ data class VendorPOParameters(
             "orderLines.order.buyer.name",
             "orderLines.order.buyer.location"
         ),
+        limit = limit,
+        offset = offset,
         filter = "vendor.id == '$vendorId'",
         order = order
     )

@@ -37,12 +37,12 @@ class C3RepositoryImpl @Inject constructor(private val api: C3ApiService) : C3Re
             api.getPOLines(POLinesDetailsParameters(itemId, orderId, order)).objs
         }
 
-    override suspend fun getPOForVendor(
+    override suspend fun getPOsForVendor(
         vendorId: String,
         order: String
     ): C3Result<List<PurchaseOrder.Order>> =
         C3Result.on {
-            api.getPOForVendor(VendorPOParameters(vendorId, order)).objs
+            api.getPOsForVendor(VendorPOParameters(vendorId, order)).objs
         }
 
     override suspend fun getSupplierContacts(id: String): C3Result<C3VendorContact> = C3Result.on {
@@ -53,9 +53,9 @@ class C3RepositoryImpl @Inject constructor(private val api: C3ApiService) : C3Re
         api.getBuyerContacts(BuyerContactsParameters(id)).objs[0]
     }
 
-    override suspend fun getSuppliedItems(supplierId: String): C3Result<List<C3Item>> =
+    override suspend fun getSuppliedItems(vendorId: String, order: String): C3Result<List<C3Item>> =
         C3Result.on {
-            api.getSuppliedItems(SuppliedItemsParameters(supplierId))
+            api.getSuppliedItems(SuppliedItemParameters(vendorId, order)).objs
         }
 
     override suspend fun getEvalMetricsForPOLineQty(

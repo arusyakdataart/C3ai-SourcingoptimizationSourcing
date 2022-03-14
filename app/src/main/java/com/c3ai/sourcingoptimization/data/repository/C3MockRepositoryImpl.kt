@@ -33,7 +33,7 @@ class C3MockRepositoryImpl : C3Repository {
             emptyList()
         }
 
-    override suspend fun getPOForVendor(
+    override suspend fun getPOsForVendor(
         vendorId: String,
         order: String
     ): C3Result<List<PurchaseOrder.Order>> =
@@ -49,7 +49,7 @@ class C3MockRepositoryImpl : C3Repository {
         C3BuyerContact.fake()
     }
 
-    override suspend fun getSuppliedItems(supplierId: String): C3Result<List<C3Item>> =
+    override suspend fun getSuppliedItems(vendorId: String, order: String): C3Result<List<C3Item>> =
         C3Result.on {
             (1..20).map { C3Item.fake() }
         }
