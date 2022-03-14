@@ -3,6 +3,7 @@ package com.c3ai.sourcingoptimization.domain.use_case
 import com.c3ai.sourcingoptimization.data.C3Result
 import com.c3ai.sourcingoptimization.data.repository.C3Repository
 import com.c3ai.sourcingoptimization.domain.model.C3Vendor
+import com.c3ai.sourcingoptimization.domain.model.PurchaseOrder
 
 class GetSupplierDetails(private val repository: C3Repository) {
 
@@ -11,6 +12,14 @@ class GetSupplierDetails(private val repository: C3Repository) {
     }
 }
 
+class GetPOsForSupplier(private val repository: C3Repository) {
+
+    suspend operator fun invoke(supplierId: String, order: String): C3Result<List<PurchaseOrder.Order>> {
+        return repository.getPOForVendor(supplierId, order)
+    }
+}
+
 data class SuppliersDetailsUseCases(
-    val getSupplierDetails: GetSupplierDetails
+    val getSupplierDetails: GetSupplierDetails,
+    val getPOsForSupplier: GetPOsForSupplier
 )

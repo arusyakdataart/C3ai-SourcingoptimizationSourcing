@@ -1,27 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.recyclerview.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/poLinesList"
-    app:layoutManager="LinearLayoutManager"
-    android:clipToPadding="false" />
-
-<!--<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"-->
-<!--    android:layout_width="match_parent"-->
-<!--    android:layout_height="match_parent">-->
-
-<!--    <androidx.appcompat.widget.LinearLayoutCompat-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:orientation="vertical">-->
-
-<!--        <include layout="@layout/po_line_item_view"-->
-<!--            android:id="@+id/poLine1"/>-->
-
-<!--        <include layout="@layout/po_line_item_view"-->
-<!--            android:id="@+id/poLine2"/>-->
-
-<!--    </androidx.appcompat.widget.LinearLayoutCompat>-->
-
-<!--</ScrollView>-->
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clipToPadding="false"
+    app:layoutManager="LinearLayoutManager" />
