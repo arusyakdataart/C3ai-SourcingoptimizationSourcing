@@ -25,7 +25,7 @@ import com.c3ai.sourcingoptimization.presentation.navigateToPoDetails
 fun SupplierDetailsRoute(
     navController: NavController,
     supplierId: String?,
-    scaffoldState: BottomSheetScaffoldState = rememberBottomSheetScaffoldState(),
+    scaffoldState: ScaffoldState = rememberScaffoldState(),
     viewModel: SuppliersDetailsViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current

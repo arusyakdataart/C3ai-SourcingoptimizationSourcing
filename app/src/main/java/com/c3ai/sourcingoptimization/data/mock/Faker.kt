@@ -40,8 +40,13 @@ fun C3Vendor.Companion.fake(): C3Vendor {
         name = name(),
         active = random.nextBoolean(),
         allPOValue = C3UnitValue.fake(),
+        openPOValue = C3UnitValue.fake(),
         diversity = random.nextBoolean(),
         hasActiveContracts = random.nextBoolean(),
+        hasActiveAlerts = random.nextBoolean(),
+        numberOfActiveAlerts = random.nextInt(),
+        email="",
+        phone = "",
         location = C3Location.fake(),
         spend = C3UnitValue.fake(),
         purchaseOrders = (1..20).map { PurchaseOrder.Order.fake() },
@@ -54,8 +59,8 @@ fun C3VendorContact.Companion.fake(): C3VendorContact {
         id = id(),
         name = name(),
         location = C3Location.fake(),
-        preferredPhoneNumber = C3Number.fake(),
-        preferredEmail = C3CommunicationIdentifier.fake()
+        phone = "",
+        email = ""
     )
 }
 
@@ -138,8 +143,13 @@ fun PurchaseOrder.Order.Companion.fake(): PurchaseOrder.Order = PurchaseOrder.Or
         name = name(),
         active = random.nextBoolean(),
         allPOValue = C3UnitValue.fake(),
+        openPOValue = C3UnitValue.fake(),
         diversity = random.nextBoolean(),
         hasActiveContracts = random.nextBoolean(),
+        hasActiveAlerts = random.nextBoolean(),
+        numberOfActiveAlerts = random.nextInt(),
+        email = "",
+        phone = "",
         location = C3Location.fake(),
         spend = C3UnitValue.fake(),
         items = emptyList(),
@@ -184,9 +194,14 @@ fun PurchaseOrder.Line.Companion.fake(): PurchaseOrder.Line = PurchaseOrder.Line
             name = name(),
             active = random.nextBoolean(),
             allPOValue = C3UnitValue.fake(),
+            openPOValue = C3UnitValue.fake(),
             diversity = random.nextBoolean(),
             hasActiveContracts = random.nextBoolean(),
+            hasActiveAlerts = random.nextBoolean(),
+            numberOfActiveAlerts = random.nextInt(),
             location = C3Location.fake(),
+            email = "",
+            phone = "",
             spend = C3UnitValue.fake(),
             items = emptyList(),
             purchaseOrders = emptyList()

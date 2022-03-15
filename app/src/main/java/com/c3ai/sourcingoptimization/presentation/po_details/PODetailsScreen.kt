@@ -120,11 +120,9 @@ fun PODetailsScreen(
                                             currentBottomSheet =
                                                 BottomSheetType.CONTACT_SUPPLIER
                                             phoneNumber =
-                                                item.vendorContact?.preferredPhoneNumber?.number
-                                                    ?: ""
+                                                item.vendorContact?.phone ?: ""
                                             emailAddress =
-                                                item.vendorContact?.preferredEmail?.communicationIdentifier
-                                                    ?: ""
+                                                item.vendorContact?.email ?: ""
                                             coroutineScope.launch { bottomState.show() }
                                         })
                                 }
