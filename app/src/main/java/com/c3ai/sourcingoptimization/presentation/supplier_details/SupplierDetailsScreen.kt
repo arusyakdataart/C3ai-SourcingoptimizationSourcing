@@ -59,11 +59,16 @@ fun SupplierDetailsScreen(
     onBackButtonClick: () -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
+    var selectedTabIndex: Int by remember {
+        mutableStateOf(0)
+    }
+
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
         topBar = {
             TopAppBar(
                 title = stringResource(R.string.supplier_, supplierId),
+                selectedTabIndex,
                 searchInput = uiState.searchInput,
                 onBackButtonClick = onBackButtonClick,
                 onSearchInputChanged = onSearchInputChanged,
@@ -100,8 +105,14 @@ fun SupplierDetailsScreen(
                         contentModifier = Modifier.height(156.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp),
                         items = when (uiState.tabIndex) {
-                            1 -> uiState.items
-                            else -> uiState.poLines
+                            1 -> {
+                                selectedTabIndex = 1
+                                uiState.items
+                            }
+                            else -> {
+                                selectedTabIndex = 0
+                                uiState.poLines
+                            }
                         },
                         header = {
                             Tabs(
@@ -441,6 +452,7 @@ private fun ItemsSuppliedList(
 @Composable
 private fun TopAppBar(
     title: String,
+    selectedTabIndex: Int,
     searchInput: String,
     placeholderText: String = "",
     onBackButtonClick: () -> Unit,
@@ -516,7 +528,7 @@ private fun TopAppBar(
                 expanded = sortMenuExpanded,
                 onDismissRequest = { sortMenuExpanded = false }
             ) {
-                val resources = listOf(
+                val resources = if (selectedTabIndex == 0) listOf(
                     "totalCost.value" to "Total Cost",
                     "unitPrice.value" to "Unit Price",
                     "totalQuantity.value" to "Quantity",
@@ -526,6 +538,15 @@ private fun TopAppBar(
                     "promisedDeliveryDate" to "Promised Delivery Date",
                     "actualLeadTime" to "Actual Lead Time",
                     "plannedLeadTime" to "Planned Lead Time"
+                ) else listOf(
+                    "id" to "Item ID",
+                    "name" to "Item Name",
+                    "openPOValue.value" to "Open PO Line Value",
+                    "closedPOValue.value" to "Closed PO Line Value",
+                    "shareOpen" to "Share % (Open)",
+                    "shareClosed" to "Share % (Closed)",
+                    "moq" to "Minimum Order Quantity (MoQ)",
+                    "averageUnitPricePaid.value" to "Average Unit Price"
                 )
 
                 resources.map { it ->

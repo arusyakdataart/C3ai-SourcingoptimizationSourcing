@@ -226,7 +226,11 @@ class SuppliersDetailsViewModel @Inject constructor(
 
         when (event) {
             is SupplierDetailsEvent.OnSortChanged -> {
-                getPOs(event.sortOption)
+                if (uiState.value.tabIndex == 0) {
+                    getPOs(event.sortOption)
+                } else {
+                    getSuppliedItems(event.sortOption)
+                }
             }
         }
     }

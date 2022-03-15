@@ -66,7 +66,7 @@ fun PODetailsScreen(
     ModalBottomSheetLayout(
         sheetState = bottomState,
         sheetContent = {
-            currentBottomSheet?.let {
+            currentBottomSheet.let {
                 SheetLayout(bottomSheetType = it, phoneNumber, emailAddress)
             }
         }
