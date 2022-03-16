@@ -587,6 +587,7 @@ private fun TopAppBar(
                     DropdownMenuItem(
                         onClick = {
                             sortMenuExpanded = false
+                            var orderType = ""
                             when (selectedTabIndex) {
                                 0 -> {
                                     if (firstTabSortApplied == it.first) {
@@ -595,6 +596,8 @@ private fun TopAppBar(
                                     } else {
                                         firstTabSortType = SortType.DESCENDING
                                     }
+                                    orderType =
+                                        if (firstTabSortType == SortType.DESCENDING) "descending" else "ascending"
                                     firstTabSortApplied = it.first
                                 }
                                 1 -> {
@@ -604,11 +607,12 @@ private fun TopAppBar(
                                     } else {
                                         secondTabSortType = SortType.DESCENDING
                                     }
+                                    orderType =
+                                        if (secondTabSortType == SortType.DESCENDING) "descending" else "ascending"
                                     secondTabSortApplied = it.first
                                 }
                             }
-
-                            onSortChanged(it.first)
+                            onSortChanged(orderType + "(" + it.first + ")")
                         },
                     ) {
                         Row(modifier = Modifier.fillMaxSize()) {
