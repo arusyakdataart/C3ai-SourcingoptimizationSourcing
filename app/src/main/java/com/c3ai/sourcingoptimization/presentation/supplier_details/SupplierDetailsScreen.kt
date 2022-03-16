@@ -12,6 +12,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.style.TextOverflow
@@ -20,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import com.c3ai.sourcingoptimization.R
+import com.c3ai.sourcingoptimization.common.SortType
 import com.c3ai.sourcingoptimization.common.components.*
 import com.c3ai.sourcingoptimization.data.C3Result
 import com.c3ai.sourcingoptimization.data.repository.C3MockRepositoryImpl
@@ -132,8 +134,16 @@ fun SupplierDetailsScreen(
                                 header = {
                                     Tabs(
                                         selectedTab = uiState.tabIndex,
-                                        TabItem(stringResource(R.string.po_lines)) { onTabItemClick(0) },
-                                        TabItem(stringResource(R.string.items_supplied)) { onTabItemClick(1) }
+                                        TabItem(stringResource(R.string.po_lines)) {
+                                            onTabItemClick(
+                                                0
+                                            )
+                                        },
+                                        TabItem(stringResource(R.string.items_supplied)) {
+                                            onTabItemClick(
+                                                1
+                                            )
+                                        }
                                     )
                                 },
                                 content = { SuppliersDetailsInfo(uiState) }
@@ -153,7 +163,10 @@ fun SupplierDetailsScreen(
                                             .padding(horizontal = 16.dp)
                                     ) {
                                         item.orderLines.map { poLine ->
-                                            PoLinesListExpanded(poLine, onPOAlertsClick = onAlertsClick)
+                                            PoLinesListExpanded(
+                                                poLine,
+                                                onPOAlertsClick = onAlertsClick
+                                            )
                                         }
                                     }
                                 }
@@ -482,6 +495,10 @@ private fun TopAppBar(
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusRequester = remember { FocusRequester() }
     var sortMenuExpanded by remember { mutableStateOf(false) }
+    var firstTabSortApplied by remember { mutableStateOf("") }
+    var firstTabSortType by remember { mutableStateOf(SortType.ASCENDING) }
+    var secondTabSortApplied by remember { mutableStateOf("") }
+    var secondTabSortType by remember { mutableStateOf(SortType.ASCENDING) }
 
     C3TopAppBar(
         title = title,
@@ -570,14 +587,51 @@ private fun TopAppBar(
                     DropdownMenuItem(
                         onClick = {
                             sortMenuExpanded = false
+                            when (selectedTabIndex) {
+                                0 -> {
+                                    if (firstTabSortApplied == it.first) {
+                                        firstTabSortType =
+                                            if (firstTabSortType == SortType.ASCENDING) SortType.DESCENDING else SortType.ASCENDING
+                                    } else {
+                                        firstTabSortType = SortType.DESCENDING
+                                    }
+                                    firstTabSortApplied = it.first
+                                }
+                                1 -> {
+                                    if (secondTabSortApplied == it.first) {
+                                        secondTabSortType =
+                                            if (secondTabSortType == SortType.ASCENDING) SortType.DESCENDING else SortType.ASCENDING
+                                    } else {
+                                        secondTabSortType = SortType.DESCENDING
+                                    }
+                                    secondTabSortApplied = it.first
+                                }
+                            }
+
                             onSortChanged(it.first)
                         },
                     ) {
-                        Text(
-                            it.second,
-                            style = MaterialTheme.typography.subtitle1,
-                            color = MaterialTheme.colors.secondaryVariant,
-                        )
+                        Row(modifier = Modifier.fillMaxSize()) {
+                            val sortApplied =
+                                if (selectedTabIndex == 0) firstTabSortApplied else secondTabSortApplied
+                            if (sortApplied == it.first) {
+                                val sortType =
+                                    if (selectedTabIndex == 0) firstTabSortType else secondTabSortType
+                                Icon(
+                                    imageVector = if (sortType == SortType.ASCENDING) Icons.Filled.ArrowUpward else Icons.Filled.ArrowDownward,
+                                    contentDescription = "",
+                                    tint = Blue
+                                )
+                            } else {
+                                Spacer(modifier = Modifier.width(24.dp))
+                            }
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Text(
+                                it.second,
+                                style = MaterialTheme.typography.subtitle1,
+                                color = if (sortApplied == it.first) Blue else MaterialTheme.colors.secondaryVariant,
+                            )
+                        }
                     }
                 }
             }
