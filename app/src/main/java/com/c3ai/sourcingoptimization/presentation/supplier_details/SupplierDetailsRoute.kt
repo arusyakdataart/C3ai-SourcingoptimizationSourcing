@@ -42,7 +42,9 @@ fun SupplierDetailsRoute(
         onPOItemClick = { navController.navigateToPoDetails(it) },
         onAlertsClick = { navController.navigateToPoDetails(it) },
         onC3ItemClick = {
-            context.startActivity(Intent(context, ItemDetailsActivity::class.java))
+            val intent = Intent(context, ItemDetailsActivity::class.java)
+            intent.putExtra("id", it)
+            context.startActivity(intent)
         },
         onSortChanged = { viewModel.onEvent(SupplierDetailsEvent.OnSortChanged(it)) },
         onBackButtonClick = { navController.navigateUp() },

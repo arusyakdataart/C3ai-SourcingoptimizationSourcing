@@ -77,7 +77,6 @@ fun SearchScreen(
             text = "ItemDetails",
             onClick = {
                 context.startActivity(Intent(context, ItemDetailsActivity::class.java))
-                (context as? Activity)?.finish()
             }
         )
         PButton(

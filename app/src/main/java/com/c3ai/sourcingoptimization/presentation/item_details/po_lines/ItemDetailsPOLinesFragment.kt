@@ -1,7 +1,9 @@
 package com.c3ai.sourcingoptimization.presentation.item_details.po_lines
 
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.asLiveData
@@ -26,9 +28,19 @@ class ItemDetailsPOLinesFragment : BaseFragment<FragmentItemDetailsPoLinesBindin
 
     @Inject
     lateinit var assistedFactory: ItemPOLinesViewModelAssistedFactory
+    private var itemId = "item0"
 
     private val viewModel: ItemPOLinesViewModel by viewModels {
-        ItemPOLinesViewModel.Factory(assistedFactory, "item0")
+        ItemPOLinesViewModel.Factory(assistedFactory, itemId)
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        itemId = activity?.intent?.getStringExtra("id") ?: "item0"
+        return super.onCreateView(inflater, container, savedInstanceState)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
