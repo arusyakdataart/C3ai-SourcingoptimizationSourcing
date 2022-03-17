@@ -144,7 +144,10 @@ class SuppliersDetailsViewModel @Inject constructor(
             val itemsResult = useCases.getSupplierDetails("supplier0")
             viewModelState.update {
                 when (itemsResult) {
-                    is C3Result.Success -> it.copy(supplier = itemsResult.data, isLoading = false)
+                    is C3Result.Success -> it.copy(
+                        supplier = itemsResult.data,
+                        isLoading = viewModelState.value.items == null || viewModelState.value.poLines == null
+                    )
                     is C3Result.Error -> {
                         val errorMessages = it.errorMessages + ErrorMessage(
                             id = UUID.randomUUID().mostSignificantBits,
@@ -166,7 +169,10 @@ class SuppliersDetailsViewModel @Inject constructor(
             val result = useCases.getPOsForSupplier("supplier0", order)
             viewModelState.update {
                 when (result) {
-                    is C3Result.Success -> it.copy(poLines = result.data, isLoading = false)
+                    is C3Result.Success -> it.copy(
+                        poLines = result.data,
+                        isLoading = viewModelState.value.items == null || viewModelState.value.supplier == null
+                    )
                     is C3Result.Error -> {
                         val errorMessages = it.errorMessages + ErrorMessage(
                             id = UUID.randomUUID().mostSignificantBits,
@@ -186,7 +192,10 @@ class SuppliersDetailsViewModel @Inject constructor(
             val result = useCases.getSuppliedItems("supplier0", order)
             viewModelState.update {
                 when (result) {
-                    is C3Result.Success -> it.copy(items = result.data, isLoading = false)
+                    is C3Result.Success -> it.copy(
+                        items = result.data,
+                        isLoading = viewModelState.value.supplier == null || viewModelState.value.poLines == null
+                    )
                     is C3Result.Error -> {
                         val errorMessages = it.errorMessages + ErrorMessage(
                             id = UUID.randomUUID().mostSignificantBits,
