@@ -4,7 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.data.C3Result
+import com.c3ai.sourcingoptimization.domain.model.C3Item
 import com.c3ai.sourcingoptimization.domain.model.C3Vendor
+import com.c3ai.sourcingoptimization.domain.model.PurchaseOrder
 import com.c3ai.sourcingoptimization.domain.settings.C3AppSettingsProvider
 import com.c3ai.sourcingoptimization.domain.settings.FakeC3AppSettingsProvider
 import com.c3ai.sourcingoptimization.domain.use_case.SuppliersDetailsUseCases
@@ -52,8 +54,8 @@ sealed interface SupplierDetailsUiState {
      */
     data class HasDetails(
         val supplier: UiVendor,
-        val poLines: List<UiPurchaseOrder.Order> = supplier.purchaseOrders,
-        val items: List<UiItem> = supplier.items,
+        val poLines: List<UiPurchaseOrder.Order>,
+        val items: List<UiItem>,
         val expandedListItemIds: Set<String> = emptySet(),
         override val isLoading: Boolean,
         override val errorMessages: List<ErrorMessage>,
@@ -68,6 +70,8 @@ sealed interface SupplierDetailsUiState {
 private data class SupplierDetailsViewModelState(
     override val settings: C3AppSettingsProvider,
     val supplier: C3Vendor? = null,
+    val poLines: List<PurchaseOrder.Order>? = null,
+    val items: List<C3Item>? = null,
     val isLoading: Boolean = false,
     val errorMessages: List<ErrorMessage> = emptyList(),
     val searchInput: String = "",
@@ -80,21 +84,23 @@ private data class SupplierDetailsViewModelState(
      * a more strongly typed [SupplierDetailsUiState] for driving the ui.
      */
     fun toUiState(): SupplierDetailsUiState =
-        if (supplier == null) {
-            SupplierDetailsUiState.NoDetails(
-                isLoading = isLoading,
-                errorMessages = errorMessages,
-                searchInput = searchInput,
-                tabIndex = 0
-            )
-        } else {
+        if (supplier != null && poLines != null && items != null) {
             SupplierDetailsUiState.HasDetails(
                 supplier = convert(supplier),
+                poLines = poLines.map { convert(it) },
+                items = items.map { convert(it) },
                 expandedListItemIds = expandedListItemIds,
                 isLoading = isLoading,
                 errorMessages = errorMessages,
                 searchInput = searchInput,
                 tabIndex = tabIndex
+            )
+        } else {
+            SupplierDetailsUiState.NoDetails(
+                isLoading = isLoading,
+                errorMessages = errorMessages,
+                searchInput = searchInput,
+                tabIndex = 0
             )
         }
 }
@@ -131,7 +137,7 @@ class SuppliersDetailsViewModel @Inject constructor(
     /**
      * Refresh supplier details and update the UI state accordingly
      */
-    fun refreshDetails(order: String = "") {
+    fun refreshDetails() {
         viewModelState.update { it.copy(isLoading = true) }
 
         viewModelScope.launch {
@@ -139,6 +145,48 @@ class SuppliersDetailsViewModel @Inject constructor(
             viewModelState.update {
                 when (itemsResult) {
                     is C3Result.Success -> it.copy(supplier = itemsResult.data, isLoading = false)
+                    is C3Result.Error -> {
+                        val errorMessages = it.errorMessages + ErrorMessage(
+                            id = UUID.randomUUID().mostSignificantBits,
+                            messageId = R.string.load_error
+                        )
+                        it.copy(errorMessages = errorMessages, isLoading = false)
+                    }
+                }
+            }
+        }
+        getPOs()
+        getSuppliedItems()
+    }
+
+    private fun getPOs(order: String = "") {
+        viewModelState.update { it.copy(isLoading = true) }
+
+        viewModelScope.launch {
+            val result = useCases.getPOsForSupplier("supplier0", order)
+            viewModelState.update {
+                when (result) {
+                    is C3Result.Success -> it.copy(poLines = result.data, isLoading = false)
+                    is C3Result.Error -> {
+                        val errorMessages = it.errorMessages + ErrorMessage(
+                            id = UUID.randomUUID().mostSignificantBits,
+                            messageId = R.string.load_error
+                        )
+                        it.copy(errorMessages = errorMessages, isLoading = false)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun getSuppliedItems(order: String = "") {
+        viewModelState.update { it.copy(isLoading = true) }
+
+        viewModelScope.launch {
+            val result = useCases.getSuppliedItems("supplier0", order)
+            viewModelState.update {
+                when (result) {
+                    is C3Result.Success -> it.copy(items = result.data, isLoading = false)
                     is C3Result.Error -> {
                         val errorMessages = it.errorMessages + ErrorMessage(
                             id = UUID.randomUUID().mostSignificantBits,
@@ -172,6 +220,16 @@ class SuppliersDetailsViewModel @Inject constructor(
                 }
                 else -> {
                     state.copy()
+                }
+            }
+        }
+
+        when (event) {
+            is SupplierDetailsEvent.OnSortChanged -> {
+                if (uiState.value.tabIndex == 0) {
+                    getPOs(event.sortOption)
+                } else {
+                    getSuppliedItems(event.sortOption)
                 }
             }
         }

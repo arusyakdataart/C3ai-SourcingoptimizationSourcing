@@ -7,6 +7,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Sort
 import androidx.compose.runtime.*
@@ -19,9 +21,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.common.BottomSheetType
+import com.c3ai.sourcingoptimization.common.SortType
 import com.c3ai.sourcingoptimization.common.components.*
 import com.c3ai.sourcingoptimization.data.C3Result
 import com.c3ai.sourcingoptimization.data.repository.C3MockRepositoryImpl
+import com.c3ai.sourcingoptimization.ui.theme.Blue
 import com.c3ai.sourcingoptimization.ui.theme.C3AppTheme
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -66,7 +70,7 @@ fun PODetailsScreen(
     ModalBottomSheetLayout(
         sheetState = bottomState,
         sheetContent = {
-            currentBottomSheet?.let {
+            currentBottomSheet.let {
                 SheetLayout(bottomSheetType = it, phoneNumber, emailAddress)
             }
         }
@@ -120,11 +124,9 @@ fun PODetailsScreen(
                                             currentBottomSheet =
                                                 BottomSheetType.CONTACT_SUPPLIER
                                             phoneNumber =
-                                                item.vendorContact?.preferredPhoneNumber?.number
-                                                    ?: ""
+                                                item.vendorContact?.phone ?: ""
                                             emailAddress =
-                                                item.vendorContact?.preferredEmail?.communicationIdentifier
-                                                    ?: ""
+                                                item.vendorContact?.email ?: ""
                                             coroutineScope.launch { bottomState.show() }
                                         })
                                 }
@@ -226,6 +228,8 @@ private fun PODetailsAppBar(
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusRequester = remember { FocusRequester() }
     var sortMenuExpanded by remember { mutableStateOf(false) }
+    var sortApplied by remember { mutableStateOf("") }
+    var sortType by remember { mutableStateOf(SortType.ASCENDING) }
 
     C3TopAppBar(
         title = title,
@@ -263,14 +267,36 @@ private fun PODetailsAppBar(
                     DropdownMenuItem(
                         onClick = {
                             sortMenuExpanded = false
-                            onSortChanged(it.first)
+                            if (sortApplied == it.first) {
+                                sortType =
+                                    if (sortType == SortType.ASCENDING) SortType.DESCENDING else SortType.ASCENDING
+                            } else {
+                                sortType = SortType.DESCENDING
+                            }
+                            val orderType =
+                                if (sortType == SortType.DESCENDING) "descending" else "ascending"
+                            sortApplied = it.first
+
+                            onSortChanged(orderType + "(" + it.first + ")")
                         },
                     ) {
-                        Text(
-                            it.second,
-                            style = MaterialTheme.typography.subtitle1,
-                            color = MaterialTheme.colors.secondaryVariant,
-                        )
+                        Row(modifier = Modifier.fillMaxSize()) {
+                            if (sortApplied == it.first) {
+                                Icon(
+                                    imageVector = if (sortType == SortType.ASCENDING) Icons.Filled.ArrowUpward else Icons.Filled.ArrowDownward,
+                                    contentDescription = "",
+                                    tint = Blue
+                                )
+                            } else {
+                                Spacer(modifier = Modifier.width(24.dp))
+                            }
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Text(
+                                it.second,
+                                style = MaterialTheme.typography.subtitle1,
+                                color = if (sortApplied == it.first) Blue else MaterialTheme.colors.secondaryVariant,
+                            )
+                        }
                     }
                 }
             }

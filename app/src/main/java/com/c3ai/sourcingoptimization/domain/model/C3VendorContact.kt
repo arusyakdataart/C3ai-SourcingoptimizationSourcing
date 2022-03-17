@@ -4,8 +4,8 @@ data class C3VendorContact(
     val id: String,
     val name: String,
     val location: C3Location,
-    val preferredPhoneNumber: C3Number?,
-    val preferredEmail: C3CommunicationIdentifier?
+    val phone: String?,
+    val email: String?
 ) {
     companion object
 }

@@ -12,6 +12,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.style.TextOverflow
@@ -20,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import com.c3ai.sourcingoptimization.R
+import com.c3ai.sourcingoptimization.common.SortType
 import com.c3ai.sourcingoptimization.common.components.*
 import com.c3ai.sourcingoptimization.data.C3Result
 import com.c3ai.sourcingoptimization.data.repository.C3MockRepositoryImpl
@@ -45,7 +47,7 @@ import kotlinx.coroutines.runBlocking
 )
 @Composable
 fun SupplierDetailsScreen(
-    scaffoldState: BottomSheetScaffoldState,
+    scaffoldState: ScaffoldState,
     supplierId: String,
     uiState: SupplierDetailsUiState,
     onRefreshDetails: () -> Unit,
@@ -59,95 +61,134 @@ fun SupplierDetailsScreen(
     onBackButtonClick: () -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
-    BottomSheetScaffold(
-        scaffoldState = scaffoldState,
-        topBar = {
-            TopAppBar(
-                title = stringResource(R.string.supplier_, supplierId),
-                searchInput = uiState.searchInput,
-                onBackButtonClick = onBackButtonClick,
-                onSearchInputChanged = onSearchInputChanged,
-                onClearClick = { onSearchInputChanged("") },
-                onSortChanged = { onSortChanged(it) },
-                onContactsClick = {
-                    coroutineScope.launch {
-                        if (scaffoldState.bottomSheetState.isCollapsed) {
-                            scaffoldState.bottomSheetState.expand()
-                        } else {
-                            scaffoldState.bottomSheetState.collapse()
+    val bottomState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+
+    var selectedTabIndex: Int by remember {
+        mutableStateOf(0)
+    }
+
+    var phoneNumber: String by remember {
+        mutableStateOf("")
+    }
+
+    var emailAddress: String by remember {
+        mutableStateOf("")
+    }
+
+    ModalBottomSheetLayout(
+        sheetState = bottomState,
+        sheetContent = {
+            ContactSupplierBottomSheetContent(phoneNumber, emailAddress)
+        }
+    ) {
+        Scaffold(
+            scaffoldState = scaffoldState,
+            topBar = {
+                TopAppBar(
+                    title = stringResource(R.string.supplier_, supplierId),
+                    selectedTabIndex = selectedTabIndex,
+                    searchInput = uiState.searchInput,
+                    onBackButtonClick = onBackButtonClick,
+                    onSearchInputChanged = onSearchInputChanged,
+                    onClearClick = { onSearchInputChanged("") },
+                    onSortChanged = { onSortChanged(it) },
+                    onContactsClick = {
+                        coroutineScope.launch {
+                            if (!bottomState.isVisible) {
+                                bottomState.show()
+                            }
+                        }
+                    }
+                )
+            },
+            snackbarHost = { C3SnackbarHost(hostState = it) },
+        ) { innerPadding ->
+            val contentModifier = Modifier.padding(innerPadding)
+
+            LoadingContent(
+                empty = when (uiState) {
+                    is SupplierDetailsUiState.HasDetails -> false
+                    is SupplierDetailsUiState.NoDetails -> uiState.isLoading
+                },
+                emptyContent = { FullScreenLoading() },
+                loading = uiState.isLoading,
+                onRefresh = onRefreshDetails,
+                content = {
+                    when (uiState) {
+                        is SupplierDetailsUiState.HasDetails -> {
+                            phoneNumber = uiState.supplier.phone ?: "+37455504112"
+                            emailAddress = uiState.supplier.email ?: "test@test.com"
+                            CollapsingContentList(
+                                contentModifier = Modifier.height(156.dp),
+                                verticalArrangement = Arrangement.spacedBy(16.dp),
+                                items = when (uiState.tabIndex) {
+                                    1 -> {
+                                        selectedTabIndex = 1
+                                        uiState.items
+                                    }
+                                    else -> {
+                                        selectedTabIndex = 0
+                                        uiState.poLines
+                                    }
+                                },
+                                header = {
+                                    Tabs(
+                                        selectedTab = uiState.tabIndex,
+                                        TabItem(stringResource(R.string.po_lines)) {
+                                            onTabItemClick(
+                                                0
+                                            )
+                                        },
+                                        TabItem(stringResource(R.string.items_supplied)) {
+                                            onTabItemClick(
+                                                1
+                                            )
+                                        }
+                                    )
+                                },
+                                content = { SuppliersDetailsInfo(uiState) }
+                            ) { item ->
+                                when (item) {
+                                    is UiItem -> ItemsSuppliedList(
+                                        item,
+                                        onC3ItemClick,
+                                        onAlertsClick
+                                    )
+                                    is UiPurchaseOrder.Order -> ExpandableLayout(
+                                        expanded = uiState.expandedListItemIds.contains(item.id),
+                                        onClick = { onExpandableItemClick(item.id) },
+                                        content = { PoLinesListSimple(item, onPOItemClick) },
+                                        modifier = Modifier
+                                            .background(MaterialTheme.colors.background)
+                                            .padding(horizontal = 16.dp)
+                                    ) {
+                                        item.orderLines.map { poLine ->
+                                            PoLinesListExpanded(
+                                                poLine,
+                                                onPOAlertsClick = onAlertsClick
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        is SupplierDetailsUiState.NoDetails -> {
+                            if (uiState.errorMessages.isEmpty()) {
+                                // if there are no posts, and no error, let the user refresh manually
+                                PButton(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    text = stringResource(id = R.string.tap_to_load_content),
+                                    onClick = onRefreshDetails,
+                                )
+                            } else {
+                                // there's currently an error showing, don't show any content
+                                Box(contentModifier.fillMaxSize()) { /* empty screen */ }
+                            }
                         }
                     }
                 }
             )
-        },
-        snackbarHost = { C3SnackbarHost(hostState = it) },
-        sheetContent = { ContactSupplierBottomSheetContent("", "") },
-        sheetPeekHeight = 0.dp
-    ) { innerPadding ->
-        val contentModifier = Modifier.padding(innerPadding)
-
-        LoadingContent(
-            empty = when (uiState) {
-                is SupplierDetailsUiState.HasDetails -> false
-                is SupplierDetailsUiState.NoDetails -> uiState.isLoading
-            },
-            emptyContent = { FullScreenLoading() },
-            loading = uiState.isLoading,
-            onRefresh = onRefreshDetails,
-            content = {
-                when (uiState) {
-                    is SupplierDetailsUiState.HasDetails -> CollapsingContentList(
-                        contentModifier = Modifier.height(156.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
-                        items = when (uiState.tabIndex) {
-                            1 -> uiState.items
-                            else -> uiState.poLines
-                        },
-                        header = {
-                            Tabs(
-                                selectedTab = uiState.tabIndex,
-                                TabItem(stringResource(R.string.po_lines)) { onTabItemClick(0) },
-                                TabItem(stringResource(R.string.items_supplied)) { onTabItemClick(1) }
-                            )
-                        },
-                        content = { SuppliersDetailsInfo(uiState) }
-                    ) { item ->
-                        when (item) {
-                            is UiItem -> ItemsSuppliedList(
-                                item,
-                                onC3ItemClick,
-                                onAlertsClick
-                            )
-                            is UiPurchaseOrder.Order -> ExpandableLayout(
-                                expanded = uiState.expandedListItemIds.contains(item.id),
-                                onClick = { onExpandableItemClick(item.id) },
-                                content = { PoLinesListSimple(item, onPOItemClick) },
-                                modifier = Modifier
-                                    .background(MaterialTheme.colors.background)
-                                    .padding(horizontal = 16.dp)
-                            ) {
-                                item.orderLines.map { poLine ->
-                                    PoLinesListExpanded(poLine, onPOAlertsClick = onAlertsClick)
-                                }
-                            }
-                        }
-                    }
-                    is SupplierDetailsUiState.NoDetails -> {
-                        if (uiState.errorMessages.isEmpty()) {
-                            // if there are no posts, and no error, let the user refresh manually
-                            PButton(
-                                modifier = Modifier.fillMaxWidth(),
-                                text = stringResource(id = R.string.tap_to_load_content),
-                                onClick = onRefreshDetails,
-                            )
-                        } else {
-                            // there's currently an error showing, don't show any content
-                            Box(contentModifier.fillMaxSize()) { /* empty screen */ }
-                        }
-                    }
-                }
-            }
-        )
+        }
     }
 
     // Process one error message at a time and show them as Snackbars in the UI
@@ -441,6 +482,7 @@ private fun ItemsSuppliedList(
 @Composable
 private fun TopAppBar(
     title: String,
+    selectedTabIndex: Int,
     searchInput: String,
     placeholderText: String = "",
     onBackButtonClick: () -> Unit,
@@ -453,6 +495,10 @@ private fun TopAppBar(
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusRequester = remember { FocusRequester() }
     var sortMenuExpanded by remember { mutableStateOf(false) }
+    var firstTabSortApplied by remember { mutableStateOf("") }
+    var firstTabSortType by remember { mutableStateOf(SortType.ASCENDING) }
+    var secondTabSortApplied by remember { mutableStateOf("") }
+    var secondTabSortType by remember { mutableStateOf(SortType.ASCENDING) }
 
     C3TopAppBar(
         title = title,
@@ -516,7 +562,7 @@ private fun TopAppBar(
                 expanded = sortMenuExpanded,
                 onDismissRequest = { sortMenuExpanded = false }
             ) {
-                val resources = listOf(
+                val resources = if (selectedTabIndex == 0) listOf(
                     "totalCost.value" to "Total Cost",
                     "unitPrice.value" to "Unit Price",
                     "totalQuantity.value" to "Quantity",
@@ -526,20 +572,70 @@ private fun TopAppBar(
                     "promisedDeliveryDate" to "Promised Delivery Date",
                     "actualLeadTime" to "Actual Lead Time",
                     "plannedLeadTime" to "Planned Lead Time"
+                ) else listOf(
+                    "id" to "Item ID",
+                    "name" to "Item Name",
+                    "openPOValue.value" to "Open PO Line Value",
+                    "closedPOValue.value" to "Closed PO Line Value",
+                    "shareOpen" to "Share % (Open)",
+                    "shareClosed" to "Share % (Closed)",
+                    "moq" to "Minimum Order Quantity (MoQ)",
+                    "averageUnitPricePaid.value" to "Average Unit Price"
                 )
 
                 resources.map { it ->
                     DropdownMenuItem(
                         onClick = {
                             sortMenuExpanded = false
-                            onSortChanged(it.first)
+                            var orderType = ""
+                            when (selectedTabIndex) {
+                                0 -> {
+                                    if (firstTabSortApplied == it.first) {
+                                        firstTabSortType =
+                                            if (firstTabSortType == SortType.ASCENDING) SortType.DESCENDING else SortType.ASCENDING
+                                    } else {
+                                        firstTabSortType = SortType.DESCENDING
+                                    }
+                                    orderType =
+                                        if (firstTabSortType == SortType.DESCENDING) "descending" else "ascending"
+                                    firstTabSortApplied = it.first
+                                }
+                                1 -> {
+                                    if (secondTabSortApplied == it.first) {
+                                        secondTabSortType =
+                                            if (secondTabSortType == SortType.ASCENDING) SortType.DESCENDING else SortType.ASCENDING
+                                    } else {
+                                        secondTabSortType = SortType.DESCENDING
+                                    }
+                                    orderType =
+                                        if (secondTabSortType == SortType.DESCENDING) "descending" else "ascending"
+                                    secondTabSortApplied = it.first
+                                }
+                            }
+                            onSortChanged(orderType + "(" + it.first + ")")
                         },
                     ) {
-                        Text(
-                            it.second,
-                            style = MaterialTheme.typography.subtitle1,
-                            color = MaterialTheme.colors.secondaryVariant,
-                        )
+                        Row(modifier = Modifier.fillMaxSize()) {
+                            val sortApplied =
+                                if (selectedTabIndex == 0) firstTabSortApplied else secondTabSortApplied
+                            if (sortApplied == it.first) {
+                                val sortType =
+                                    if (selectedTabIndex == 0) firstTabSortType else secondTabSortType
+                                Icon(
+                                    imageVector = if (sortType == SortType.ASCENDING) Icons.Filled.ArrowUpward else Icons.Filled.ArrowDownward,
+                                    contentDescription = "",
+                                    tint = Blue
+                                )
+                            } else {
+                                Spacer(modifier = Modifier.width(24.dp))
+                            }
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Text(
+                                it.second,
+                                style = MaterialTheme.typography.subtitle1,
+                                color = if (sortApplied == it.first) Blue else MaterialTheme.colors.secondaryVariant,
+                            )
+                        }
                     }
                 }
             }
@@ -562,7 +658,7 @@ fun SupplierDetailsPreview() {
     }
     C3AppTheme {
         SupplierDetailsScreen(
-            scaffoldState = rememberBottomSheetScaffoldState(),
+            scaffoldState = rememberScaffoldState(),
             supplierId = supplier.id,
             uiState = PreviewSupplierDetailsUiState(supplier),
             onRefreshDetails = {},
@@ -587,7 +683,7 @@ fun SupplierDetailsItemsSuppliedTabPreview() {
     }
     C3AppTheme {
         SupplierDetailsScreen(
-            scaffoldState = rememberBottomSheetScaffoldState(),
+            scaffoldState = rememberScaffoldState(),
             supplierId = supplier.id,
             uiState = PreviewSupplierDetailsUiState(supplier, 1),
             onRefreshDetails = {},

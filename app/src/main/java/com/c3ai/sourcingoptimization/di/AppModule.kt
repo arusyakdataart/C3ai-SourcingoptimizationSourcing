@@ -52,7 +52,9 @@ object AppModule {
     @Provides
     fun provideSuppliersDetailsUseCases(repository: C3Repository): SuppliersDetailsUseCases {
         return SuppliersDetailsUseCases(
-            GetSupplierDetails(repository)
+            getSupplierDetails = GetSupplierDetails(repository),
+            getPOsForSupplier = GetPOsForSupplier(repository),
+            getSuppliedItems = GetSuppliedItems(repository)
         )
     }
 

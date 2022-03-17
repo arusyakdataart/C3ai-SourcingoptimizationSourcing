@@ -3,6 +3,7 @@ package com.c3ai.sourcingoptimization.presentation.item_details.overview
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.TextView
 import androidx.fragment.app.viewModels
@@ -42,7 +43,7 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
     @Inject
     lateinit var assistedFactory: ItemDetailsViewModelAssistedFactory
 
-    private val itemId = "item0"
+    private var itemId = "item0"
     private var selectedSpinnerPosition = 0
     private lateinit var suppliers: List<C3Vendor>
     private val suppliersChartData = mutableMapOf<String, List<Double>>()
@@ -67,6 +68,14 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
         )
     }
 
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        itemId = activity?.intent?.getStringExtra("id") ?: "item0"
+        return super.onCreateView(inflater, container, savedInstanceState)
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

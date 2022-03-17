@@ -12,7 +12,7 @@ data class SupplierContactsParameters(
         include = listOf(
             "id",
             "name",
-            "mail",
+            "email",
             "phone",
             "location.address"
         ),
