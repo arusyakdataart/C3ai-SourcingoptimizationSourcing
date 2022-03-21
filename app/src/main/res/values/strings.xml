@@ -61,6 +61,8 @@
     <string name="select_suppliers">Select up to 5 suppliers</string>
     <string name="max_number_reached">Maximum number reached</string>
     <string name="max_number_reached_text">You have selected the maximum number of suppliers. Please remove and select a new one.</string>
+    <string name="min_number_reached">At least one supplier must be selected.</string>
+    <string name="min_number_reached_text">Please select a new one and remove this one.</string>
     <string name="dismiss">Dismiss</string>
     <array name="sort_po">
         <item>Total Cost</item>

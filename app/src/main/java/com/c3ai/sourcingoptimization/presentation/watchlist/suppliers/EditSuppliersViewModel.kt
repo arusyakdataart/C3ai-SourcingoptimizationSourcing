@@ -1,4 +1,4 @@
-package com.c3ai.sourcingoptimization.presentation.watchlist
+package com.c3ai.sourcingoptimization.presentation.watchlist.suppliers
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -28,22 +28,22 @@ sealed interface EditSuppliersUiState {
     val searchInput: String
 
     /**
-     * There are no details to render.
+     * There is no data to render.
      *
      * This could either be because they are still loading or they failed to load, and we are
      * waiting to reload them.
      */
-    data class NoDetails(
+    data class NoData(
         override val isLoading: Boolean,
         override val errorMessages: List<ErrorMessage>,
         override val searchInput: String
     ) : EditSuppliersUiState
 
     /**
-     * There are details to render, as contained in model[supplier].
+     * There is data to render, as contained in model[index].
      *
      */
-    data class HasDetails(
+    data class HasData(
         val suppliers: List<C3Vendor>,
         val checkedItemsIds: Set<String> = emptySet(),
         override val isLoading: Boolean,
@@ -70,7 +70,7 @@ private data class EditSuppliersViewModelState(
      */
     fun toUiState(): EditSuppliersUiState =
         if (suppliers != null) {
-            EditSuppliersUiState.HasDetails(
+            EditSuppliersUiState.HasData(
                 suppliers = suppliers,
                 checkedItemsIds = checkedItemsIds,
                 isLoading = isLoading,
@@ -78,7 +78,7 @@ private data class EditSuppliersViewModelState(
                 searchInput = searchInput
             )
         } else {
-            EditSuppliersUiState.NoDetails(
+            EditSuppliersUiState.NoData(
                 isLoading = isLoading,
                 errorMessages = errorMessages,
                 searchInput = searchInput

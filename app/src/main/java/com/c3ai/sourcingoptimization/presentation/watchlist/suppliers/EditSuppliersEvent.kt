@@ -1,4 +1,4 @@
-package com.c3ai.sourcingoptimization.presentation.watchlist
+package com.c3ai.sourcingoptimization.presentation.watchlist.suppliers
 
 sealed class EditSuppliersEvent {
     data class OnSearchInputChanged(val searchInput: String) : EditSuppliersEvent()

@@ -1,4 +1,4 @@
-package com.c3ai.sourcingoptimization.presentation.watchlist
+package com.c3ai.sourcingoptimization.presentation.watchlist.suppliers
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material.Scaffold

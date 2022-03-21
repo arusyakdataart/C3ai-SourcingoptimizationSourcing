@@ -13,7 +13,7 @@ import androidx.navigation.navArgument
 import com.c3ai.sourcingoptimization.presentation.po_details.PODetailsRoute
 import com.c3ai.sourcingoptimization.presentation.search.SearchRoute
 import com.c3ai.sourcingoptimization.presentation.supplier_details.SupplierDetailsRoute
-import com.c3ai.sourcingoptimization.presentation.watchlist.EditSuppliersRoute
+import com.c3ai.sourcingoptimization.presentation.watchlist.suppliers.EditSuppliersRoute
 import com.google.gson.Gson
 
 @ExperimentalFoundationApi

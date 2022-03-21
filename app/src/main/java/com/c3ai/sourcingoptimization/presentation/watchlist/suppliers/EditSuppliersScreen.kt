@@ -1,4 +1,4 @@
-package com.c3ai.sourcingoptimization.presentation.watchlist
+package com.c3ai.sourcingoptimization.presentation.watchlist.suppliers
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -69,15 +69,15 @@ fun EditSuppliersScreen(
 
         LoadingContent(
             empty = when (uiState) {
-                is EditSuppliersUiState.HasDetails -> false
-                is EditSuppliersUiState.NoDetails -> uiState.isLoading
+                is EditSuppliersUiState.HasData -> false
+                is EditSuppliersUiState.NoData -> uiState.isLoading
             },
             emptyContent = { FullScreenLoading() },
             loading = uiState.isLoading,
             onRefresh = onRefreshDetails,
             content = {
                 when (uiState) {
-                    is EditSuppliersUiState.HasDetails -> {
+                    is EditSuppliersUiState.HasData -> {
                         val listState = rememberLazyListState()
                         LazyColumn(modifier = Modifier.fillMaxSize(), listState) {
                             stickyHeader {
@@ -176,7 +176,7 @@ fun EditSuppliersScreen(
                                             if (isChecked && checkedSuppliers.size < 5) {
                                                 checkedState.value = isChecked
                                                 checkedSuppliers.add(it.id)
-                                            } else if (!isChecked) {
+                                            } else if (!isChecked && checkedSuppliers.size > 1) {
                                                 checkedState.value = isChecked
                                                 checkedSuppliers.remove(it.id)
                                             } else {
@@ -211,7 +211,7 @@ fun EditSuppliersScreen(
                             })
                         }
                     }
-                    is EditSuppliersUiState.NoDetails -> {
+                    is EditSuppliersUiState.NoData -> {
                         if (uiState.errorMessages.isEmpty()) {
                             // if there are no posts, and no error, let the user refresh manually
                             PButton(
@@ -227,8 +227,8 @@ fun EditSuppliersScreen(
                 }
                 if (openDialog.value) {
                     C3AlertDialog(
-                        title = stringResource(id = R.string.max_number_reached),
-                        text = stringResource(id = R.string.max_number_reached_text),
+                        title = stringResource(id = if (checkedSuppliers.size == 5) R.string.max_number_reached else R.string.min_number_reached),
+                        text = stringResource(id = if (checkedSuppliers.size == 5) R.string.max_number_reached_text else R.string.min_number_reached_text),
                         dismissButtonText = stringResource(id = R.string.dismiss),
                         onDismiss = { openDialog.value = false })
                 }

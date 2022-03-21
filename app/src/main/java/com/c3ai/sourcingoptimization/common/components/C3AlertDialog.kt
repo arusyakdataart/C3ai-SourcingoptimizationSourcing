@@ -29,9 +29,7 @@ fun C3AlertDialog(
             Text(
                 text = title,
                 style = MaterialTheme.typography.h2,
-                color = MaterialTheme.colors.primary,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                color = MaterialTheme.colors.primary
             )
         },
         text = {
