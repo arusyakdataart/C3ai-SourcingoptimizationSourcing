@@ -25,6 +25,7 @@ import androidx.navigation.NavController
 fun EditSuppliersRoute(
     navController: NavController,
     itemId: String?,
+    supplierIds: List<String>?,
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     viewModel: EditSuppliersViewModel = hiltViewModel(),
 ) {
@@ -35,6 +36,7 @@ fun EditSuppliersRoute(
         scaffoldState = scaffoldState,
         uiState = uiState,
         itemId = itemId ?: "",
+        supplierIds = supplierIds ?: listOf(),
         onRefreshDetails = { viewModel.refreshDetails() },
         onSearchInputChanged = { viewModel.onEvent(EditSuppliersEvent.OnSearchInputChanged(it)) },
         onSupplierClick = {},

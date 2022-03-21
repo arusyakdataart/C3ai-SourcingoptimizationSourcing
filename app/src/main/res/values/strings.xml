@@ -59,6 +59,9 @@
     <string name="_share">% Share</string>
     <string name="avg_unit_price">% Avg. Unit Price</string>
     <string name="select_suppliers">Select up to 5 suppliers</string>
+    <string name="max_number_reached">Maximum number reached</string>
+    <string name="max_number_reached_text">You have selected the maximum number of suppliers. Please remove and select a new one.</string>
+    <string name="dismiss">Dismiss</string>
     <array name="sort_po">
         <item>Total Cost</item>
         <item>Unit Price</item>

@@ -11,6 +11,7 @@ import androidx.navigation.NavController
 import com.c3ai.sourcingoptimization.presentation.item_details.ItemDetailsActivity
 import com.c3ai.sourcingoptimization.presentation.navigateToEditSuppliers
 import com.c3ai.sourcingoptimization.presentation.navigateToPoDetails
+import com.google.gson.Gson
 
 /**
  * Displays the Home route.
@@ -40,7 +41,20 @@ fun SupplierDetailsRoute(
         onTabItemClick = { viewModel.onEvent(SupplierDetailsEvent.OnTabItemClick(it)) },
         onExpandableItemClick = { viewModel.onEvent(SupplierDetailsEvent.OnExpandableItemClick(it)) },
         onPOItemClick = { navController.navigateToPoDetails(it) },
-        onAlertsClick = { navController.navigateToEditSuppliers(it) },
+        onAlertsClick = {
+            navController.navigateToEditSuppliers(
+                it,
+                Gson().toJson(
+                    listOf(
+                        "supplier42",
+                        "supplier32",
+                        "supplier48",
+                        "supplier8",
+                        "supplier38"
+                    )
+                )
+            )
+        },
         onC3ItemClick = {
             val intent = Intent(context, ItemDetailsActivity::class.java)
             intent.putExtra("id", it)

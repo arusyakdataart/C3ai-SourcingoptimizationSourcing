@@ -40,6 +40,7 @@ fun EditSuppliersScreen(
     scaffoldState: ScaffoldState,
     uiState: EditSuppliersUiState,
     itemId: String,
+    supplierIds: List<String>,
     onRefreshDetails: () -> Unit,
     onSearchInputChanged: (String) -> Unit,
     onSupplierClick: (String) -> Unit,
@@ -62,6 +63,9 @@ fun EditSuppliersScreen(
         snackbarHost = { C3SnackbarHost(hostState = it) },
     ) { innerPadding ->
         val contentModifier = Modifier.padding(innerPadding)
+        val checkedSuppliers = mutableListOf<String>()
+        checkedSuppliers.addAll(supplierIds)
+        val openDialog = remember { mutableStateOf(false) }
 
         LoadingContent(
             empty = when (uiState) {
@@ -93,7 +97,8 @@ fun EditSuppliersScreen(
                                 }
                             }
                             items(items = uiState.suppliers, itemContent = {
-                                val checkedState = remember { mutableStateOf(true) }
+                                val isChecked = supplierIds.contains(it.id)
+                                val checkedState = remember { mutableStateOf(isChecked) }
                                 ConstraintLayout(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -167,7 +172,17 @@ fun EditSuppliersScreen(
                                     )
                                     Checkbox(
                                         checked = checkedState.value,
-                                        onCheckedChange = { checkedState.value = it },
+                                        onCheckedChange = { isChecked ->
+                                            if (isChecked && checkedSuppliers.size < 5) {
+                                                checkedState.value = isChecked
+                                                checkedSuppliers.add(it.id)
+                                            } else if (!isChecked) {
+                                                checkedState.value = isChecked
+                                                checkedSuppliers.remove(it.id)
+                                            } else {
+                                                openDialog.value = true
+                                            }
+                                        },
                                         modifier = Modifier
                                             .padding(start = 16.dp)
                                             .size(24.dp)
@@ -209,6 +224,13 @@ fun EditSuppliersScreen(
                             Box(contentModifier.fillMaxSize()) { /* empty screen */ }
                         }
                     }
+                }
+                if (openDialog.value) {
+                    C3AlertDialog(
+                        title = stringResource(id = R.string.max_number_reached),
+                        text = stringResource(id = R.string.max_number_reached_text),
+                        dismissButtonText = stringResource(id = R.string.dismiss),
+                        onDismiss = { openDialog.value = false })
                 }
             }
         )

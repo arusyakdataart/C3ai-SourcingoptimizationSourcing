@@ -10,7 +10,7 @@ object C3Destinations {
     const val SEARCH_ROUTE = "search"
     const val SUPPLIER_DETAILS_ROUTE = "supplier_details/{supplierId}"
     const val PO_DETAILS_ROUTE = "po_details/{orderId}"
-    const val EDIT_SUPPLIERS_ROUTE = "edit_suppliers/{itemId}"
+    const val EDIT_SUPPLIERS_ROUTE = "edit_suppliers?itemId={itemId}&supplierIds={supplierIds}"
 }
 
 /**
@@ -37,8 +37,9 @@ fun NavController.navigateToPoDetails(
  * @param itemId the item's id
  */
 fun NavController.navigateToEditSuppliers(
-    itemId: String
-) = navigate("edit_suppliers/$itemId")
+    itemId: String,
+    supplierIds: String
+) = navigate("edit_suppliers?itemId=$itemId&supplierIds=$supplierIds")
 
 /**
  * Models the navigation actions in the app.

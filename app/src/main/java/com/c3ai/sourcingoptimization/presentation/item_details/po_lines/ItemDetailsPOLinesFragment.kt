@@ -28,7 +28,7 @@ class ItemDetailsPOLinesFragment : BaseFragment<FragmentItemDetailsPoLinesBindin
 
     @Inject
     lateinit var assistedFactory: ItemPOLinesViewModelAssistedFactory
-    private var itemId = "item0"
+    private var itemId = "item1"
 
     private val viewModel: ItemPOLinesViewModel by viewModels {
         ItemPOLinesViewModel.Factory(assistedFactory, itemId)
@@ -39,7 +39,7 @@ class ItemDetailsPOLinesFragment : BaseFragment<FragmentItemDetailsPoLinesBindin
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        itemId = activity?.intent?.getStringExtra("id") ?: "item0"
+        itemId = activity?.intent?.getStringExtra("id") ?: "item1"
         return super.onCreateView(inflater, container, savedInstanceState)
     }
 

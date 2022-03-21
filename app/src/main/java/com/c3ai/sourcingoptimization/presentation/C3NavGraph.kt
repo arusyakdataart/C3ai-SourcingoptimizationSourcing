@@ -14,6 +14,7 @@ import com.c3ai.sourcingoptimization.presentation.po_details.PODetailsRoute
 import com.c3ai.sourcingoptimization.presentation.search.SearchRoute
 import com.c3ai.sourcingoptimization.presentation.supplier_details.SupplierDetailsRoute
 import com.c3ai.sourcingoptimization.presentation.watchlist.EditSuppliersRoute
+import com.google.gson.Gson
 
 @ExperimentalFoundationApi
 @OptIn(ExperimentalMaterialApi::class)
@@ -52,12 +53,17 @@ fun C3NavGraph(
         composable(
             C3Destinations.EDIT_SUPPLIERS_ROUTE,
             arguments = listOf(
-                navArgument("itemId") { type = NavType.StringType }
+                navArgument("itemId") { type = NavType.StringType },
+                navArgument("supplierIds") { type = NavType.StringType }
             )
         ) { entry ->
             EditSuppliersRoute(
                 navController = navController,
-                itemId = entry.arguments?.getString("itemId")
+                itemId = entry.arguments?.getString("itemId"),
+                supplierIds = Gson().fromJson(
+                    entry.arguments?.getString("supplierIds"),
+                    Array<String>::class.java
+                ).asList()
             )
         }
     }

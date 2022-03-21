@@ -42,7 +42,7 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
     @Inject
     lateinit var assistedFactory: ItemDetailsViewModelAssistedFactory
 
-    private var itemId = "item0"
+    private var itemId = "item1"
     private var selectedSpinnerPosition = 0
     private lateinit var suppliers: List<C3Vendor>
     private val suppliersChartData = mutableMapOf<String, List<Double>>()
@@ -72,7 +72,7 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        itemId = activity?.intent?.getStringExtra("id") ?: "item0"
+        itemId = activity?.intent?.getStringExtra("id") ?: "item1"
         return super.onCreateView(inflater, container, savedInstanceState)
     }
 
