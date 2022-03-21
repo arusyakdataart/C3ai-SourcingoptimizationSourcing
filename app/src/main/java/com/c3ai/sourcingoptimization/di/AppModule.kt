@@ -67,4 +67,11 @@ object AppModule {
             getBuyerContacts = GetBuyerContacts(repository)
         )
     }
+
+    @Provides
+    fun provideEditSuppliersUseCases(repository: C3Repository): EditSuppliersUseCases {
+        return EditSuppliersUseCases(
+            getSuppliers = GetSuppliersForItem(repository)
+        )
+    }
 }

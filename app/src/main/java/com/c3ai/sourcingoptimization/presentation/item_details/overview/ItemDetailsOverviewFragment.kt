@@ -23,7 +23,6 @@ import com.github.aachartmodel.aainfographics.aatools.AALinearGradientDirection
 import dagger.hilt.android.AndroidEntryPoint
 import java.text.DecimalFormat
 import javax.inject.Inject
-import android.widget.LinearLayout
 import androidx.appcompat.widget.LinearLayoutCompat
 
 

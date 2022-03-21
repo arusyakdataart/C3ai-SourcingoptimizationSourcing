@@ -88,12 +88,12 @@ class C3RepositoryImpl @Inject constructor(private val api: C3ApiService) : C3Re
         )
     }
 
-    override suspend fun getItemDetailsSuppliers(itemId: String): C3Result<List<C3Vendor>> =
+    override suspend fun getItemDetailsSuppliers(itemId: String, limit: Int): C3Result<List<C3Vendor>> =
         C3Result.on {
             api.getSuppliers(
                 SuppliersParameters(
                     itemId = itemId,
-                    limit = 5,
+                    limit = limit,
                     order = "descending(spend.value)"
                 )
             ).objs

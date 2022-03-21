@@ -74,7 +74,7 @@ class C3MockRepositoryImpl : C3Repository {
         TODO("Not yet implemented")
     }
 
-    override suspend fun getItemDetailsSuppliers(itemId: String): C3Result<List<C3Vendor>> {
+    override suspend fun getItemDetailsSuppliers(itemId: String, limit: Int): C3Result<List<C3Vendor>> {
         TODO("Not yet implemented")
     }
 

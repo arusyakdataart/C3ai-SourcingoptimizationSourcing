@@ -15,6 +15,7 @@
     <string name="cd_settings">Settings</string>
     <string name="cd_navigation_back_button">Back button</string>
     <string name="supplier_">"Supplier %s"</string>
+    <string name="edit_suppliers">"Edit Suppliers"</string>
     <string name="cd_search_clear">CLear search</string>
     <string name="po_lines">PO Lines</string>
     <string name="po_lines_">"PO Lines (%s)"</string>
@@ -57,6 +58,7 @@
     <string name="moq">MOQ</string>
     <string name="_share">% Share</string>
     <string name="avg_unit_price">% Avg. Unit Price</string>
+    <string name="select_suppliers">Select up to 5 suppliers</string>
     <array name="sort_po">
         <item>Total Cost</item>
         <item>Unit Price</item>
