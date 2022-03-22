@@ -8,7 +8,6 @@ import com.c3ai.sourcingoptimization.data.C3Result.Success
 import com.c3ai.sourcingoptimization.data.repository.C3Repository
 import com.c3ai.sourcingoptimization.domain.model.*
 import com.c3ai.sourcingoptimization.utilities.PAGINATED_RESPONSE_LIMIT
-import com.c3ai.sourcingoptimization.utilities.VISIBLE_THRESHOLD
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -341,7 +340,7 @@ class ItemDetailsViewModel @AssistedInject constructor(
                 }
             }
 
-            val marketPriceIndex = repository.getMarketPriceIndex()
+            val marketPriceIndex = repository.getMarketPriceIndexes()
             viewModelState.update {
                 when (marketPriceIndex) {
                     is Success -> {

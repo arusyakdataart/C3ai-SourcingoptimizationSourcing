@@ -1,13 +1,14 @@
-package com.c3ai.sourcingoptimization.presentation.watchlist.suppliers
+package com.c3ai.sourcingoptimization.presentation.watchlist.index
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.data.C3Result
-import com.c3ai.sourcingoptimization.domain.model.C3Vendor
+import com.c3ai.sourcingoptimization.domain.model.MarketPriceIndex
 import com.c3ai.sourcingoptimization.domain.settings.C3AppSettingsProvider
-import com.c3ai.sourcingoptimization.domain.use_case.EditSuppliersUseCases
+import com.c3ai.sourcingoptimization.domain.use_case.EditIndexUseCases
 import com.c3ai.sourcingoptimization.presentation.ViewModelState
+import com.c3ai.sourcingoptimization.presentation.watchlist.suppliers.EditSuppliersEvent
 import com.c3ai.sourcingoptimization.utilities.ErrorMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -18,10 +19,10 @@ import javax.inject.Inject
 /**
  * UI state for the Home route.
  *
- * This is derived from [EditSuppliersUiState], but split into two possible subclasses to more
+ * This is derived from [EditIndexUiState], but split into two possible subclasses to more
  * precisely represent the state available to render the UI.
  */
-sealed interface EditSuppliersUiState {
+sealed interface EditIndexUiState {
 
     val isLoading: Boolean
     val errorMessages: List<ErrorMessage>
@@ -37,48 +38,48 @@ sealed interface EditSuppliersUiState {
         override val isLoading: Boolean,
         override val errorMessages: List<ErrorMessage>,
         override val searchInput: String
-    ) : EditSuppliersUiState
+    ) : EditIndexUiState
 
     /**
-     * There is data to render, as contained in model[index].
+     * There is data to render, as contained in model[indexes].
      *
      */
     data class HasData(
-        val suppliers: List<C3Vendor>,
-        val checkedItemsIds: Set<String> = emptySet(),
+        val indexes: List<MarketPriceIndex>,
+        val checkedItemId: String = "",
         override val isLoading: Boolean,
         override val errorMessages: List<ErrorMessage>,
         override val searchInput: String,
-    ) : EditSuppliersUiState
+    ) : EditIndexUiState
 }
 
 /**
- * An internal representation of the EditSuppliers route state, in a raw form
+ * An internal representation of the EditIndex route state, in a raw form
  */
-private data class EditSuppliersViewModelState(
+private data class EditIndexViewModelState(
     override val settings: C3AppSettingsProvider,
-    val suppliers: List<C3Vendor>? = null,
+    val indexes: List<MarketPriceIndex>? = null,
     val isLoading: Boolean = false,
     val errorMessages: List<ErrorMessage> = emptyList(),
     val searchInput: String = "",
-    val checkedItemsIds: Set<String> = emptySet()
+    val checkedItemId: String = ""
 ) : ViewModelState() {
 
     /**
-     * Converts this [EditSuppliersViewModelState] into
-     * a more strongly typed [EditSuppliersUiState] for driving the ui.
+     * Converts this [EditIndexViewModelState] into
+     * a more strongly typed [EditIndexUiState] for driving the ui.
      */
-    fun toUiState(): EditSuppliersUiState =
-        if (suppliers != null) {
-            EditSuppliersUiState.HasData(
-                suppliers = suppliers,
-                checkedItemsIds = checkedItemsIds,
+    fun toUiState(): EditIndexUiState =
+        if (indexes != null) {
+            EditIndexUiState.HasData(
+                indexes = indexes,
+                checkedItemId = checkedItemId,
                 isLoading = isLoading,
                 errorMessages = errorMessages,
                 searchInput = searchInput
             )
         } else {
-            EditSuppliersUiState.NoData(
+            EditIndexUiState.NoData(
                 isLoading = isLoading,
                 errorMessages = errorMessages,
                 searchInput = searchInput
@@ -87,13 +88,13 @@ private data class EditSuppliersViewModelState(
 }
 
 @HiltViewModel
-class EditSuppliersViewModel @Inject constructor(
+class EditIndexViewModel @Inject constructor(
     settings: C3AppSettingsProvider,
-    private val useCases: EditSuppliersUseCases
+    private val useCases: EditIndexUseCases
 ) : ViewModel() {
 
     private val viewModelState = MutableStateFlow(
-        EditSuppliersViewModelState(
+        EditIndexViewModelState(
             settings = settings,
             isLoading = true
         )
@@ -113,16 +114,16 @@ class EditSuppliersViewModel @Inject constructor(
     }
 
     /**
-     * Refresh supplier details and update the UI state accordingly
+     * Refresh index data and update the UI state accordingly
      */
     fun refreshDetails() {
         viewModelState.update { it.copy(isLoading = true) }
 
         viewModelScope.launch {
-            val result = useCases.getSuppliers("item1")
+            val result = useCases.getIndexes()
             viewModelState.update {
                 when (result) {
-                    is C3Result.Success -> it.copy(suppliers = result.data, isLoading = false)
+                    is C3Result.Success -> it.copy(indexes = result.data, isLoading = false)
                     is C3Result.Error -> {
                         val errorMessages = it.errorMessages + ErrorMessage(
                             id = UUID.randomUUID().mostSignificantBits,

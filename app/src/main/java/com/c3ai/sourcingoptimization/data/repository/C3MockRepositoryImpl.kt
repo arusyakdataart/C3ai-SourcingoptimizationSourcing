@@ -95,7 +95,7 @@ class C3MockRepositoryImpl : C3Repository {
         TODO("Not yet implemented")
     }
 
-    override suspend fun getMarketPriceIndex(): C3Result<List<MarketPriceIndex>> {
+    override suspend fun getMarketPriceIndexes(): C3Result<List<MarketPriceIndex>> {
         TODO("Not yet implemented")
     }
 

@@ -74,4 +74,11 @@ object AppModule {
             getSuppliers = GetSuppliersForItem(repository)
         )
     }
+
+    @Provides
+    fun provideEditIndexUseCases(repository: C3Repository): EditIndexUseCases {
+        return EditIndexUseCases(
+            getIndexes = GetMarketPriceIndexes(repository)
+        )
+    }
 }

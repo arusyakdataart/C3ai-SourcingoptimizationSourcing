@@ -13,6 +13,7 @@ import androidx.navigation.navArgument
 import com.c3ai.sourcingoptimization.presentation.po_details.PODetailsRoute
 import com.c3ai.sourcingoptimization.presentation.search.SearchRoute
 import com.c3ai.sourcingoptimization.presentation.supplier_details.SupplierDetailsRoute
+import com.c3ai.sourcingoptimization.presentation.watchlist.index.EditIndexRoute
 import com.c3ai.sourcingoptimization.presentation.watchlist.suppliers.EditSuppliersRoute
 import com.google.gson.Gson
 
@@ -64,6 +65,17 @@ fun C3NavGraph(
                     entry.arguments?.getString("supplierIds"),
                     Array<String>::class.java
                 ).asList()
+            )
+        }
+        composable(
+            C3Destinations.EDIT_INDEX_ROUTE,
+            arguments = listOf(
+                navArgument("indexId") { type = NavType.StringType }
+            )
+        ) { entry ->
+            EditIndexRoute(
+                navController = navController,
+                indexId = entry.arguments?.getString("indexId")
             )
         }
     }

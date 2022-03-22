@@ -1,4 +1,4 @@
-package com.c3ai.sourcingoptimization.presentation.watchlist.suppliers
+package com.c3ai.sourcingoptimization.presentation.watchlist.index
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -6,15 +6,12 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
@@ -25,10 +22,9 @@ import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.common.components.*
 import com.c3ai.sourcingoptimization.ui.theme.BackgroundColor
 import com.c3ai.sourcingoptimization.ui.theme.Blue
-import com.c3ai.sourcingoptimization.ui.theme.Gray70
 
 /**
- * A display and edit of the suppliers list for item.
+ * A display and edit of the indexes list for item.
  *
  * This sets up the scaffold with the top app bar, and surrounds the content with refresh,
  * loading and error handling.
@@ -36,23 +32,19 @@ import com.c3ai.sourcingoptimization.ui.theme.Gray70
 
 @ExperimentalFoundationApi
 @Composable
-fun EditSuppliersScreen(
+fun EditIndexScreen(
     scaffoldState: ScaffoldState,
-    uiState: EditSuppliersUiState,
-    itemId: String,
-    supplierIds: List<String>,
+    uiState: EditIndexUiState,
+    indexId: String,
     onRefreshDetails: () -> Unit,
     onSearchInputChanged: (String) -> Unit,
-    onSupplierClick: (String) -> Unit,
-    onCheckSupplier: (String) -> Unit,
-    onUncheckSupplier: (String) -> Unit,
     onBackButtonClick: () -> Unit,
 ) {
     Scaffold(
         scaffoldState = scaffoldState,
         topBar = {
             TopAppBar(
-                title = stringResource(R.string.edit_suppliers),
+                title = stringResource(R.string.edit_index),
                 searchInput = uiState.searchInput,
                 onBackButtonClick = onBackButtonClick,
                 onSearchInputChanged = onSearchInputChanged,
@@ -63,22 +55,20 @@ fun EditSuppliersScreen(
         snackbarHost = { C3SnackbarHost(hostState = it) },
     ) { innerPadding ->
         val contentModifier = Modifier.padding(innerPadding)
-        val checkedSuppliers = mutableListOf<String>()
-        checkedSuppliers.addAll(supplierIds)
-        val openDialog = remember { mutableStateOf(false) }
-
         LoadingContent(
             empty = when (uiState) {
-                is EditSuppliersUiState.HasData -> false
-                is EditSuppliersUiState.NoData -> uiState.isLoading
+                is EditIndexUiState.HasData -> false
+                is EditIndexUiState.NoData -> uiState.isLoading
             },
             emptyContent = { FullScreenLoading() },
             loading = uiState.isLoading,
             onRefresh = onRefreshDetails,
             content = {
                 when (uiState) {
-                    is EditSuppliersUiState.HasData -> {
+                    is EditIndexUiState.HasData -> {
                         val listState = rememberLazyListState()
+                        val selectedState = remember { mutableStateOf(indexId) }
+
                         LazyColumn(modifier = Modifier.fillMaxSize(), listState) {
                             stickyHeader {
                                 Box(
@@ -87,7 +77,7 @@ fun EditSuppliersScreen(
                                         .background(BackgroundColor)
                                 ) {
                                     Text(
-                                        text = stringResource(R.string.select_suppliers),
+                                        text = stringResource(R.string.select_index),
                                         style = MaterialTheme.typography.h5,
                                         color = MaterialTheme.colors.secondary,
                                         modifier = Modifier
@@ -96,54 +86,18 @@ fun EditSuppliersScreen(
                                     )
                                 }
                             }
-                            items(items = uiState.suppliers, itemContent = {
-                                val isChecked = supplierIds.contains(it.id)
-                                val checkedState = remember { mutableStateOf(isChecked) }
+                            items(items = uiState.indexes, itemContent = {
                                 ConstraintLayout(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .padding(
                                             start = 16.dp,
-                                            top = 24.dp,
+                                            top = 16.dp,
                                             end = 16.dp,
                                             bottom = 0.dp
                                         )
                                 ) {
-                                    val (header, image, titleText, subtitleText, checkBox, divider) = createRefs()
-                                    val nameShort = it.name.split(" ")
-                                        .joinToString("") { it[0].toString() }.uppercase()
-                                    Text(
-                                        text = stringResource(
-                                            R.string.supplier_,
-                                            it.id
-                                        ).uppercase(),
-                                        style = MaterialTheme.typography.h5,
-                                        color = MaterialTheme.colors.secondary,
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .constrainAs(header) {
-                                                top to parent.top
-                                                start to parent.start
-                                            }
-                                    )
-
-                                    Box(
-                                        contentAlignment = Alignment.Center,
-                                        modifier = Modifier
-                                            .size(48.dp)
-                                            .clip(CircleShape)
-                                            .background(Gray70)
-                                            .constrainAs(image) {
-                                                top.linkTo(header.bottom, margin = 16.dp)
-                                                start to parent.start
-                                            }) {
-                                        Text(
-                                            nameShort,
-                                            style = MaterialTheme.typography.h1,
-                                            color = MaterialTheme.colors.primary,
-                                        )
-                                    }
-
+                                    val (titleText, radioButton, divider) = createRefs()
                                     Text(
                                         it.name,
                                         style = MaterialTheme.typography.h3,
@@ -152,45 +106,22 @@ fun EditSuppliersScreen(
                                         overflow = TextOverflow.Ellipsis,
                                         modifier = Modifier
                                             .constrainAs(titleText) {
-                                                top.linkTo(header.bottom, margin = 16.dp)
-                                                start.linkTo(image.end, margin = 16.dp)
+                                                top.linkTo(parent.top, margin = 16.dp)
+                                                start.linkTo(parent.start, margin = 16.dp)
                                             }
                                     )
-                                    Text(
-                                        it.location?.address?.components?.joinToString {
-                                            it.name ?: ""
-                                        } ?: "",
-                                        style = MaterialTheme.typography.subtitle1,
-                                        color = MaterialTheme.colors.secondary,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis,
-                                        modifier = Modifier
-                                            .constrainAs(subtitleText) {
-                                                top.linkTo(titleText.bottom)
-                                                start.linkTo(image.end, margin = 16.dp)
-                                            }
-                                    )
-                                    Checkbox(
-                                        checked = checkedState.value,
-                                        onCheckedChange = { isChecked ->
-                                            if (isChecked && checkedSuppliers.size < 5) {
-                                                checkedState.value = isChecked
-                                                checkedSuppliers.add(it.id)
-                                            } else if (!isChecked && checkedSuppliers.size > 1) {
-                                                checkedState.value = isChecked
-                                                checkedSuppliers.remove(it.id)
-                                            } else {
-                                                openDialog.value = true
-                                            }
-                                        },
+
+                                    RadioButton(
+                                        selected = selectedState.value == it.id,
+                                        onClick = { selectedState.value = it.id },
                                         modifier = Modifier
                                             .padding(start = 16.dp)
                                             .size(24.dp)
-                                            .constrainAs(checkBox) {
-                                                top.linkTo(header.bottom, margin = 16.dp)
+                                            .constrainAs(radioButton) {
+                                                top.linkTo(parent.top, margin = 16.dp)
                                                 end.linkTo(parent.end)
                                             },
-                                        colors = CheckboxDefaults.colors(Blue)
+                                        colors = RadioButtonDefaults.colors(Blue)
                                     )
 
                                     Divider(
@@ -202,7 +133,7 @@ fun EditSuppliersScreen(
                                                 bottom = 0.dp
                                             )
                                             .constrainAs(divider) {
-                                                top.linkTo(image.bottom)
+                                                top.linkTo(titleText.bottom)
                                                 end.linkTo(parent.end)
                                             }
                                     )
@@ -211,7 +142,7 @@ fun EditSuppliersScreen(
                             })
                         }
                     }
-                    is EditSuppliersUiState.NoData -> {
+                    is EditIndexUiState.NoData -> {
                         if (uiState.errorMessages.isEmpty()) {
                             // if there are no posts, and no error, let the user refresh manually
                             PButton(
@@ -225,20 +156,13 @@ fun EditSuppliersScreen(
                         }
                     }
                 }
-                if (openDialog.value) {
-                    C3AlertDialog(
-                        title = stringResource(id = if (checkedSuppliers.size == 5) R.string.max_number_reached else R.string.min_number_reached),
-                        text = stringResource(id = if (checkedSuppliers.size == 5) R.string.max_number_reached_text else R.string.min_number_reached_text),
-                        dismissButtonText = stringResource(id = R.string.dismiss),
-                        onDismiss = { openDialog.value = false })
-                }
             }
         )
     }
 }
 
 /**
- * TopAppBar for the edit suppliers screen[EditSupplierScreen]
+ * TopAppBar for the edit suppliers screen[EditIndexScreen]
  */
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable

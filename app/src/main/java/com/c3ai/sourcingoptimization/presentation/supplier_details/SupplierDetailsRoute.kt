@@ -9,6 +9,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.c3ai.sourcingoptimization.presentation.item_details.ItemDetailsActivity
+import com.c3ai.sourcingoptimization.presentation.navigateToEditIndex
 import com.c3ai.sourcingoptimization.presentation.navigateToEditSuppliers
 import com.c3ai.sourcingoptimization.presentation.navigateToPoDetails
 import com.google.gson.Gson
@@ -42,18 +43,20 @@ fun SupplierDetailsRoute(
         onExpandableItemClick = { viewModel.onEvent(SupplierDetailsEvent.OnExpandableItemClick(it)) },
         onPOItemClick = { navController.navigateToPoDetails(it) },
         onAlertsClick = {
-            navController.navigateToEditSuppliers(
-                it,
-                Gson().toJson(
-                    listOf(
-                        "supplier42",
-                        "supplier32",
-                        "supplier48",
-                        "supplier8",
-                        "supplier38"
-                    )
-                )
-            )
+//            navController.navigateToEditSuppliers(
+//                it,
+//                Gson().toJson(
+//                    listOf(
+//                        "supplier42",
+//                        "supplier32",
+//                        "supplier48",
+//                        "supplier8",
+//                        "supplier38"
+//                    )
+//                )
+//            )
+
+            navController.navigateToEditIndex("mpi0")
         },
         onC3ItemClick = {
             val intent = Intent(context, ItemDetailsActivity::class.java)
