@@ -16,7 +16,7 @@
     <string name="cd_navigation_back_button">Back button</string>
     <string name="supplier_">"Supplier %s"</string>
     <string name="edit_suppliers">"Edit Suppliers"</string>
-    <string name="edit_index">"Edit Index"</string>
+    <string name="edit_index">"Edit Market Price Index"</string>
     <string name="cd_search_clear">CLear search</string>
     <string name="po_lines">PO Lines</string>
     <string name="po_lines_">"PO Lines (%s)"</string>
