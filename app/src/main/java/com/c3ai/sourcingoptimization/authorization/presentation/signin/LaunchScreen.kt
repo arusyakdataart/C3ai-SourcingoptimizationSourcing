@@ -3,6 +3,7 @@ package com.c3ai.sourcingoptimization.authorization.presentation.signin
 import android.app.Activity
 import android.content.Intent
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
@@ -30,6 +31,7 @@ import com.c3ai.sourcingoptimization.presentation.MainActivity
  * Start screen in the application. It checks authorization and navigates to next screen
  * depending on the current state[C3Session]
  * */
+@OptIn(ExperimentalFoundationApi::class)
 @ExperimentalAnimationApi
 @Composable
 fun LaunchScreen(

@@ -16,7 +16,7 @@ class ItemDetailsActivity :
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val id = intent.getStringExtra("id") ?: "item0"
+        val id = intent.getStringExtra("id") ?: "item1"
         supportActionBar?.title = "Item ID$id"
     }
 }

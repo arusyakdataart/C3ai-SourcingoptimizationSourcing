@@ -40,7 +40,6 @@ import com.c3ai.sourcingoptimization.common.components.C3SnackbarHost
 import com.c3ai.sourcingoptimization.common.components.PButton
 import com.c3ai.sourcingoptimization.domain.model.Alert
 import com.c3ai.sourcingoptimization.modifiers.interceptKey
-import com.c3ai.sourcingoptimization.presentation.MainActivity
 import com.c3ai.sourcingoptimization.presentation.alerts.AlertCardSimple
 import com.c3ai.sourcingoptimization.presentation.item_details.ItemDetailsActivity
 import com.c3ai.sourcingoptimization.presentation.navigateToSupplierDetails

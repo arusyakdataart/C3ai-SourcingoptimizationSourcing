@@ -8,7 +8,6 @@ import com.c3ai.sourcingoptimization.data.C3Result.Success
 import com.c3ai.sourcingoptimization.data.repository.C3Repository
 import com.c3ai.sourcingoptimization.domain.model.*
 import com.c3ai.sourcingoptimization.utilities.PAGINATED_RESPONSE_LIMIT
-import com.c3ai.sourcingoptimization.utilities.VISIBLE_THRESHOLD
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -225,18 +224,8 @@ class ItemDetailsViewModel @AssistedInject constructor(
             viewModelState.value.toUiState()
         )
 
-    val accept: (UiAction) -> Unit
-
     init {
         refresh()
-
-        accept = { action ->
-            when (action) {
-                is UiAction.Scroll -> if (action.shouldFetchMore(offset) && !viewModelState.value.isLoading) {
-                    refresh()
-                }
-            }
-        }
     }
 
     /**
@@ -328,7 +317,7 @@ class ItemDetailsViewModel @AssistedInject constructor(
                 }
             }
 
-            val suppliersResult = repository.getItemDetailsSuppliers(itemId)
+            val suppliersResult = repository.getItemDetailsSuppliers(itemId, 5)
             viewModelState.update {
                 when (suppliersResult) {
                     is Success -> {
@@ -351,7 +340,7 @@ class ItemDetailsViewModel @AssistedInject constructor(
                 }
             }
 
-            val marketPriceIndex = repository.getMarketPriceIndex()
+            val marketPriceIndex = repository.getMarketPriceIndexes()
             viewModelState.update {
                 when (marketPriceIndex) {
                     is Success -> {
@@ -532,19 +521,6 @@ class ItemDetailsViewModel @AssistedInject constructor(
             ) as T
         }
     }
-}
-
-fun UiAction.Scroll.shouldFetchMore(offset: Int): Boolean {
-    return offset == totalItemCount * PAGINATED_RESPONSE_LIMIT
-            && visibleItemCount + lastVisibleItemPosition + VISIBLE_THRESHOLD >= totalItemCount
-}
-
-sealed class UiAction {
-    data class Scroll(
-        val visibleItemCount: Int,
-        val lastVisibleItemPosition: Int,
-        val totalItemCount: Int
-    ) : UiAction()
 }
 
 @AssistedFactory
