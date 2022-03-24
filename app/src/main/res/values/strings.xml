@@ -16,6 +16,7 @@
     <string name="cd_navigation_back_button">Back button</string>
     <string name="supplier_">"Supplier %s"</string>
     <string name="cd_search_clear">CLear search</string>
+    <string name="overview">Overview</string>
     <string name="po_lines">PO Lines</string>
     <string name="po_lines_">"PO Lines (%s)"</string>
     <string name="items_supplied">Items Supplied</string>
@@ -57,6 +58,8 @@
     <string name="moq">MOQ</string>
     <string name="_share">% Share</string>
     <string name="avg_unit_price">% Avg. Unit Price</string>
+    <string name="saving_opportunity">Saving Opportunity</string>
+    <string name="suppliers_with_contract">Suppliers with Contract</string>
     <array name="sort_po">
         <item>Total Cost</item>
         <item>Unit Price</item>

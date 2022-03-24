@@ -106,7 +106,7 @@ private data class SupplierDetailsViewModelState(
 }
 
 /**
- * ViewModel that handles the business logic of the Home screen
+ * ViewModel that handles the business logic of the SuppliersDetails screen
  */
 @HiltViewModel
 class SuppliersDetailsViewModel @Inject constructor(

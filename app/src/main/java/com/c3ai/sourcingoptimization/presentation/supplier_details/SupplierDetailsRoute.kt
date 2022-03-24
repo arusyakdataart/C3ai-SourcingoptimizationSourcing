@@ -1,6 +1,5 @@
 package com.c3ai.sourcingoptimization.presentation.supplier_details
 
-import android.app.Activity
 import android.content.Intent
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable

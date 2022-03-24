@@ -40,9 +40,6 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
     FragmentItemDetailsOverviewBinding::inflate
 ) {
 
-    @Inject
-    lateinit var assistedFactory: ItemDetailsViewModelAssistedFactory
-
     private var itemId = "item0"
     private var selectedSpinnerPosition = 0
     private lateinit var suppliers: List<C3Vendor>
@@ -54,19 +51,7 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
         arrayOf("#82B0FF", "#C799FF", "#F2950A", "#49BFA9", "#A7ADC4")
 
 
-    private val viewModel: ItemDetailsViewModel by viewModels {
-        ItemDetailsViewModel.Factory(
-            assistedFactory, itemId,
-            po_expressions = listOf("OpenPOLineQuantity", "ClosedPOLineQuantity"),
-            po_startDate = formatDate(date = getYearBackDate(1)),
-            po_endDate = formatDate(date = getCurrentDate()),
-            po_interval = "YEAR",
-            so_expressions = listOf("SavingsOpportunityCompound"),
-            so_startDate = formatDate(date = getMonthBackDate(1)),
-            so_endDate = formatDate(date = getCurrentDate()),
-            so_interval = "MONTH",
-        )
-    }
+    private val viewModel: ItemDetailsViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -87,23 +72,14 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
         viewModel.uiState.asLiveData().observe(viewLifecycleOwner) { result ->
             when (result) {
                 is ItemDetailsUiState.HasItem -> {
-                    bindC3Item(result.item)
-                }
+//                    bindC3Item(result.item)
 
-                is ItemDetailsUiState.HasPOLinesQtyMetrics -> {
-                    bindOpenClosedPOLineQty(result.poLineQty)
-                }
-
-                is ItemDetailsUiState.HasSavingsOpportunity -> {
-                    bindSavingsOpportunity(result.savingsOpportunity)
-                }
-                is ItemDetailsUiState.HasSuppliers -> {
+                    result.poLineQty?.let { bindOpenClosedPOLineQty(it) }
+                    result.savingsOpportunity?.let { bindSavingsOpportunity(it) }
                     suppliers = result.suppliers
                     bindSuppliers()
                     viewModel.getItemVendorRelation(itemId, suppliers.map { it.id })
-                }
-                is ItemDetailsUiState.HasItemVendorRelation -> {
-                    relations = result.relations
+                    relations = result.vendorRelations
                     viewModel.getItemVendorRelationMetrics(
                         ids = relations.map { it.id },
                         expressions = listOf("OrderLineValue"),
@@ -111,26 +87,18 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
                         endDate = formatDate(date = getCurrentDate()),
                         interval = "MONTH"
                     )
-                }
-                is ItemDetailsUiState.HasItemVendorRelationMetrics -> {
-                    val metrics = result.relationMetrics
-                    relations.forEach {
-                        suppliersChartData.put(
-                            it.to.id,
-                            metrics.result.get(it.id)?.OrderLineValue?.data ?: listOf()
-                        )
+                    result.itemVendorRelationMetrics?.let {
+                        val metrics = it
+                        relations.forEach { relation ->
+                            suppliersChartData[relation.to.id] =
+                                metrics.result[relation.id]?.OrderLineValue?.data ?: listOf()
+                        }
+                        bindMultiLineChart()
                     }
-                    bindMultiLineChart()
-                }
-
-                is ItemDetailsUiState.HasMarketPriceIndex -> {
                     if (result.indexes.isNotEmpty()) {
                         indexId = result.indexes[0].id
                         viewModel.getItemMarketPriceIndexRelation(itemId, indexId)
                     }
-                }
-
-                is ItemDetailsUiState.HasItemMarketPriceIndexRelation -> {
                     viewModel.getItemMarketPriceIndexRelationMetrics(
                         ids = listOf(indexId),
                         expressions = listOf("IndexPrice"),
@@ -138,14 +106,13 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
                         endDate = formatDate(date = getCurrentDate()),
                         interval = "MONTH"
                     )
-                }
-
-                is ItemDetailsUiState.HasItemMarketPriceIndexRelationMetrics -> {
-                    marketPriceIndexRelationMetric = result.relationMetrics.result[indexId]
-                    setGraphYear()
-                    val indexPrice = marketPriceIndexRelationMetric?.IndexPrice
-                    if (indexPrice != null) {
-                        bindDashedLineChart(indexPrice)
+                    result.itemMarketPriceIndexRelationMetrics?.let {
+                        marketPriceIndexRelationMetric = it.result[indexId]
+                        setGraphYear()
+                        val indexPrice = marketPriceIndexRelationMetric?.IndexPrice
+                        if (indexPrice != null) {
+                            bindDashedLineChart(indexPrice)
+                        }
                     }
                 }
                 else -> {
