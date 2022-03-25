@@ -23,7 +23,7 @@ import java.util.*
 import javax.inject.Inject
 
 /**
- * UI state for the Home route.
+ * UI state for the Supplier Details route.
  *
  * This is derived from [SupplierDetailsUiState], but split into two possible subclasses to more
  * precisely represent the state available to render the UI.

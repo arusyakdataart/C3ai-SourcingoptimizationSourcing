@@ -38,7 +38,7 @@ fun AlertCardSimple(
             }
     ) {
         Column(modifier = Modifier.weight(1f)) {
-            Text(alert.title, style = MaterialTheme.typography.subtitle1)
+            Text(alert.description, style = MaterialTheme.typography.subtitle1)
         }
     }
 }

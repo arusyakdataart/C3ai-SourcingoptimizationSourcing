@@ -81,4 +81,11 @@ object AppModule {
             getIndexes = GetMarketPriceIndexes(repository)
         )
     }
+
+    @Provides
+    fun provideAlertsUseCases(repository: C3Repository): AlertsUseCases {
+        return AlertsUseCases(
+            getAlerts = GetAlertsForUser(repository)
+        )
+    }
 }

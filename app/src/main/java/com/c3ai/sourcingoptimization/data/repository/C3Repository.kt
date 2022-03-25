@@ -74,4 +74,6 @@ interface C3Repository {
         endDate: String,
         interval: String
     ): C3Result<ItemMarketPriceIndexRelationMetrics>
+
+    suspend fun getAlertsForUser(order: String): C3Result<List<Alert>>
 }

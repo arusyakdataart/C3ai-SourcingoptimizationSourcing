@@ -163,4 +163,8 @@ class C3RepositoryImpl @Inject constructor(private val api: C3ApiService) : C3Re
             )
         )
     }
+
+    override suspend fun getAlertsForUser(order: String): C3Result<List<Alert>> = C3Result.on {
+        api.getAlertsForUser(AlertsParameters(order)).objs
+    }
 }
