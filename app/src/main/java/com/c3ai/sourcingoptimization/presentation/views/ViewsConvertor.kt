@@ -1,9 +1,6 @@
 package com.c3ai.sourcingoptimization.presentation.views
 
-import com.c3ai.sourcingoptimization.domain.model.C3Item
-import com.c3ai.sourcingoptimization.domain.model.C3UnitValue
-import com.c3ai.sourcingoptimization.domain.model.C3Vendor
-import com.c3ai.sourcingoptimization.domain.model.PurchaseOrder
+import com.c3ai.sourcingoptimization.domain.model.*
 import com.c3ai.sourcingoptimization.domain.settings.C3AppSettingsProvider
 import com.c3ai.sourcingoptimization.presentation.ViewModelState
 import java.util.*
@@ -85,6 +82,35 @@ fun ViewModelState.convert(line: PurchaseOrder.Line): UiPurchaseOrder.Line =
         actualLeadTime = Date().daysBefore(line.promisedDeliveryDate),
         order = line.order?.let { convert(it) },
     )
+
+fun ViewModelState.convert(
+    savingsOppItem: SavingsOpportunityItem?,
+    itemId: String
+): UiSavingsOpportunityItem = UiSavingsOpportunityItem(
+    savingOppText = savingsOppItem?.let { item ->
+        val savingOppText = item.result[itemId]?.SavingsOpportunityCompound?.missing?.let { list ->
+            val filteredList = list.filter { it < 100 }
+            if (filteredList.isEmpty()) "0" else filteredList.sum().div(filteredList.size)
+        }
+        String.format("%s%s", "$", savingOppText)
+    } ?: "",
+    data = savingsOppItem?.result?.get(itemId)?.SavingsOpportunityCompound?.data
+        ?: emptyList()
+)
+
+fun ViewModelState.convert(
+    ocPOLineQtyItem: OpenClosedPOLineQtyItem?,
+    itemId: String
+): UiOpenClosedPOLineQtyItem = UiOpenClosedPOLineQtyItem(
+    closedValueText = String.format(
+        "%s%s", "$",
+        (ocPOLineQtyItem?.result?.get(itemId)?.ClosedPOLineQuantity?.data?.get(0) ?: "").toString()
+    ),
+    openValueText = String.format(
+        "%s%s", "$",
+        (ocPOLineQtyItem?.result?.get(itemId)?.OpenPOLineQuantity?.data?.get(0) ?: "").toString()
+    ),
+)
 
 fun C3AppSettingsProvider.format(date: Date?): String {
     return date?.let { getDateFormatter().format(date) } ?: "-"

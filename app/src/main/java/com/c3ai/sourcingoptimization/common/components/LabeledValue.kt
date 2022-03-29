@@ -13,13 +13,17 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun LabeledValue(
     modifier: Modifier = Modifier,
+    labelModifier: Modifier = Modifier,
     label: String,
     value: String,
     valueStyle: TextStyle = MaterialTheme.typography.subtitle2,
     valueColor: Color = MaterialTheme.colors.primary,
 ) {
     Column(modifier = modifier) {
-        Text(label, style = MaterialTheme.typography.h5, color = MaterialTheme.colors.secondary)
+        Text(
+            label, style = MaterialTheme.typography.h5, color = MaterialTheme.colors.secondary,
+            modifier = labelModifier
+        )
         Text(value, style = valueStyle, color = valueColor, modifier = Modifier.padding(top = 4.dp))
     }
 }

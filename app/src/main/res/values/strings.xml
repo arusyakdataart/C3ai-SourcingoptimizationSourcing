@@ -60,6 +60,17 @@
     <string name="avg_unit_price">% Avg. Unit Price</string>
     <string name="saving_opportunity">Saving Opportunity</string>
     <string name="suppliers_with_contract">Suppliers with Contract</string>
+    <string name="suppliers">"Suppliers"</string>
+    <string name="last_30_days">Last 30 days</string>
+    <string name="inventory">Inventory</string>
+    <string name="open_pol_value">Open POL Value</string>
+    <string name="closed_pol_value">Closed POL Value</string>
+    <string name="cases">Cases</string>
+    <string name="last_12_mo">Last 12 mo</string>
+    <string name="avg_price">Avg Price</string>
+    <string name="lowest_price">Lowest Price</string>
+    <string name="last_price">Last Price</string>
+    <string name="sourcing_analysis">Sourcing Analysis</string>
     <array name="sort_po">
         <item>Total Cost</item>
         <item>Unit Price</item>
@@ -70,5 +81,9 @@
         <item>Promised Delivery Date</item>
         <item>Actual Lead Time</item>
         <item>Planned Lead Time</item>
+    </array>
+    <array name="sourcingAnalysisStatsType">
+        <item>Total Spent ($)</item>
+        <item>Share (%)</item>
     </array>
 </resources>

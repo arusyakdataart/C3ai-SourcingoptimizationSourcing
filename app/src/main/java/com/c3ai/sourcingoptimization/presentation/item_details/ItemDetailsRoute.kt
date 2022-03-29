@@ -38,6 +38,8 @@ fun ItemDetailsRoute(
         itemId = itemId ?: "",
         onTabItemClick = { viewModel.onEvent(ItemDetailsEvent.OnTabItemClick(it)) },
         onBackButtonClick = { navController.navigateUp() },
-        loadData = { itemId -> viewModel.loadData(itemId) },
+        loadData = { itemId?.let { viewModel.loadData(it) } },
+        onAlertsClick = {},
+        onStatsTypeSelected = { viewModel.onEvent(ItemDetailsEvent.OnStatsTypeSelected(it))}
     )
 }

@@ -15,9 +15,13 @@ import com.c3ai.sourcingoptimization.domain.settings.FakeC3AppSettingsProvider
 import com.c3ai.sourcingoptimization.presentation.ViewModelState
 import com.c3ai.sourcingoptimization.presentation.item_details.ItemDetailsEvent
 import com.c3ai.sourcingoptimization.presentation.views.UiItem
+import com.c3ai.sourcingoptimization.presentation.views.UiOpenClosedPOLineQtyItem
+import com.c3ai.sourcingoptimization.presentation.views.UiSavingsOpportunityItem
 import com.c3ai.sourcingoptimization.presentation.views.convert
 import com.c3ai.sourcingoptimization.utilities.PAGINATED_RESPONSE_LIMIT
 import com.c3ai.sourcingoptimization.utilities.VISIBLE_THRESHOLD
+import com.c3ai.sourcingoptimization.utilities.extentions.formatNumberLocal
+import com.github.mikephil.charting.utils.Utils.formatNumber
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -34,6 +38,7 @@ sealed interface ItemDetailsUiState {
     val isLoading: Boolean
     val itemId: String
     val tabIndex: Int
+    val statsTypeSelected: Int
 
     /**
      * There are no item to render.
@@ -44,7 +49,8 @@ sealed interface ItemDetailsUiState {
     data class NoItem(
         override val isLoading: Boolean,
         override val itemId: String,
-        override val tabIndex: Int
+        override val tabIndex: Int,
+        override val statsTypeSelected: Int
     ) : ItemDetailsUiState
 
     /**
@@ -53,9 +59,11 @@ sealed interface ItemDetailsUiState {
      */
     data class HasItem(
         val item: UiItem,
-        val poLineQty: OpenClosedPOLineQtyItem? = null,
-        val savingsOpportunity: SavingsOpportunityItem? = null,
+        val savingsOpportunity: UiSavingsOpportunityItem,
+        val ocPOLineQty: UiOpenClosedPOLineQtyItem,
         val suppliers: List<C3Vendor> = emptyList(),
+        val suppliersChartData: List<Double> = emptyList(),
+        val suppliersChartDataMaxValue: Double?,
         val vendorRelations: List<ItemRelation> = emptyList(),
         val itemVendorRelationMetrics: ItemVendorRelationMetrics? = null,
         val indexes: List<MarketPriceIndex> = emptyList(),
@@ -63,7 +71,8 @@ sealed interface ItemDetailsUiState {
         val itemMarketPriceIndexRelationMetrics: ItemMarketPriceIndexRelationMetrics? = null,
         override val isLoading: Boolean,
         override val itemId: String,
-        override val tabIndex: Int
+        override val tabIndex: Int,
+        override val statsTypeSelected: Int
     ) : ItemDetailsUiState
 }
 
@@ -76,6 +85,8 @@ private data class ItemDetailsViewModelState(
     val openClosedPOLineQty: OpenClosedPOLineQtyItem? = null,
     val savingsOpportunity: SavingsOpportunityItem? = null,
     val suppliers: List<C3Vendor> = emptyList(),
+    val suppliersChartData: List<Any> = emptyList(),
+    val suppliersChartDataMaxValue: Double? = null,
     val itemVendorRelations: List<ItemRelation> = emptyList(),
     val itemVendorRelationMetrics: ItemVendorRelationMetrics? = null,
     val marketPriceIndex: List<MarketPriceIndex> = emptyList(),
@@ -92,6 +103,7 @@ private data class ItemDetailsViewModelState(
     val isLoading: Boolean = false,
     val itemId: String = "",
     val tabIndex: Int = 0,
+    val statsTypeSelected: Int = 0,
 ) : ViewModelState() {
 
     /**
@@ -102,9 +114,11 @@ private data class ItemDetailsViewModelState(
         return if (item != null) {
             ItemDetailsUiState.HasItem(
                 item = convert(item),
-                poLineQty = openClosedPOLineQty,
-                savingsOpportunity = savingsOpportunity,
+                savingsOpportunity = convert(savingsOpportunity, item.id),
+                ocPOLineQty = convert(openClosedPOLineQty, item.id),
                 suppliers = suppliers,
+                suppliersChartData = formatSuppliersChartData(),
+                suppliersChartDataMaxValue = formatSuppliersChartData().maxOrNull(),
                 vendorRelations = itemVendorRelations,
                 itemVendorRelationMetrics = itemVendorRelationMetrics,
                 indexes = marketPriceIndex,
@@ -112,15 +126,29 @@ private data class ItemDetailsViewModelState(
                 itemMarketPriceIndexRelationMetrics = itemMarketPriceIndexRelationMetrics,
                 isLoading = isLoading,
                 itemId = itemId,
-                tabIndex = tabIndex
+                tabIndex = tabIndex,
+                statsTypeSelected = statsTypeSelected
             )
         } else {
             ItemDetailsUiState.NoItem(
                 isLoading = isLoading,
                 itemId = itemId,
-                tabIndex = tabIndex
+                tabIndex = tabIndex,
+                statsTypeSelected = statsTypeSelected
             )
         }
+    }
+
+    fun formatSuppliersChartData(): List<Double> {
+        if (statsTypeSelected == 0) {
+            return suppliers.map { it.spend.value.formatNumberLocal() }
+        }
+
+        val total = suppliers.sumOf { it.spend.value }
+        if (total == 0.0) {
+            return emptyList()
+        }
+        return suppliers.map { ((it.spend.value / total) * 100) }
     }
 }
 
@@ -340,6 +368,9 @@ class ItemDetailsViewModel @Inject constructor(
             when (event) {
                 is ItemDetailsEvent.OnTabItemClick -> {
                     state.copy(tabIndex = event.tabIndex)
+                }
+                is ItemDetailsEvent.OnStatsTypeSelected -> {
+                    state.copy(statsTypeSelected = event.selected)
                 }
             }
         }

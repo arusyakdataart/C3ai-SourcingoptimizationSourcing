@@ -1,37 +1,39 @@
 package com.c3ai.sourcingoptimization.presentation.item_details
 
+import android.view.ViewGroup
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import com.c3ai.sourcingoptimization.R
-import com.c3ai.sourcingoptimization.common.SortType
 import com.c3ai.sourcingoptimization.common.components.*
 import com.c3ai.sourcingoptimization.data.C3Result
 import com.c3ai.sourcingoptimization.data.repository.C3MockRepositoryImpl
 import com.c3ai.sourcingoptimization.presentation.item_details.overview.ItemDetailsUiState
 import com.c3ai.sourcingoptimization.presentation.item_details.overview.PreviewItemDetailsUiState
-import com.c3ai.sourcingoptimization.presentation.supplier_details.SupplierDetailsUiState
-import com.c3ai.sourcingoptimization.presentation.views.UiItem
-import com.c3ai.sourcingoptimization.presentation.views.UiPurchaseOrder
+import com.c3ai.sourcingoptimization.presentation.views.UiSavingsOpportunityItem
 import com.c3ai.sourcingoptimization.ui.theme.*
-import kotlinx.coroutines.launch
+import com.github.aachartmodel.aainfographics.aachartcreator.*
+import com.github.aachartmodel.aainfographics.aaoptionsmodel.AAColumn
+import com.github.aachartmodel.aainfographics.aaoptionsmodel.AAStyle
+import com.github.aachartmodel.aainfographics.aatools.AAColor
+import com.github.aachartmodel.aainfographics.aatools.AAGradientColor
+import com.github.aachartmodel.aainfographics.aatools.AALinearGradientDirection
 import kotlinx.coroutines.runBlocking
 
 /**
@@ -56,8 +58,9 @@ fun ItemDetailsScreen(
     onRefreshDetails: () -> Unit,
     onTabItemClick: (Int) -> Unit,
     onBackButtonClick: () -> Unit,
-    loadData: (itemId: String) -> Unit,
+    loadData: () -> Unit,
     onAlertsClick: (String) -> Unit,
+    onStatsTypeSelected: (Int) -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
     val bottomState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
@@ -71,7 +74,7 @@ fun ItemDetailsScreen(
     }
 
     LaunchedEffect(itemId) {
-        loadData(itemId)
+        loadData()
     }
 
     ModalBottomSheetLayout(
@@ -111,16 +114,28 @@ fun ItemDetailsScreen(
                                     },
                                     TabItem(stringResource(R.string.po_lines)) {
                                         onTabItemClick(1)
+                                    },
+                                    TabItem(stringResource(R.string.suppliers)) {
+                                        onTabItemClick(2)
                                     }
                                 )
-                                when(uiState.tabIndex) {
+                                when (uiState.tabIndex) {
                                     0 -> {
-                                        Column {
+                                        Column(
+                                            modifier = Modifier
+                                                .padding(16.dp)
+                                                .verticalScroll(rememberScrollState())
+                                        ) {
                                             ItemDetailsInfo(uiState, onAlertsClick)
+                                            Box(modifier = Modifier.height(16.dp))
+                                            SourcingAnalysis(uiState, onStatsTypeSelected)
                                         }
 
                                     }
                                     1 -> {
+
+                                    }
+                                    2 -> {
 
                                     }
                                 }
@@ -182,6 +197,8 @@ private fun ItemDetailsInfo(
     onAlertsClick: (String) -> Unit,
 ) {
     val item = uiState.item
+    val savingsOpportunity = uiState.savingsOpportunity
+    val ocPOLineQty = uiState.ocPOLineQty
     C3SimpleCard {
         ConstraintLayout(
             modifier = Modifier
@@ -192,17 +209,20 @@ private fun ItemDetailsInfo(
             val (
                 alerts,
                 desc,
-                divider,
                 savingOpportunity,
                 suppliersWithContract,
-                openedPOIV,
-                stubPOIV,
-                moq,
-                share,
-                avgUnitPrice,
+                soChartView,
+                last30days,
+                divider,
+                closedPOLValue,
+                openPOLValue,
+                inventory,
+                lastPrice,
+                avgPrice,
+                lowestPrice,
             ) = createRefs()
             Text(
-                (item.name ?: "") + (item.description ?: ""),
+                (item.name ?: ", ") + (item.description ?: ""),
                 style = MaterialTheme.typography.h3,
                 color = MaterialTheme.colors.primary,
                 maxLines = 2,
@@ -223,23 +243,23 @@ private fun ItemDetailsInfo(
                     }) {
                 Icon(
                     imageVector = Icons.Filled.Warning,
-                    contentDescription = stringResource(R.string.cd_read_more)
+                    contentDescription = stringResource(R.string.cd_read_more),
+                    tint = MaterialTheme.colors.primary
                 )
             }
             LabeledValue(
                 label = stringResource(R.string.saving_opportunity),
-                value = "",
+                value = savingsOpportunity.savingOppText,
                 modifier = Modifier
                     .constrainAs(savingOpportunity) {
                         top.linkTo(desc.bottom, margin = 16.dp)
                         start.linkTo(parent.start)
-                        end.linkTo(openedPOIV.start)
                         width = Dimension.fillToConstraints
                     },
             )
             LabeledValue(
                 label = stringResource(R.string.suppliers_with_contract),
-                value = "",
+                value = item.numberOfVendors.toString(),
                 modifier = Modifier
                     .width(80.dp)
                     .constrainAs(suppliersWithContract) {
@@ -247,64 +267,279 @@ private fun ItemDetailsInfo(
                         end.linkTo(parent.end)
                     },
             )
-            ListDivider(Modifier.constrainAs(divider) { top.linkTo(desc.bottom) })
-            LabeledValue(
-                label = stringResource(R.string.open_po_item_value),
-                value = "",
-                modifier = Modifier
-                    .constrainAs(openedPOIV) {
-                        top.linkTo(desc.bottom, margin = 32.dp)
-                        start.linkTo(closedPOIV.end, margin = 12.dp)
-                        end.linkTo(stubPOIV.start)
-                        width = Dimension.fillToConstraints
-                    },
+            AndroidView(factory = { ctx ->
+                AAChartView(ctx).apply {
+                    layoutParams = ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT)
+                    aa_drawChartWithChartModel(
+                        configureGradientColorAreaChart(
+                            savingsOpportunity
+                        )
+                    )
+                }
+            }, modifier = Modifier
+                .height(28.dp)
+                .constrainAs(soChartView) {
+                    top.linkTo(savingOpportunity.bottom)
+                    start.linkTo(parent.start)
+                    end.linkTo(suppliersWithContract.start, margin = 16.dp)
+                }
             )
-            LabeledValue(
-                label = "",
-                value = "",
+            Text(
+                stringResource(R.string.last_30_days),
+                style = MaterialTheme.typography.h5,
+                color = MaterialTheme.colors.secondary,
                 modifier = Modifier
-                    .constrainAs(stubPOIV) {
-                        top.linkTo(desc.bottom, margin = 32.dp)
-                        start.linkTo(openedPOIV.end, margin = 12.dp)
-                        end.linkTo(parent.end)
-                        width = Dimension.fillToConstraints
-                    },
-            )
-            LabeledValue(
-                label = stringResource(R.string.moq),
-                value = "",
-                modifier = Modifier
-                    .constrainAs(moq) {
-                        top.linkTo(closedPOIV.bottom, margin = 20.dp)
+                    .constrainAs(last30days) {
+                        top.linkTo(soChartView.bottom, margin = 4.dp)
                         start.linkTo(parent.start)
-                        end.linkTo(share.start)
+                    },
+            )
+            ListDivider(Modifier.constrainAs(divider) { top.linkTo(last30days.bottom) })
+            LabeledValue(
+                label = stringResource(R.string.closed_pol_value),
+                value = ocPOLineQty.closedValueText,
+                labelModifier = Modifier.height(32.dp),
+                modifier = Modifier
+                    .constrainAs(closedPOLValue) {
+                        top.linkTo(divider.bottom)
+                        start.linkTo(parent.start)
+                        end.linkTo(openPOLValue.start)
                         width = Dimension.fillToConstraints
                     },
             )
             LabeledValue(
-                label = stringResource(R.string._share),
-                value = "",
+                label = stringResource(R.string.open_pol_value),
+                value = ocPOLineQty.openValueText,
+                labelModifier = Modifier.height(32.dp),
                 modifier = Modifier
-                    .constrainAs(share) {
-                        top.linkTo(closedPOIV.bottom, margin = 20.dp)
-                        start.linkTo(moq.end, margin = 12.dp)
-                        end.linkTo(avgUnitPrice.start)
+                    .constrainAs(openPOLValue) {
+                        top.linkTo(divider.bottom)
+                        start.linkTo(closedPOLValue.end, margin = 12.dp)
+                        end.linkTo(inventory.start)
                         width = Dimension.fillToConstraints
                     },
             )
             LabeledValue(
-                label = stringResource(R.string.avg_unit_price),
-                value = item.averageUnitPricePaid,
+                label = stringResource(R.string.inventory),
+                value = String.format(
+                    "%s %s", item.currentInventory?.value, stringResource(R.string.cases)
+                ),
+                labelModifier = Modifier.height(32.dp),
                 modifier = Modifier
-                    .constrainAs(avgUnitPrice) {
-                        top.linkTo(closedPOIV.bottom, margin = 20.dp)
-                        start.linkTo(share.end, margin = 12.dp)
+                    .constrainAs(inventory) {
+                        top.linkTo(divider.bottom)
+                        start.linkTo(openPOLValue.end, margin = 12.dp)
                         end.linkTo(parent.end)
                         width = Dimension.fillToConstraints
                     },
+            )
+            LabeledValue(
+                label = stringResource(R.string.last_price),
+                value = "",
+                modifier = Modifier
+                    .constrainAs(lastPrice) {
+                        top.linkTo(closedPOLValue.bottom, margin = 16.dp)
+                        start.linkTo(parent.start)
+                        end.linkTo(avgPrice.start)
+                        width = Dimension.fillToConstraints
+                    },
+            )
+            Column(
+                modifier = Modifier
+                    .constrainAs(avgPrice) {
+                        top.linkTo(closedPOLValue.bottom, margin = 16.dp)
+                        start.linkTo(lastPrice.end, margin = 12.dp)
+                        end.linkTo(lowestPrice.start)
+                        width = Dimension.fillToConstraints
+                    },
+            ) {
+                LabeledValue(
+                    label = stringResource(R.string.avg_price),
+                    value = item.averageUnitPricePaid,
+                )
+                Text(
+                    stringResource(R.string.last_12_mo),
+                    style = MaterialTheme.typography.subtitle2,
+                    color = MaterialTheme.colors.secondary
+                )
+            }
+            Column(
+                modifier = Modifier
+                    .constrainAs(lowestPrice) {
+                        top.linkTo(closedPOLValue.bottom, margin = 16.dp)
+                        start.linkTo(avgPrice.end, margin = 12.dp)
+                        end.linkTo(parent.end)
+                        width = Dimension.fillToConstraints
+                    },
+            ) {
+                LabeledValue(
+                    label = stringResource(R.string.lowest_price),
+                    value = item.averageUnitPricePaid,
+                )
+                Text(
+                    stringResource(R.string.last_12_mo),
+                    style = MaterialTheme.typography.subtitle2,
+                    color = MaterialTheme.colors.secondary
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SourcingAnalysis(
+    uiState: ItemDetailsUiState.HasItem,
+    onStatsTypeSelected: (Int) -> Unit,
+) {
+    val item = uiState.item
+    C3SimpleCard {
+        ConstraintLayout(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            val (
+                title,
+                statsMenu,
+                sapChartView
+            ) = createRefs()
+            Text(
+                stringResource(R.string.sourcing_analysis),
+                style = MaterialTheme.typography.h3,
+                color = MaterialTheme.colors.primary,
+                modifier = Modifier
+                    .constrainAs(title) {
+                        top.linkTo(parent.top)
+                        start.linkTo(parent.start)
+                    }
+            )
+            Spinner(
+                items = stringArrayResource(R.array.sourcingAnalysisStatsType).asList(),
+                onItemSelectedListener = { position, _ -> onStatsTypeSelected(position) }
+            )
+            C3IconButton(
+                onClick = { },
+                badgeText = item.numberOfActiveAlerts,
+                modifier = Modifier
+                    .constrainAs(statsMenu) {
+                        top.linkTo(title.bottom)
+                        end.linkTo(parent.end)
+                    }) {
+                Icon(
+                    imageVector = Icons.Filled.MoreVert,
+                    contentDescription = stringResource(R.string.cd_read_more),
+                    tint = MaterialTheme.colors.primary
+                )
+            }
+            AndroidView(factory = { ctx ->
+                AAChartView(ctx).apply {
+                    layoutParams = ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT)
+
+                    val model = configureColumnChart(uiState)
+                    val aaColumn = AAColumn().groupPadding(0.01f).borderWidth(0f)
+
+                    val aaOptions = model.aa_toAAOptions()
+                    aaOptions.xAxis?.lineColor = AAColor.Clear
+                    aaOptions.plotOptions?.column = aaColumn
+                    model.aa_toAAOptions()
+                    aaOptions.plotOptions?.series?.dataLabels?.format(
+                        if (uiState.statsTypeSelected == 0) "{point.y:,.2f}M"
+                        else "{point.y:,.0f} %"
+                    )
+                    aa_drawChartWithChartOptions(aaOptions)
+                }
+            }, modifier = Modifier
+                .fillMaxWidth()
+                .height(100.dp)
+                .constrainAs(sapChartView) {
+                    top.linkTo(title.bottom, margin = 40.dp)
+                    start.linkTo(parent.start)
+                }
             )
         }
     }
+}
+
+private fun configureGradientColorAreaChart(
+    savingsOpportunity: UiSavingsOpportunityItem
+): AAChartModel {
+    val stopsArr: Array<Any> = arrayOf(
+        arrayOf(0, "rgba(86,179,95,1)"),
+        arrayOf(1, "rgba(86,179,95,0.5)")
+    )
+
+    val linearGradientColor = AAGradientColor.linearGradient(
+        AALinearGradientDirection.ToBottom,
+        stopsArr
+    )
+
+    return AAChartModel()
+        .chartType(AAChartType.Areaspline)
+        .title("")
+        .subtitle("")
+        .backgroundColor("rgba(0,0,0,0)")
+        .yAxisTitle("")
+        .markerRadius(8f)
+        .markerSymbolStyle(AAChartSymbolStyleType.InnerBlank)
+        .markerSymbol(AAChartSymbolType.Circle)
+        .yAxisLineWidth(0f)
+        .yAxisGridLineWidth(0f)
+        .legendEnabled(false)
+        .xAxisVisible(false)
+        .xAxisLabelsEnabled(false)
+        .yAxisLineWidth(0f)
+        .yAxisTitle("")
+        .yAxisVisible(false)
+        .markerRadius(0f)
+        .tooltipEnabled(false)
+        .dataLabelsEnabled(false)
+        .touchEventEnabled(true)
+        .series(
+            arrayOf(
+                AASeriesElement()
+                    .name("Saving Opportunity")
+                    .lineWidth(3.0f)
+                    .color("rgba(86,179,95, 1)")
+                    .fillColor(linearGradientColor)
+                    .data(savingsOpportunity.data.toTypedArray())
+            )
+        )
+}
+
+private fun configureColumnChart(uiState: ItemDetailsUiState.HasItem, ): AAChartModel {
+    val chartColors: Array<Any> = arrayOf("#82B0FF", "#C799FF", "#F2950A", "#49BFA9", "#A7ADC4")
+
+    return AAChartModel()
+        .chartType(AAChartType.Column)
+        .colorsTheme(chartColors)
+        .series(
+            arrayOf(
+                AASeriesElement()
+                    .data(uiState.suppliersChartData.toTypedArray())
+                    .colorByPoint(true)
+            )
+        )
+        .dataLabelsEnabled(true)
+        .legendEnabled(false)
+        .tooltipEnabled(false)
+        .xAxisVisible(true)
+        .axesTextColor("#FFFFFF")
+        .yAxisVisible(false)
+        .yAxisLabelsEnabled(false)
+        .xAxisLabelsEnabled(true)
+        .yAxisMin(0f)
+        .yAxisMax(uiState.suppliersChartDataMaxValue?.toFloat())
+        .stacking(AAChartStackingType.Normal)
+        .backgroundColor("rgba(0,0,0,0)")
+        .categories(uiState.suppliers.map { it.name }.toTypedArray())
+        .dataLabelsStyle(
+            AAStyle()
+                .color("#1f1b1b")//Title font color
+                .lineWidth(0f)
+                .fontSize(11f)//Title font size
+                .fontWeight(AAChartFontWeightType.Bold)//Title font weight
+                .textOutline("0px 0px contrast")
+        )
 }
 
 /**
@@ -339,6 +574,7 @@ fun ItemDetailsPreview() {
             onBackButtonClick = {},
             loadData = {},
             onAlertsClick = {},
+            onStatsTypeSelected = {},
         )
     }
 }
@@ -360,6 +596,7 @@ fun ItemDetailsPOLinesTabPreview() {
             onBackButtonClick = {},
             loadData = {},
             onAlertsClick = {},
+            onStatsTypeSelected = {},
         )
     }
 }

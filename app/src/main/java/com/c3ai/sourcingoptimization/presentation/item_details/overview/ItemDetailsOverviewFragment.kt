@@ -74,8 +74,8 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
                 is ItemDetailsUiState.HasItem -> {
 //                    bindC3Item(result.item)
 
-                    result.poLineQty?.let { bindOpenClosedPOLineQty(it) }
-                    result.savingsOpportunity?.let { bindSavingsOpportunity(it) }
+//                    result.poLineQty?.let { bindOpenClosedPOLineQty(it) }
+//                    result.savingsOpportunity?.let { bindSavingsOpportunity(it) }
                     suppliers = result.suppliers
                     bindSuppliers()
                     viewModel.getItemVendorRelation(itemId, suppliers.map { it.id })
@@ -180,7 +180,7 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
     private fun bindSavingsOpportunity(data: SavingsOpportunityItem) {
         val aaGradientChartModel = configureGradientColorAreaChart(data)
         val gradientChartChart = binding.gradientChart
-        gradientChartChart.aa_drawChartWithChartModel(aaGradientChartModel)
+        gradientChartChart.aa_drawChartWithChartModel(configureGradientColorAreaChart(data))
 
         val notMissingData =
             data.result[itemId]?.SavingsOpportunityCompound?.missing?.filter { it < 100 }
