@@ -160,7 +160,7 @@ fun SupplierDetailsScreen(
                                         content = { PoLinesListSimple(item, onPOItemClick) },
                                         modifier = Modifier
                                             .background(MaterialTheme.colors.background)
-                                            .padding(horizontal = 16.dp)
+                                            .padding(horizontal = 16.dp),
                                     ) {
                                         item.orderLines.map { poLine ->
                                             PoLinesListExpanded(

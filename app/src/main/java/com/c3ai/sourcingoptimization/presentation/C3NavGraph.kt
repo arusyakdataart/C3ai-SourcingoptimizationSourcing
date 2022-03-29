@@ -10,6 +10,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.c3ai.sourcingoptimization.presentation.alerts.AlertsRoute
 import com.c3ai.sourcingoptimization.presentation.po_details.PODetailsRoute
 import com.c3ai.sourcingoptimization.presentation.search.SearchRoute
 import com.c3ai.sourcingoptimization.presentation.supplier_details.SupplierDetailsRoute
@@ -76,6 +77,13 @@ fun C3NavGraph(
             EditIndexRoute(
                 navController = navController,
                 indexId = entry.arguments?.getString("indexId")
+            )
+        }
+        composable(
+            C3Destinations.ALERTS_ROUTE
+        ) { entry ->
+            AlertsRoute(
+                navController = navController
             )
         }
     }

@@ -8,6 +8,8 @@ import com.c3ai.sourcingoptimization.domain.model.Alert
 import com.c3ai.sourcingoptimization.domain.settings.C3AppSettingsProvider
 import com.c3ai.sourcingoptimization.domain.use_case.AlertsUseCases
 import com.c3ai.sourcingoptimization.presentation.ViewModelState
+import com.c3ai.sourcingoptimization.presentation.views.UiAlertWithCategory
+import com.c3ai.sourcingoptimization.presentation.views.convert
 import com.c3ai.sourcingoptimization.utilities.ErrorMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -44,7 +46,8 @@ sealed interface AlertsUiState {
      *
      */
     data class HasData(
-        val alerts: List<Alert>,
+        val alerts: List<UiAlertWithCategory>,
+        val expandedListItemIds: Set<String> = emptySet(),
         override val isLoading: Boolean,
         override val errorMessages: List<ErrorMessage>,
         override val searchInput: String,
@@ -59,7 +62,8 @@ private data class AlertsViewModelState(
     val alerts: List<Alert>? = null,
     val isLoading: Boolean = false,
     val errorMessages: List<ErrorMessage> = emptyList(),
-    val searchInput: String = ""
+    val searchInput: String = "",
+    val expandedListItemIds: Set<String> = emptySet()
 ) : ViewModelState() {
 
     /**
@@ -69,10 +73,11 @@ private data class AlertsViewModelState(
     fun toUiState(): AlertsUiState =
         if (alerts != null) {
             AlertsUiState.HasData(
-                alerts = alerts,
+                alerts = convert(alerts),
                 isLoading = isLoading,
                 errorMessages = errorMessages,
-                searchInput = searchInput
+                searchInput = searchInput,
+                expandedListItemIds = expandedListItemIds,
             )
         } else {
             AlertsUiState.NoData(
@@ -136,6 +141,22 @@ class AlertsViewModel @Inject constructor(
      * Update state by user event.
      */
     fun onEvent(event: AlertsEvent) {
-
+        viewModelState.update { state ->
+            when (event) {
+                is AlertsEvent.OnSearchInputChanged -> {
+                    state.copy(searchInput = event.searchInput)
+                }
+                is AlertsEvent.OnExpandableItemClick -> {
+                    state.copy(
+                        expandedListItemIds = state.expandedListItemIds.toMutableSet().apply {
+                            val isRemoved = remove(event.itemId)
+                            isRemoved || add((event.itemId))
+                        })
+                }
+                else -> {
+                    state.copy()
+                }
+            }
+        }
     }
 }

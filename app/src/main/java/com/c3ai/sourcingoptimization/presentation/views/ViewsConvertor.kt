@@ -1,9 +1,7 @@
 package com.c3ai.sourcingoptimization.presentation.views
 
-import com.c3ai.sourcingoptimization.domain.model.C3Item
-import com.c3ai.sourcingoptimization.domain.model.C3UnitValue
-import com.c3ai.sourcingoptimization.domain.model.C3Vendor
-import com.c3ai.sourcingoptimization.domain.model.PurchaseOrder
+import com.c3ai.sourcingoptimization.common.AlertTypes
+import com.c3ai.sourcingoptimization.domain.model.*
 import com.c3ai.sourcingoptimization.domain.settings.C3AppSettingsProvider
 import com.c3ai.sourcingoptimization.presentation.ViewModelState
 import java.util.*
@@ -85,6 +83,51 @@ fun ViewModelState.convert(line: PurchaseOrder.Line): UiPurchaseOrder.Line =
         actualLeadTime = Date().daysBefore(line.promisedDeliveryDate),
         order = line.order?.let { convert(it) },
     )
+
+fun ViewModelState.convert(alerts: List<Alert>): List<UiAlertWithCategory> {
+    val uiAlerts = alerts.map {
+        UiAlert(
+            id = it.id,
+            alertType = it.alertType,
+            category = it.category,
+            description = it.description,
+            currentState = it.currentState,
+            readStatus = it.readStatus,
+            flagged = it.flagged,
+            timestamp = settings.format(it.timestamp),
+            redirectUrl = it.redirectUrl
+        )
+    }
+    val uiAlertsWithCategory = mutableMapOf<String, MutableList<UiAlertWithCategory>>()
+    uiAlertsWithCategory.put(AlertTypes.NEW_LOWEST_PRICE.categoryName, mutableListOf())
+    uiAlertsWithCategory.put(AlertTypes.UNEXPECTED_PRICE_INCREASE.categoryName, mutableListOf())
+    uiAlertsWithCategory.put(
+        AlertTypes.REQUESTED_DELIVERY_DATE_CHANGE.categoryName,
+        mutableListOf()
+    )
+    uiAlertsWithCategory.put(AlertTypes.SHORT_CYCLED_PURCHASE_ORDER.categoryName, mutableListOf())
+    uiAlertsWithCategory.put(AlertTypes.INDEX_PRICE_CHANGE.categoryName, mutableListOf())
+    uiAlertsWithCategory.put(
+        AlertTypes.CORRELATED_INDEX_PRICING_ANOMALY.categoryName,
+        mutableListOf()
+    )
+    uiAlertsWithCategory.put(AlertTypes.D_U_N_S_RISK.categoryName, mutableListOf())
+    uiAlertsWithCategory.put(AlertTypes.RAPID_RATINGS_RISK.categoryName, mutableListOf())
+
+    uiAlerts.forEach {
+        uiAlertsWithCategory.get(it.category?.name)
+            ?.add(UiAlertWithCategory(it.category?.name ?: "", it))
+    }
+
+    val uiAlertsList = mutableListOf<UiAlertWithCategory>()
+    uiAlertsWithCategory.values.forEach {
+        if (it.isNotEmpty()) {
+            uiAlertsList.add(UiAlertWithCategory(it[0].category))
+            uiAlertsList.addAll(it)
+        }
+    }
+    return uiAlertsList
+}
 
 fun C3AppSettingsProvider.format(date: Date?): String {
     return date?.let { getDateFormatter().format(date) } ?: "-"

@@ -33,6 +33,7 @@
     <string name="load_error">Load error</string>
     <string name="tap_to_load_content">Tap to load content</string>
     <string name="cd_search_menu">Search</string>
+    <string name="cd_settings_menu">Settings</string>
     <string name="open_po_value">Open PO Value | %s</string>
     <string name="active">Active</string>
     <string name="contract">Contract</string>
@@ -53,6 +54,7 @@
     <string name="po_">PO %s</string>
     <string name="cd_read_more">Read More</string>
     <string name="buyer_">Buyer %s</string>
+    <string name="item">Item</string>
     <string name="item_">Item %s</string>
     <string name="closed_po_item_value">Closed PO Item Value</string>
     <string name="open_po_item_value">Open PO Item Value</string>
@@ -66,6 +68,31 @@
     <string name="min_number_reached">At least one supplier must be selected.</string>
     <string name="min_number_reached_text">Please select a new one and remove this one.</string>
     <string name="dismiss">Dismiss</string>
+    <string name="alerts">Alerts</string>
+    <string name="savings_opportunity">Savings Opportunity</string>
+    <string name="open_po_line_value">Open PO Line Value</string>
+    <string name="open_po_val">Open PO Value</string>
+    <string name="old_lowest_price">Old Lowest\nPrice</string>
+    <string name="new_lowest_price">New Lowest\nPrice</string>
+    <string name="old_requested_delivery_date">Old Requested\nDelivery date\n</string>
+    <string name="new_requested_delivery_date">New\nRequested\nDelivery date</string>
+    <string name="planned_lead_time">Planned Lead\nTime</string>
+    <string name="requested_delivery_date_">Requested\nDelivery Date</string>
+    <string name="opened_date_">Opened\nDate</string>
+    <string name="old_index_price">Old Index\nPrice</string>
+    <string name="new_index_price">New Index\nPrice</string>
+    <string name="index_price_change">Index Price\nChange</string>
+    <string name="supplier__">Supplier\n\n</string>
+    <string name="last_item_price">Last Item Price</string>
+    <string name="index">Index</string>
+    <string name="price_change">Price\nChange</string>
+    <string name="source">Source</string>
+    <string name="ser">SER</string>
+    <string name="ssl">SSL</string>
+    <string name="emma">EMMA</string>
+    <string name="fhr">FHR</string>
+    <string name="helpful">Helpful</string>
+    <string name="not_helpful">Not helpful</string>
     <array name="sort_po">
         <item>Total Cost</item>
         <item>Unit Price</item>

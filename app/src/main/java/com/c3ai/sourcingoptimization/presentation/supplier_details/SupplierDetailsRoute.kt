@@ -9,13 +9,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.c3ai.sourcingoptimization.presentation.item_details.ItemDetailsActivity
-import com.c3ai.sourcingoptimization.presentation.navigateToEditIndex
-import com.c3ai.sourcingoptimization.presentation.navigateToEditSuppliers
+import com.c3ai.sourcingoptimization.presentation.navigateToAlerts
 import com.c3ai.sourcingoptimization.presentation.navigateToPoDetails
-import com.google.gson.Gson
 
 /**
- * Displays the Home route.
+ * Displays the Supplier Details route.
  *
  * Note: AAC ViewModels don't work with Compose Previews currently.
  *
@@ -56,7 +54,8 @@ fun SupplierDetailsRoute(
 //                )
 //            )
 
-            navController.navigateToEditIndex("mpi0")
+//            navController.navigateToEditIndex("mpi0")
+            navController.navigateToAlerts()
         },
         onC3ItemClick = {
             val intent = Intent(context, ItemDetailsActivity::class.java)

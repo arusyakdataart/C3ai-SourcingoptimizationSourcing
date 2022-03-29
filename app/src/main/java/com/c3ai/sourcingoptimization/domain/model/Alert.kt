@@ -1,5 +1,7 @@
 package com.c3ai.sourcingoptimization.domain.model
 
+import java.util.*
+
 data class Alert(
     val id: String,
     val alertType: String?,
@@ -8,6 +10,6 @@ data class Alert(
     val currentState: C3Category?,
     val readStatus: String?,
     val flagged: Boolean?,
-    val timestamp: String?,
+    val timestamp: Date?,
     val redirectUrl: String?
 )
