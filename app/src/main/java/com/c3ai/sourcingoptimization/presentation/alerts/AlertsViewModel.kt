@@ -8,7 +8,7 @@ import com.c3ai.sourcingoptimization.domain.model.Alert
 import com.c3ai.sourcingoptimization.domain.settings.C3AppSettingsProvider
 import com.c3ai.sourcingoptimization.domain.use_case.AlertsUseCases
 import com.c3ai.sourcingoptimization.presentation.ViewModelState
-import com.c3ai.sourcingoptimization.presentation.views.UiAlertWithCategory
+import com.c3ai.sourcingoptimization.presentation.views.UiAlert
 import com.c3ai.sourcingoptimization.presentation.views.convert
 import com.c3ai.sourcingoptimization.utilities.ErrorMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -46,7 +46,7 @@ sealed interface AlertsUiState {
      *
      */
     data class HasData(
-        val alerts: List<UiAlertWithCategory>,
+        val alerts: List<UiAlert>,
         val expandedListItemIds: Set<String> = emptySet(),
         override val isLoading: Boolean,
         override val errorMessages: List<ErrorMessage>,
@@ -74,10 +74,10 @@ private data class AlertsViewModelState(
         if (alerts != null) {
             AlertsUiState.HasData(
                 alerts = convert(alerts),
+                expandedListItemIds = alerts.map { it.id }.toSet(),
                 isLoading = isLoading,
                 errorMessages = errorMessages,
-                searchInput = searchInput,
-                expandedListItemIds = expandedListItemIds,
+                searchInput = searchInput
             )
         } else {
             AlertsUiState.NoData(
@@ -149,8 +149,8 @@ class AlertsViewModel @Inject constructor(
                 is AlertsEvent.OnExpandableItemClick -> {
                     state.copy(
                         expandedListItemIds = state.expandedListItemIds.toMutableSet().apply {
-                            val isRemoved = remove(event.itemId)
-                            isRemoved || add((event.itemId))
+                            val isRemoved = remove(event.category)
+                            isRemoved || add((event.category))
                         })
                 }
                 else -> {

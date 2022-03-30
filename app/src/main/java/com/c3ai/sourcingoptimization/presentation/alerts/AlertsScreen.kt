@@ -1,6 +1,10 @@
 package com.c3ai.sourcingoptimization.presentation.alerts
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -35,6 +39,7 @@ import kotlinx.coroutines.launch
  * loading and error handling.
  */
 
+@RequiresApi(Build.VERSION_CODES.N)
 @ExperimentalMaterialApi
 @ExperimentalFoundationApi
 @Composable
@@ -102,32 +107,35 @@ fun AlertsScreen(
                     LazyColumn(modifier = Modifier.fillMaxSize(), listState) {
                         when (uiState) {
                             is AlertsUiState.HasData -> {
-                                items(uiState.alerts) {
-                                    if (it.alert == null) {
-                                        AlertCategoryScreen(it.category)
-                                    } else {
-                                        when (it.category) {
+                                val categoryList = uiState.alerts.groupBy { it.category?.name }
+                                categoryList.forEach { it, it1 ->
+                                    stickyHeader {
+                                        AlertCategoryScreen(it ?: "", onExpandableItemClick)
+                                    }
+
+                                    items(it1) {
+                                        when (it.category?.name) {
                                             AlertTypes.NEW_LOWEST_PRICE.categoryName -> PriceChangeAlert(
-                                                it.alert
+                                                it
                                             )
                                             AlertTypes.UNEXPECTED_PRICE_INCREASE.categoryName -> PriceChangeAlert(
-                                                it.alert
+                                                it
                                             )
                                             AlertTypes.REQUESTED_DELIVERY_DATE_CHANGE.categoryName -> RequestedDeliveryDateChangeAlert(
-                                                it.alert
+                                                it
                                             )
                                             AlertTypes.SHORT_CYCLED_PURCHASE_ORDER.categoryName -> PurchaseOrderAlert(
-                                                it.alert
+                                                it
                                             )
                                             AlertTypes.INDEX_PRICE_CHANGE.categoryName -> IndexPriceChangeAlert(
-                                                it.alert
+                                                it
                                             )
                                             AlertTypes.CORRELATED_INDEX_PRICING_ANOMALY.categoryName -> IndexPriceAnomalyAlert(
-                                                it.alert
+                                                it
                                             )
-                                            AlertTypes.D_U_N_S_RISK.categoryName -> DUNSRiskAlert(it.alert)
+                                            AlertTypes.D_U_N_S_RISK.categoryName -> DUNSRiskAlert(it)
                                             AlertTypes.RAPID_RATINGS_RISK.categoryName -> RapidRatingsRiskAlert(
-                                                it.alert
+                                                it
                                             )
                                         }
                                     }
@@ -159,11 +167,14 @@ fun AlertsScreen(
 @Composable
 private fun AlertCategoryScreen(
     category: String,
+    onExpandableItemClick: (String) -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 0.dp),
+            .padding(start = 16.dp, top = 0.dp, end = 16.dp, bottom = 0.dp)
+            .background(BackgroundColor)
+            .clickable { onExpandableItemClick(category) },
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -253,7 +264,7 @@ private fun PriceChangeAlert(alert: UiAlert) {
                 )
                 LabeledValue(
                     label = stringResource(R.string.new_lowest_price),
-                    value = "-", // TODO!!! not clear which is savings opp from api data.
+                    value = "-", // TODO!!! not clear which api data.
                     modifier = Modifier
                         .constrainAs(newPrice) {
                             top.linkTo(divider1.bottom)
@@ -264,7 +275,7 @@ private fun PriceChangeAlert(alert: UiAlert) {
                 )
                 LabeledValue(
                     label = stringResource(R.string.price_change),
-                    value = "-\n(-)", // TODO!!! not clear which is savings opp from api data.
+                    value = "-\n(-)", // TODO!!! not clear which api data.
                     modifier = Modifier
                         .constrainAs(priceChange) {
                             top.linkTo(divider1.bottom)
@@ -380,7 +391,7 @@ private fun IndexPriceChangeAlert(alert: UiAlert) {
                     modifier = Modifier.constrainAs(poValue) {
                         top.linkTo(status.bottom, margin = 0.dp)
                     },
-                    // TODO!!! not clear which is savings opp from api data.
+                    // TODO!!! not clear which api data.
                     SpanStyle(Lila40) to stringResource(id = R.string.open_po_line_value),
                     null to "-",
                 )
@@ -398,7 +409,7 @@ private fun IndexPriceChangeAlert(alert: UiAlert) {
                 )
                 LabeledValue(
                     label = stringResource(R.string.new_index_price),
-                    value = "-", // TODO!!! not clear which is savings opp from api data.
+                    value = "-", // TODO!!! not clear which api data.
                     modifier = Modifier
                         .constrainAs(newIndex) {
                             top.linkTo(divider1.bottom)
@@ -409,7 +420,7 @@ private fun IndexPriceChangeAlert(alert: UiAlert) {
                 )
                 LabeledValue(
                     label = stringResource(R.string.index_price_change),
-                    value = "-", // TODO!!! not clear which is savings opp from api data.
+                    value = "-", // TODO!!! not clear which api data.
                     modifier = Modifier
                         .constrainAs(indexChange) {
                             top.linkTo(divider1.bottom)
@@ -525,7 +536,7 @@ private fun IndexPriceAnomalyAlert(alert: UiAlert) {
                     modifier = Modifier.constrainAs(poValue) {
                         top.linkTo(status.bottom, margin = 0.dp)
                     },
-                    // TODO!!! not clear which is savings opp from api data.
+                    // TODO!!! not clear which api data.
                     SpanStyle(Lila40) to stringResource(id = R.string.open_po_line_value),
                     null to "-",
                 )
@@ -543,7 +554,7 @@ private fun IndexPriceAnomalyAlert(alert: UiAlert) {
                 )
                 LabeledValue(
                     label = stringResource(R.string.index),
-                    value = "-", // TODO!!! not clear which is savings opp from api data.
+                    value = "-", // TODO!!! not clear which api data.
                     modifier = Modifier
                         .constrainAs(index) {
                             top.linkTo(divider1.bottom)
@@ -659,7 +670,7 @@ private fun RequestedDeliveryDateChangeAlert(alert: UiAlert) {
                     modifier = Modifier.constrainAs(poValue) {
                         top.linkTo(status.bottom, margin = 0.dp)
                     },
-                    // TODO!!! not clear which is savings opp from api data.
+                    // TODO!!! not clear which api data.
                     SpanStyle(Lila40) to stringResource(id = R.string.open_po_line_value),
                     null to "-",
                 )
@@ -677,7 +688,7 @@ private fun RequestedDeliveryDateChangeAlert(alert: UiAlert) {
                 )
                 LabeledValue(
                     label = stringResource(R.string.new_requested_delivery_date),
-                    value = "-", // TODO!!! not clear which is savings opp from api data.
+                    value = "-", // TODO!!! not clear which api data.
                     modifier = Modifier
                         .constrainAs(newDate) {
                             top.linkTo(divider1.bottom)
@@ -688,7 +699,7 @@ private fun RequestedDeliveryDateChangeAlert(alert: UiAlert) {
                 )
                 LabeledValue(
                     label = stringResource(R.string.supplier__),
-                    value = "-", // TODO!!! not clear which is savings opp from api data.
+                    value = "-", // TODO!!! not clear which api data.
                     modifier = Modifier
                         .constrainAs(supplier) {
                             top.linkTo(divider1.bottom)
@@ -817,7 +828,7 @@ private fun PurchaseOrderAlert(alert: UiAlert) {
                     modifier = Modifier.constrainAs(poValue) {
                         top.linkTo(status.bottom)
                     },
-                    // TODO!!! not clear which is savings opp from api data.
+                    // TODO!!! not clear which api data.
                     SpanStyle(Lila40) to stringResource(id = R.string.open_po_line_value),
                     null to "-",
                 )
@@ -825,7 +836,7 @@ private fun PurchaseOrderAlert(alert: UiAlert) {
                     modifier = Modifier.constrainAs(item) {
                         top.linkTo(poValue.bottom)
                     },
-                    // TODO!!! not clear which is savings opp from api data.
+                    // TODO!!! not clear which api data.
                     SpanStyle(PrimaryColor) to stringResource(id = R.string.item),
                     null to "-",
                 )
@@ -843,7 +854,7 @@ private fun PurchaseOrderAlert(alert: UiAlert) {
                 )
                 LabeledValue(
                     label = stringResource(R.string.requested_delivery_date_),
-                    value = "-", // TODO!!! not clear which is savings opp from api data.
+                    value = "-", // TODO!!! not clear which api data.
                     modifier = Modifier
                         .constrainAs(requestedDate) {
                             top.linkTo(divider1.bottom)

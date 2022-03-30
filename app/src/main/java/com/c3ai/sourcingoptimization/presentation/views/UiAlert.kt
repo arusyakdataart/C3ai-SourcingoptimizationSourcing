@@ -2,11 +2,6 @@ package com.c3ai.sourcingoptimization.presentation.views
 
 import com.c3ai.sourcingoptimization.domain.model.C3Category
 
-data class UiAlertWithCategory(
-    val category: String,
-    val alert: UiAlert? = null
-)
-
 data class UiAlert(
     val id: String,
     val alertType: String?,
