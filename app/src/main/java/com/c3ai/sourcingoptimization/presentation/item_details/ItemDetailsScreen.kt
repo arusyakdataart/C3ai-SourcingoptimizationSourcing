@@ -1,8 +1,10 @@
 package com.c3ai.sourcingoptimization.presentation.item_details
 
+import android.content.Context
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -12,6 +14,7 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -26,15 +29,19 @@ import com.c3ai.sourcingoptimization.data.C3Result
 import com.c3ai.sourcingoptimization.data.repository.C3MockRepositoryImpl
 import com.c3ai.sourcingoptimization.presentation.item_details.overview.ItemDetailsUiState
 import com.c3ai.sourcingoptimization.presentation.item_details.overview.PreviewItemDetailsUiState
+import com.c3ai.sourcingoptimization.presentation.views.SuppliersChart
 import com.c3ai.sourcingoptimization.presentation.views.UiSavingsOpportunityItem
 import com.c3ai.sourcingoptimization.ui.theme.*
 import com.github.aachartmodel.aainfographics.aachartcreator.*
 import com.github.aachartmodel.aainfographics.aaoptionsmodel.AAColumn
+import com.github.aachartmodel.aainfographics.aaoptionsmodel.AACrosshair
 import com.github.aachartmodel.aainfographics.aaoptionsmodel.AAStyle
 import com.github.aachartmodel.aainfographics.aatools.AAColor
 import com.github.aachartmodel.aainfographics.aatools.AAGradientColor
 import com.github.aachartmodel.aainfographics.aatools.AALinearGradientDirection
 import kotlinx.coroutines.runBlocking
+
+private val chartColors: Array<Any> = arrayOf("#82B0FF", "#C799FF", "#F2950A", "#49BFA9", "#A7ADC4")
 
 /**
  * A display of the item details screen that has the lists.
@@ -60,6 +67,7 @@ fun ItemDetailsScreen(
     onBackButtonClick: () -> Unit,
     loadData: () -> Unit,
     onAlertsClick: (String) -> Unit,
+    onDateRangeSelected: (Int) -> Unit,
     onStatsTypeSelected: (Int) -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -128,7 +136,11 @@ fun ItemDetailsScreen(
                                         ) {
                                             ItemDetailsInfo(uiState, onAlertsClick)
                                             Box(modifier = Modifier.height(16.dp))
-                                            SourcingAnalysis(uiState, onStatsTypeSelected)
+                                            SourcingAnalysis(
+                                                uiState,
+                                                onDateRangeSelected,
+                                                onStatsTypeSelected,
+                                            )
                                         }
 
                                     }
@@ -249,7 +261,7 @@ private fun ItemDetailsInfo(
             }
             LabeledValue(
                 label = stringResource(R.string.saving_opportunity),
-                value = savingsOpportunity.savingOppText,
+                value = savingsOpportunity?.savingOppText ?: "",
                 modifier = Modifier
                     .constrainAs(savingOpportunity) {
                         top.linkTo(desc.bottom, margin = 16.dp)
@@ -267,22 +279,27 @@ private fun ItemDetailsInfo(
                         end.linkTo(parent.end)
                     },
             )
-            AndroidView(factory = { ctx ->
-                AAChartView(ctx).apply {
-                    layoutParams = ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT)
-                    aa_drawChartWithChartModel(
-                        configureGradientColorAreaChart(
-                            savingsOpportunity
+            AndroidView(
+                factory = { ctx ->
+                    AAChartView(ctx).apply {
+                        layoutParams = ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT)
+                    }
+                },
+                update = { view ->
+                    savingsOpportunity?.let {
+                        view.aa_drawChartWithChartModel(
+                            configureGradientColorAreaChart(it)
                         )
-                    )
-                }
-            }, modifier = Modifier
-                .height(28.dp)
-                .constrainAs(soChartView) {
-                    top.linkTo(savingOpportunity.bottom)
-                    start.linkTo(parent.start)
-                    end.linkTo(suppliersWithContract.start, margin = 16.dp)
-                }
+                    }
+                },
+                modifier = Modifier
+                    .height(38.dp)
+                    .constrainAs(soChartView) {
+                        top.linkTo(savingOpportunity.bottom)
+                        start.linkTo(parent.start)
+                        end.linkTo(suppliersWithContract.start, margin = 16.dp)
+                        width = Dimension.fillToConstraints
+                    }
             )
             Text(
                 stringResource(R.string.last_30_days),
@@ -389,8 +406,10 @@ private fun ItemDetailsInfo(
 @Composable
 private fun SourcingAnalysis(
     uiState: ItemDetailsUiState.HasItem,
+    onDateRangeSelected: (Int) -> Unit,
     onStatsTypeSelected: (Int) -> Unit,
 ) {
+    val context = LocalContext.current
     val item = uiState.item
     C3SimpleCard {
         ConstraintLayout(
@@ -400,8 +419,17 @@ private fun SourcingAnalysis(
         ) {
             val (
                 title,
+                dateRange,
                 statsMenu,
-                sapChartView
+                suppliersChartView,
+                divider,
+                supplierTitle,
+                supplierMenu,
+                divider2,
+                indexTitle,
+                indexMenu,
+                divider3,
+                bottomGraphCard,
             ) = createRefs()
             Text(
                 stringResource(R.string.sourcing_analysis),
@@ -411,51 +439,158 @@ private fun SourcingAnalysis(
                     .constrainAs(title) {
                         top.linkTo(parent.top)
                         start.linkTo(parent.start)
+                        end.linkTo(dateRange.start, margin = 16.dp)
+                        width = Dimension.fillToConstraints
                     }
             )
             Spinner(
-                items = stringArrayResource(R.array.sourcingAnalysisStatsType).asList(),
-                onItemSelectedListener = { position, _ -> onStatsTypeSelected(position) }
+                items = stringArrayResource(R.array.dateRange).asList(),
+                onItemSelectedListener = { position, _ -> onStatsTypeSelected(position) },
+                modifier = Modifier
+                    .constrainAs(dateRange) {
+                        top.linkTo(parent.top)
+                        end.linkTo(parent.end)
+                    }
             )
-            C3IconButton(
-                onClick = { },
-                badgeText = item.numberOfActiveAlerts,
+            CardMenu(
+                items = stringArrayResource(R.array.sourcingAnalysisStatsType).asList(),
+                onItemSelectedListener = { position, _ -> onDateRangeSelected(position) },
                 modifier = Modifier
                     .constrainAs(statsMenu) {
-                        top.linkTo(title.bottom)
+                        top.linkTo(dateRange.bottom, margin = 16.dp)
                         end.linkTo(parent.end)
-                    }) {
-                Icon(
-                    imageVector = Icons.Filled.MoreVert,
-                    contentDescription = stringResource(R.string.cd_read_more),
-                    tint = MaterialTheme.colors.primary
-                )
-            }
-            AndroidView(factory = { ctx ->
-                AAChartView(ctx).apply {
-                    layoutParams = ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT)
-
-                    val model = configureColumnChart(uiState)
-                    val aaColumn = AAColumn().groupPadding(0.01f).borderWidth(0f)
-
-                    val aaOptions = model.aa_toAAOptions()
-                    aaOptions.xAxis?.lineColor = AAColor.Clear
-                    aaOptions.plotOptions?.column = aaColumn
-                    model.aa_toAAOptions()
-                    aaOptions.plotOptions?.series?.dataLabels?.format(
-                        if (uiState.statsTypeSelected == 0) "{point.y:,.2f}M"
-                        else "{point.y:,.0f} %"
-                    )
-                    aa_drawChartWithChartOptions(aaOptions)
-                }
-            }, modifier = Modifier
-                .fillMaxWidth()
-                .height(100.dp)
-                .constrainAs(sapChartView) {
-                    top.linkTo(title.bottom, margin = 40.dp)
-                    start.linkTo(parent.start)
-                }
+                    }
             )
+            AndroidView(
+                factory = { ctx ->
+                    AAChartView(ctx).apply {
+                        layoutParams = ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT)
+                    }
+                },
+                update = { view ->
+                    uiState.suppliersChart?.let {
+                        val model = configureColumnChart(it)
+                        val aaColumn = AAColumn().groupPadding(0.01f).borderWidth(0f)
+
+                        val aaOptions = model.aa_toAAOptions()
+                        aaOptions.xAxis?.lineColor = AAColor.Clear
+                        aaOptions.plotOptions?.column = aaColumn
+                        model.aa_toAAOptions()
+                        aaOptions.plotOptions?.series?.dataLabels?.format(it.dataLabelsFormat)
+                        view.aa_drawChartWithChartOptions(aaOptions)
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(100.dp)
+                    .constrainAs(suppliersChartView) {
+                        top.linkTo(title.bottom, margin = 40.dp)
+                        start.linkTo(parent.start)
+                    }
+            )
+            ListDivider(Modifier.constrainAs(divider) { top.linkTo(suppliersChartView.bottom) })
+            Text(
+                stringResource(R.string.supplier),
+                style = MaterialTheme.typography.h3,
+                color = MaterialTheme.colors.secondary,
+                modifier = Modifier
+                    .constrainAs(supplierTitle) {
+                        top.linkTo(divider.bottom)
+                        start.linkTo(parent.start)
+                        end.linkTo(supplierMenu.start, margin = 16.dp)
+                        width = Dimension.fillToConstraints
+                    }
+            )
+            CardMenu(
+                items = stringArrayResource(R.array.sourcingAnalysisStatsType).asList(),
+                onItemSelectedListener = { position, _ -> onDateRangeSelected(position) },
+                modifier = Modifier
+                    .constrainAs(supplierMenu) {
+                        top.linkTo(divider.bottom)
+                        end.linkTo(parent.end)
+                    }
+            )
+            ListDivider(Modifier.constrainAs(divider2) { top.linkTo(supplierTitle.bottom) })
+            Text(
+                stringResource(R.string.index),
+                style = MaterialTheme.typography.h3,
+                color = MaterialTheme.colors.secondary,
+                modifier = Modifier
+                    .constrainAs(indexTitle) {
+                        top.linkTo(divider2.bottom)
+                        start.linkTo(parent.start)
+                        end.linkTo(indexMenu.start, margin = 16.dp)
+                        width = Dimension.fillToConstraints
+                    }
+            )
+            CardMenu(
+                items = stringArrayResource(R.array.sourcingAnalysisStatsType).asList(),
+                onItemSelectedListener = { position, _ -> onDateRangeSelected(position) },
+                modifier = Modifier
+                    .constrainAs(indexMenu) {
+                        top.linkTo(divider2.bottom)
+                        end.linkTo(parent.end)
+                    }
+            )
+            ListDivider(Modifier.constrainAs(divider3) { top.linkTo(indexTitle.bottom) })
+            C3SimpleCard(
+                backgroundColor = CardBackgroundSecondary,
+                border = BorderStroke(1.dp, CardBackgroundSecondary),
+                modifier = Modifier
+                    .constrainAs(bottomGraphCard) { top.linkTo(divider3.bottom) }
+            ) {
+                Column {
+                    Text(
+                        stringResource(R.string.supplier_avg_price_symbol, "$"),
+                        style = MaterialTheme.typography.h6,
+                        color = MaterialTheme.colors.secondary,
+                        modifier = Modifier.padding(horizontal = 30.dp, vertical = 8.dp)
+                    )
+                    AndroidView(
+                        factory = { ctx ->
+                            AAChartView(ctx).apply {
+                                layoutParams = ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT)
+                            }
+                        },
+                        update = { view ->
+                            uiState.vendorRelationMetrics?.let {
+                                val model = configureMultiLineChart(context, it)
+                                val aaOptions = model.aa_toAAOptions()
+                                aaOptions.xAxis?.crosshair(AACrosshair().width(1f))
+                                aaOptions.yAxis?.apply {
+                                    lineWidth(0f)
+                                    gridLineColor(AAColor.Clear)
+                                    lineColor(AAColor.Clear)
+                                }
+                                view.isClearBackgroundColor = true
+//                            view.callBack = ChartCallback()
+                                view.aa_drawChartWithChartOptions(aaOptions)
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(175.dp)
+                    )
+                    Text(
+                        stringResource(R.string.index_symbol, "$"),
+                        style = MaterialTheme.typography.h6,
+                        color = MaterialTheme.colors.secondary,
+                        modifier = Modifier.padding(horizontal = 30.dp, vertical = 8.dp)
+                    )
+                    AndroidView(
+                        factory = { ctx ->
+                            AAChartView(ctx).apply {
+                                layoutParams = ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT)
+                            }
+                        },
+                        update = { view ->
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp)
+                    )
+                }
+            }
         }
     }
 }
@@ -506,8 +641,7 @@ private fun configureGradientColorAreaChart(
         )
 }
 
-private fun configureColumnChart(uiState: ItemDetailsUiState.HasItem, ): AAChartModel {
-    val chartColors: Array<Any> = arrayOf("#82B0FF", "#C799FF", "#F2950A", "#49BFA9", "#A7ADC4")
+private fun configureColumnChart(suppliersChart: SuppliersChart): AAChartModel {
 
     return AAChartModel()
         .chartType(AAChartType.Column)
@@ -515,7 +649,7 @@ private fun configureColumnChart(uiState: ItemDetailsUiState.HasItem, ): AAChart
         .series(
             arrayOf(
                 AASeriesElement()
-                    .data(uiState.suppliersChartData.toTypedArray())
+                    .data(suppliersChart.data.toTypedArray())
                     .colorByPoint(true)
             )
         )
@@ -528,10 +662,10 @@ private fun configureColumnChart(uiState: ItemDetailsUiState.HasItem, ): AAChart
         .yAxisLabelsEnabled(false)
         .xAxisLabelsEnabled(true)
         .yAxisMin(0f)
-        .yAxisMax(uiState.suppliersChartDataMaxValue?.toFloat())
+        .yAxisMax(suppliersChart.suppliersChartDataMaxValue?.toFloat())
         .stacking(AAChartStackingType.Normal)
         .backgroundColor("rgba(0,0,0,0)")
-        .categories(uiState.suppliers.map { it.name }.toTypedArray())
+        .categories(suppliersChart.categories.toTypedArray())
         .dataLabelsStyle(
             AAStyle()
                 .color("#1f1b1b")//Title font color
@@ -540,6 +674,39 @@ private fun configureColumnChart(uiState: ItemDetailsUiState.HasItem, ): AAChart
                 .fontWeight(AAChartFontWeightType.Bold)//Title font weight
                 .textOutline("0px 0px contrast")
         )
+}
+
+private fun configureMultiLineChart(
+    context: Context,
+    vendorRelationMetrics: Map<String, List<Double>>
+): AAChartModel {
+
+    val chartData = mutableListOf<AASeriesElement>()
+    vendorRelationMetrics.values.forEachIndexed { index, d ->
+        val element = AASeriesElement()
+            .color(chartColors[index])
+            .lineWidth(2f)
+            .data(d.toTypedArray())
+        chartData.add(element)
+    }
+
+    val aaChartModel = AAChartModel.Builder(context)
+        .setChartType(AAChartType.Line)
+        .setXAxisVisible(false)
+        .setDataLabelsEnabled(false)
+        .setAnimationType(AAChartAnimationType.Bounce)
+        .setTouchEventEnabled(true)
+        .setLegendEnabled(false)
+        .setMarkerSymbolStyle(AAChartSymbolStyleType.InnerBlank)
+        .setMarkerRadius(0f)
+        .setMarkerSymbol(AAChartSymbolType.Circle)
+        .setTooltipEnabled(false)
+        .setCategories(*arrayOf())
+        .setYAxisTitle("")
+        .setAxesTextColor("#AAAEB5")
+        .build()
+    aaChartModel.series(chartData.toTypedArray())
+    return aaChartModel
 }
 
 /**
@@ -574,6 +741,7 @@ fun ItemDetailsPreview() {
             onBackButtonClick = {},
             loadData = {},
             onAlertsClick = {},
+            onDateRangeSelected = {},
             onStatsTypeSelected = {},
         )
     }
@@ -596,6 +764,7 @@ fun ItemDetailsPOLinesTabPreview() {
             onBackButtonClick = {},
             loadData = {},
             onAlertsClick = {},
+            onDateRangeSelected = {},
             onStatsTypeSelected = {},
         )
     }

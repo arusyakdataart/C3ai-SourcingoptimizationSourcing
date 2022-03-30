@@ -71,6 +71,10 @@
     <string name="lowest_price">Lowest Price</string>
     <string name="last_price">Last Price</string>
     <string name="sourcing_analysis">Sourcing Analysis</string>
+    <string name="supplier">Supplier</string>
+    <string name="index">Index</string>
+    <string name="supplier_avg_price_symbol">Supplier Avg. Price (%s)</string>
+    <string name="index_symbol">Index (%s)</string>
     <array name="sort_po">
         <item>Total Cost</item>
         <item>Unit Price</item>
@@ -81,6 +85,12 @@
         <item>Promised Delivery Date</item>
         <item>Actual Lead Time</item>
         <item>Planned Lead Time</item>
+    </array>
+    <array name="dateRange">
+        <item>3M</item>
+        <item>6M</item>
+        <item>1Y</item>
+        <item>All</item>
     </array>
     <array name="sourcingAnalysisStatsType">
         <item>Total Spent ($)</item>

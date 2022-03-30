@@ -76,25 +76,25 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
 
 //                    result.poLineQty?.let { bindOpenClosedPOLineQty(it) }
 //                    result.savingsOpportunity?.let { bindSavingsOpportunity(it) }
-                    suppliers = result.suppliers
-                    bindSuppliers()
-                    viewModel.getItemVendorRelation(itemId, suppliers.map { it.id })
-                    relations = result.vendorRelations
-                    viewModel.getItemVendorRelationMetrics(
-                        ids = relations.map { it.id },
-                        expressions = listOf("OrderLineValue"),
-                        startDate = formatDate(date = getYearBackDate(1)),
-                        endDate = formatDate(date = getCurrentDate()),
-                        interval = "MONTH"
-                    )
-                    result.itemVendorRelationMetrics?.let {
-                        val metrics = it
-                        relations.forEach { relation ->
-                            suppliersChartData[relation.to.id] =
-                                metrics.result[relation.id]?.OrderLineValue?.data ?: listOf()
-                        }
-                        bindMultiLineChart()
-                    }
+//                    suppliers = result.suppliers
+//                    bindSuppliers()
+//                    viewModel.getItemVendorRelation(itemId, suppliers.map { it.id })
+//                    relations = result.vendorRelations
+//                    viewModel.getItemVendorRelationMetrics(
+//                        ids = relations.map { it.id },
+//                        expressions = listOf("OrderLineValue"),
+//                        startDate = formatDate(date = getYearBackDate(1)),
+//                        endDate = formatDate(date = getCurrentDate()),
+//                        interval = "MONTH"
+//                    )
+//                    result.itemVendorRelationMetrics?.let {
+//                        val metrics = it
+//                        relations.forEach { relation ->
+//                            suppliersChartData[relation.to.id] =
+//                                metrics.result[relation.id]?.OrderLineValue?.data ?: listOf()
+//                        }
+//                        bindMultiLineChart()
+//                    }
                     if (result.indexes.isNotEmpty()) {
                         indexId = result.indexes[0].id
                         viewModel.getItemMarketPriceIndexRelation(itemId, indexId)

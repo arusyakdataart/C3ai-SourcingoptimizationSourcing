@@ -40,6 +40,7 @@ fun ItemDetailsRoute(
         onBackButtonClick = { navController.navigateUp() },
         loadData = { itemId?.let { viewModel.loadData(it) } },
         onAlertsClick = {},
+        onDateRangeSelected = { viewModel.onEvent(ItemDetailsEvent.OnDateRangeSelected(it))},
         onStatsTypeSelected = { viewModel.onEvent(ItemDetailsEvent.OnStatsTypeSelected(it))}
     )
 }

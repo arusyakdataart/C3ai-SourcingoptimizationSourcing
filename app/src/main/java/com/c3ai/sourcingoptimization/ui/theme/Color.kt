@@ -25,3 +25,4 @@ val Gray70 = Color(0xFF50545C)
 val Accent = Color(0xFF4F8DFF)
 
 val Blue = Color(0xFF37A2FF)
+val CardBackgroundSecondary = Color(0x1AFFFFFF)

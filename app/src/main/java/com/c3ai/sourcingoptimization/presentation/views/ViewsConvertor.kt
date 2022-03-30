@@ -84,17 +84,17 @@ fun ViewModelState.convert(line: PurchaseOrder.Line): UiPurchaseOrder.Line =
     )
 
 fun ViewModelState.convert(
-    savingsOppItem: SavingsOpportunityItem?,
+    savingsOppItem: SavingsOpportunityItem,
     itemId: String
 ): UiSavingsOpportunityItem = UiSavingsOpportunityItem(
-    savingOppText = savingsOppItem?.let { item ->
+    savingOppText = savingsOppItem.let { item ->
         val savingOppText = item.result[itemId]?.SavingsOpportunityCompound?.missing?.let { list ->
             val filteredList = list.filter { it < 100 }
             if (filteredList.isEmpty()) "0" else filteredList.sum().div(filteredList.size)
         }
         String.format("%s%s", "$", savingOppText)
     } ?: "",
-    data = savingsOppItem?.result?.get(itemId)?.SavingsOpportunityCompound?.data
+    data = savingsOppItem.result[itemId]?.SavingsOpportunityCompound?.data
         ?: emptyList()
 )
 
