@@ -22,8 +22,6 @@ import com.github.aachartmodel.aainfographics.aatools.AAGradientColor
 import com.github.aachartmodel.aainfographics.aatools.AALinearGradientDirection
 import dagger.hilt.android.AndroidEntryPoint
 import java.text.DecimalFormat
-import javax.inject.Inject
-import android.widget.LinearLayout
 import androidx.appcompat.widget.LinearLayoutCompat
 
 
@@ -95,25 +93,25 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
 //                        }
 //                        bindMultiLineChart()
 //                    }
-                    if (result.indexes.isNotEmpty()) {
-                        indexId = result.indexes[0].id
-                        viewModel.getItemMarketPriceIndexRelation(itemId, indexId)
-                    }
-                    viewModel.getItemMarketPriceIndexRelationMetrics(
-                        ids = listOf(indexId),
-                        expressions = listOf("IndexPrice"),
-                        startDate = formatDate(date = getYearBackDate(1)),
-                        endDate = formatDate(date = getCurrentDate()),
-                        interval = "MONTH"
-                    )
-                    result.itemMarketPriceIndexRelationMetrics?.let {
-                        marketPriceIndexRelationMetric = it.result[indexId]
-                        setGraphYear()
-                        val indexPrice = marketPriceIndexRelationMetric?.IndexPrice
-                        if (indexPrice != null) {
-                            bindDashedLineChart(indexPrice)
-                        }
-                    }
+//                    if (result.indexes.isNotEmpty()) {
+//                        indexId = result.indexes[0].id
+//                        viewModel.getItemMarketPriceIndexRelation(itemId, indexId)
+//                    }
+//                    viewModel.getItemMarketPriceIndexRelationMetrics(
+//                        ids = listOf(indexId),
+//                        expressions = listOf("IndexPrice"),
+//                        startDate = formatDate(date = getYearBackDate(1)),
+//                        endDate = formatDate(date = getCurrentDate()),
+//                        interval = "MONTH"
+//                    )
+//                    result.itemMarketPriceIndexRelationMetrics?.let {
+//                        marketPriceIndexRelationMetric = it.result[indexId]
+//                        setGraphYear()
+//                        val indexPrice = marketPriceIndexRelationMetric?.indexPrice
+//                        if (indexPrice != null) {
+//                            bindDashedLineChart(indexPrice)
+//                        }
+//                    }
                 }
                 else -> {
                     // TODO!!! Handle error and loading states
@@ -380,10 +378,10 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
     }
 
     private fun setGraphYear() {
-        val firstYear = getYear(marketPriceIndexRelationMetric?.IndexPrice?.dates?.get(0) ?: "")
+        val firstYear = getYear(marketPriceIndexRelationMetric?.indexPrice?.dates?.get(0) ?: "")
         val lastYear = getYear(
-            marketPriceIndexRelationMetric?.IndexPrice?.dates?.get(
-                marketPriceIndexRelationMetric?.IndexPrice?.dates?.size?.minus(1) ?: 0
+            marketPriceIndexRelationMetric?.indexPrice?.dates?.get(
+                marketPriceIndexRelationMetric?.indexPrice?.dates?.size?.minus(1) ?: 0
             ) ?: ""
         )
         binding.year.text = if (firstYear == lastYear) firstYear.toString()
@@ -466,7 +464,7 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
     private fun updateData(index: Int) {
         activity?.runOnUiThread {
 
-            val date = marketPriceIndexRelationMetric?.IndexPrice?.dates?.get(index) ?: ""
+            val date = marketPriceIndexRelationMetric?.indexPrice?.dates?.get(index) ?: ""
             val dateString = getMonth(date) + " " + getYear(date)
             binding.dateSpp.text = dateString
             binding.dateIndex.text = dateString
@@ -474,7 +472,7 @@ class ItemDetailsOverviewFragment : BaseFragment<FragmentItemDetailsOverviewBind
             binding.price.text = String.format(
                 "%s%s", "$", String.format(
                     "%.2f",
-                    marketPriceIndexRelationMetric?.IndexPrice?.data?.get(index)
+                    marketPriceIndexRelationMetric?.indexPrice?.data?.get(index)
                 )
             )
 

@@ -29,7 +29,8 @@ import com.c3ai.sourcingoptimization.data.C3Result
 import com.c3ai.sourcingoptimization.data.repository.C3MockRepositoryImpl
 import com.c3ai.sourcingoptimization.presentation.item_details.overview.ItemDetailsUiState
 import com.c3ai.sourcingoptimization.presentation.item_details.overview.PreviewItemDetailsUiState
-import com.c3ai.sourcingoptimization.presentation.views.SuppliersChart
+import com.c3ai.sourcingoptimization.presentation.views.itemdetails.IndexPriceCharts
+import com.c3ai.sourcingoptimization.presentation.views.itemdetails.SuppliersCharts
 import com.c3ai.sourcingoptimization.presentation.views.UiSavingsOpportunityItem
 import com.c3ai.sourcingoptimization.ui.theme.*
 import com.github.aachartmodel.aainfographics.aachartcreator.*
@@ -69,6 +70,8 @@ fun ItemDetailsScreen(
     onAlertsClick: (String) -> Unit,
     onDateRangeSelected: (Int) -> Unit,
     onStatsTypeSelected: (Int) -> Unit,
+    onSupplierClick: (String) -> Unit,
+    onIndexClick: (String) -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
     val bottomState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
@@ -140,6 +143,8 @@ fun ItemDetailsScreen(
                                                 uiState,
                                                 onDateRangeSelected,
                                                 onStatsTypeSelected,
+                                                onSupplierClick,
+                                                onIndexClick,
                                             )
                                         }
 
@@ -408,6 +413,8 @@ private fun SourcingAnalysis(
     uiState: ItemDetailsUiState.HasItem,
     onDateRangeSelected: (Int) -> Unit,
     onStatsTypeSelected: (Int) -> Unit,
+    onSupplierClick: (String) -> Unit,
+    onIndexClick: (String) -> Unit,
 ) {
     val context = LocalContext.current
     val item = uiState.item
@@ -424,10 +431,10 @@ private fun SourcingAnalysis(
                 suppliersChartView,
                 divider,
                 supplierTitle,
-                supplierMenu,
+                supplierRoute,
                 divider2,
                 indexTitle,
-                indexMenu,
+                indexRoute,
                 divider3,
                 bottomGraphCard,
             ) = createRefs()
@@ -497,19 +504,24 @@ private fun SourcingAnalysis(
                     .constrainAs(supplierTitle) {
                         top.linkTo(divider.bottom)
                         start.linkTo(parent.start)
-                        end.linkTo(supplierMenu.start, margin = 16.dp)
+                        end.linkTo(supplierRoute.start, margin = 16.dp)
                         width = Dimension.fillToConstraints
                     }
             )
-            CardMenu(
-                items = stringArrayResource(R.array.sourcingAnalysisStatsType).asList(),
-                onItemSelectedListener = { position, _ -> onDateRangeSelected(position) },
+            C3IconButton(
+                onClick = { onSupplierClick(item.id) },
                 modifier = Modifier
-                    .constrainAs(supplierMenu) {
+                    .constrainAs(supplierRoute) {
                         top.linkTo(divider.bottom)
                         end.linkTo(parent.end)
                     }
-            )
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.ArrowForward,
+                    contentDescription = stringResource(R.string.cd_read_more),
+                    tint = MaterialTheme.colors.primary
+                )
+            }
             ListDivider(Modifier.constrainAs(divider2) { top.linkTo(supplierTitle.bottom) })
             Text(
                 stringResource(R.string.index),
@@ -519,19 +531,24 @@ private fun SourcingAnalysis(
                     .constrainAs(indexTitle) {
                         top.linkTo(divider2.bottom)
                         start.linkTo(parent.start)
-                        end.linkTo(indexMenu.start, margin = 16.dp)
+                        end.linkTo(indexRoute.start, margin = 16.dp)
                         width = Dimension.fillToConstraints
                     }
             )
-            CardMenu(
-                items = stringArrayResource(R.array.sourcingAnalysisStatsType).asList(),
-                onItemSelectedListener = { position, _ -> onDateRangeSelected(position) },
+            C3IconButton(
+                onClick = { onIndexClick(item.id) },
                 modifier = Modifier
-                    .constrainAs(indexMenu) {
+                    .constrainAs(indexRoute) {
                         top.linkTo(divider2.bottom)
                         end.linkTo(parent.end)
                     }
-            )
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.ArrowForward,
+                    contentDescription = stringResource(R.string.cd_read_more),
+                    tint = MaterialTheme.colors.primary
+                )
+            }
             ListDivider(Modifier.constrainAs(divider3) { top.linkTo(indexTitle.bottom) })
             C3SimpleCard(
                 backgroundColor = CardBackgroundSecondary,
@@ -555,12 +572,13 @@ private fun SourcingAnalysis(
                         update = { view ->
                             uiState.vendorRelationMetrics?.let {
                                 val model = configureMultiLineChart(context, it)
-                                val aaOptions = model.aa_toAAOptions()
-                                aaOptions.xAxis?.crosshair(AACrosshair().width(1f))
-                                aaOptions.yAxis?.apply {
-                                    lineWidth(0f)
-                                    gridLineColor(AAColor.Clear)
-                                    lineColor(AAColor.Clear)
+                                val aaOptions = model.aa_toAAOptions().apply {
+                                    xAxis?.crosshair(AACrosshair().width(1f))
+                                    yAxis?.apply {
+                                        lineWidth(0f)
+                                        gridLineColor(AAColor.Clear)
+                                        lineColor(AAColor.Clear)
+                                    }
                                 }
                                 view.isClearBackgroundColor = true
 //                            view.callBack = ChartCallback()
@@ -584,6 +602,21 @@ private fun SourcingAnalysis(
                             }
                         },
                         update = { view ->
+                            uiState.indexPriceChart?.let {
+                                val model = configureDashedLineChart(context, it)
+                                val aaOptions = model.aa_toAAOptions().apply {
+                                    xAxis?.apply {
+                                        crosshair(AACrosshair().width(1f))
+                                        gridLineColor(AAColor.Clear)
+                                            .lineColor(AAColor.Clear)
+                                            .labels?.autoRotationLimit(0f)?.step(3)
+                                    }
+                                    yAxis?.gridLineColor(AAColor.Clear)?.lineColor(AAColor.Clear)
+                                }
+                                view.isClearBackgroundColor = true
+//                            view.callBack = ChartCallback()
+                                view.aa_drawChartWithChartOptions(aaOptions)
+                            }
                         },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -641,7 +674,7 @@ private fun configureGradientColorAreaChart(
         )
 }
 
-private fun configureColumnChart(suppliersChart: SuppliersChart): AAChartModel {
+private fun configureColumnChart(suppliersChart: SuppliersCharts): AAChartModel {
 
     return AAChartModel()
         .chartType(AAChartType.Column)
@@ -662,7 +695,7 @@ private fun configureColumnChart(suppliersChart: SuppliersChart): AAChartModel {
         .yAxisLabelsEnabled(false)
         .xAxisLabelsEnabled(true)
         .yAxisMin(0f)
-        .yAxisMax(suppliersChart.suppliersChartDataMaxValue?.toFloat())
+        .yAxisMax(suppliersChart.maxValue?.toFloat())
         .stacking(AAChartStackingType.Normal)
         .backgroundColor("rgba(0,0,0,0)")
         .categories(suppliersChart.categories.toTypedArray())
@@ -709,6 +742,65 @@ private fun configureMultiLineChart(
     return aaChartModel
 }
 
+private fun configureDashedLineChart(
+    context: Context,
+    indexPriceChart: IndexPriceCharts
+): AAChartModel {
+    val aaChartModel = AAChartModel.Builder(context)
+        .setChartType(AAChartType.Line)
+        .setXAxisVisible(false)
+        .setDataLabelsEnabled(false)
+        .setAnimationType(AAChartAnimationType.Bounce)
+        .setTouchEventEnabled(true)
+        .setLegendEnabled(false)
+        .setMarkerSymbolStyle(AAChartSymbolStyleType.InnerBlank)
+        .setMarkerRadius(3f)
+        .setMarkerSymbol(AAChartSymbolType.Circle)
+        .setTooltipEnabled(false)
+        .setYAxisMax(indexPriceChart.maxValue.toFloat())
+        .setCategories(*indexPriceChart.categories.toTypedArray())
+        .setCategories(*arrayOf())
+        .setYAxisTitle("")
+        .setAxesTextColor("#AAAEB5")
+        .build()
+
+    val element = AASeriesElement()
+        .color("#008066")
+        .name("")
+        .lineWidth(2f)
+        .data(indexPriceChart.data.toTypedArray())
+        .dashStyle(AAChartLineDashStyleType.ShortDash)
+
+    aaChartModel
+        .series(arrayOf(element))
+    return aaChartModel
+}
+
+private class ChartCallback(
+    val lineChartView: AAChartView,
+    val dashedLineChartView: AAChartView,
+    val update: (Int) -> Unit
+) : AAChartView.AAChartViewCallBack {
+
+    override fun chartViewDidFinishLoad(view: AAChartView) {}
+
+    override fun chartViewMoveOverEventMessage(
+        view: AAChartView,
+        messageModel: AAMoveOverEventMessageModel
+    ) {
+        val index = messageModel.index ?: -1
+        val addPlotLine1 = "aaGlobalChart.series[0].points[$index].onMouseOver()"
+        view.post {
+            if (view == lineChartView) {
+                dashedLineChartView.aa_evaluateTheJavaScriptStringFunction(addPlotLine1)
+            } else {
+                lineChartView.aa_evaluateTheJavaScriptStringFunction(addPlotLine1)
+            }
+        }
+        update(index)
+    }
+}
+
 /**
  * TopAppBar for the suppliers details screen[ItemDetailsScreen]
  */
@@ -743,6 +835,8 @@ fun ItemDetailsPreview() {
             onAlertsClick = {},
             onDateRangeSelected = {},
             onStatsTypeSelected = {},
+            onSupplierClick = {},
+            onIndexClick = {},
         )
     }
 }
@@ -766,6 +860,8 @@ fun ItemDetailsPOLinesTabPreview() {
             onAlertsClick = {},
             onDateRangeSelected = {},
             onStatsTypeSelected = {},
+            onSupplierClick = {},
+            onIndexClick = {},
         )
     }
 }

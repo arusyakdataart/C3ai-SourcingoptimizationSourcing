@@ -1,11 +1,14 @@
 package com.c3ai.sourcingoptimization.domain.model
 
+import com.google.gson.annotations.SerializedName
+
 data class ItemMarketPriceIndexRelationMetrics(
     val result: Map<String, ItemMarketPriceIndexRelationMetric>
 )
 
 data class ItemMarketPriceIndexRelationMetric(
-    val IndexPrice: IndexPrice
+    @SerializedName("IndexPrice")
+    val indexPrice: IndexPrice
 )
 
 data class IndexPrice(

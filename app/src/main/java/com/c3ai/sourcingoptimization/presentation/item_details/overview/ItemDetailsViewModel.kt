@@ -1,12 +1,11 @@
 package com.c3ai.sourcingoptimization.presentation.item_details.overview
 
 import android.util.Log
+import android.widget.TextView
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.c3ai.sourcingoptimization.common.formatDate
-import com.c3ai.sourcingoptimization.common.getCurrentDate
-import com.c3ai.sourcingoptimization.common.getMonthBackDate
-import com.c3ai.sourcingoptimization.common.getYearBackDate
+import com.c3ai.sourcingoptimization.R
+import com.c3ai.sourcingoptimization.common.*
 import com.c3ai.sourcingoptimization.data.C3Result.Error
 import com.c3ai.sourcingoptimization.data.C3Result.Success
 import com.c3ai.sourcingoptimization.data.repository.C3Repository
@@ -16,6 +15,8 @@ import com.c3ai.sourcingoptimization.domain.settings.FakeC3AppSettingsProvider
 import com.c3ai.sourcingoptimization.presentation.ViewModelState
 import com.c3ai.sourcingoptimization.presentation.item_details.ItemDetailsEvent
 import com.c3ai.sourcingoptimization.presentation.views.*
+import com.c3ai.sourcingoptimization.presentation.views.itemdetails.IndexPriceCharts
+import com.c3ai.sourcingoptimization.presentation.views.itemdetails.SuppliersCharts
 import com.c3ai.sourcingoptimization.utilities.PAGINATED_RESPONSE_LIMIT
 import com.c3ai.sourcingoptimization.utilities.VISIBLE_THRESHOLD
 import com.c3ai.sourcingoptimization.utilities.extentions.formatNumberLocal
@@ -58,10 +59,8 @@ sealed interface ItemDetailsUiState {
         val item: UiItem,
         val savingsOpportunity: UiSavingsOpportunityItem? = null,
         val ocPOLineQty: UiOpenClosedPOLineQtyItem,
-        val suppliersChart: SuppliersChart?,
-        val indexes: List<MarketPriceIndex> = emptyList(),
-        val itemMarketPriceIndexRelations: List<ItemRelation> = emptyList(),
-        val itemMarketPriceIndexRelationMetrics: ItemMarketPriceIndexRelationMetrics? = null,
+        val suppliersChart: SuppliersCharts?,
+        val indexPriceChart: IndexPriceCharts? = null,
         val vendorRelationMetrics: Map<String, List<Double>>? = null,
         override val isLoading: Boolean,
         override val itemId: String,
@@ -80,8 +79,7 @@ private data class ItemDetailsViewModelState(
     val savingsOpportunity: SavingsOpportunityItem? = null,
     val suppliers: List<C3Vendor> = emptyList(),
     val marketPriceIndex: List<MarketPriceIndex> = emptyList(),
-    val itemMarketPriceIndexRelations: List<ItemRelation> = emptyList(),
-    val itemMarketPriceIndexRelationMetrics: ItemMarketPriceIndexRelationMetrics? = null,
+    val indexPrice: IndexPrice? = null,
     val po_expressions: List<String> = listOf("OpenPOLineQuantity", "ClosedPOLineQuantity"),
     val vendorRelationMetrics: Map<String, List<Double>>? = null,
     val po_startDate: String = formatDate(date = getYearBackDate(1)),
@@ -96,6 +94,7 @@ private data class ItemDetailsViewModelState(
     val tabIndex: Int = 0,
     val dateRangeSelected: Int = 0,
     val statsTypeSelected: Int = 0,
+    var selectedCrosshairIndex: Int = -1,
 ) : ViewModelState() {
 
     /**
@@ -108,15 +107,48 @@ private data class ItemDetailsViewModelState(
                 item = convert(item),
                 savingsOpportunity = savingsOpportunity?.let { convert(savingsOpportunity, item.id) },
                 ocPOLineQty = convert(openClosedPOLineQty, item.id),
-                suppliersChart = SuppliersChart(
+                suppliersChart = SuppliersCharts(
                     categories = suppliers.map { it.name },
                     data = formatSuppliersChartData(),
-                    suppliersChartDataMaxValue = formatSuppliersChartData().maxOrNull(),
-                    dataLabelsFormat = if (statsTypeSelected == 0) "{point.y:,.2f}M" else "{point.y:,.0f} %"
+                    maxValue = formatSuppliersChartData().maxOrNull(),
+                    dataLabelsFormat = if (statsTypeSelected == 0) "{point.y:,.2f}M" else "{point.y:,.0f} %",
+                    suppliers = vendorRelationMetrics?.let { metrics ->
+                        val textsMap = mutableMapOf<String, String>()
+                        suppliers.forEach {
+                            textsMap[it.name] = String.format(
+                                "%s%s", "$",
+                                String.format(
+                                    "%.2f", metrics[it.id]?.get(selectedCrosshairIndex)
+                                )
+                            )
+                        }
+                        textsMap
+                    }
                 ),
-                indexes = marketPriceIndex,
-                itemMarketPriceIndexRelations = itemMarketPriceIndexRelations,
-                itemMarketPriceIndexRelationMetrics = itemMarketPriceIndexRelationMetrics,
+                indexPriceChart = IndexPriceCharts(
+                    categories = indexPrice?.dates?.map { getMonth(it) } ?: emptyList(),
+                    data = indexPrice?.data ?: emptyList(),
+                    maxValue = indexPrice?.data?.maxOrNull() ?: 100.0,
+                    graphYearFormat = indexPrice?.let {
+                        val firstYear = getYear(it.dates[0])
+                        val lastYear = getYear(it.dates[it.dates.size.minus(1) ?: 0])
+                        if (firstYear == lastYear) firstYear.toString()
+                        else String.format(
+                            "%s%s%s",
+                            firstYear.toString(), " - ", lastYear.toString()
+                        )
+                    } ?: "",
+                    dateText = indexPrice?.dates?.let { dates ->
+                        val date = dates[selectedCrosshairIndex]
+                        getMonth(date) + " " + getYear(date)
+                    } ?: "",
+                    priceText = String.format(
+                        "%s%s", "$",
+                        String.format(
+                            "%.2f", indexPrice?.data?.get(selectedCrosshairIndex) ?: ""
+                        )
+                    ),
+                ),
                 vendorRelationMetrics = vendorRelationMetrics,
                 isLoading = isLoading,
                 itemId = itemId,
@@ -134,6 +166,7 @@ private data class ItemDetailsViewModelState(
     }
 
     fun formatSuppliersChartData(): List<Double> {
+        Log.e("formatSuppliersChart", statsTypeSelected.toString())
         if (statsTypeSelected == 0) {
             return suppliers.map { it.spend.value.formatNumberLocal() }
         }
@@ -184,7 +217,6 @@ class ItemDetailsViewModel @Inject constructor(
             viewModelState.update { state ->
                 when (itemsResult) {
                     is Success -> {
-                        Log.e("itemsResult", "call")
                         offset += PAGINATED_RESPONSE_LIMIT
                         state.copy(
                             item = itemsResult.data,
@@ -207,7 +239,6 @@ class ItemDetailsViewModel @Inject constructor(
             viewModelState.update { state ->
                 when (openClosedPOLineQtyResult) {
                     is Success -> {
-                        Log.e("openClosedPOLineQty", "call")
                         state.copy(openClosedPOLineQty = openClosedPOLineQtyResult.data)
                     }
                     is Error -> {
@@ -226,7 +257,6 @@ class ItemDetailsViewModel @Inject constructor(
             viewModelState.update { state ->
                 when (savingsOpportunityResult) {
                     is Success -> {
-                        Log.e("savingsOpportunity", "call")
                         state.copy(savingsOpportunity = savingsOpportunityResult.data)
                     }
                     is Error -> {
@@ -262,7 +292,22 @@ class ItemDetailsViewModel @Inject constructor(
             viewModelState.update { state ->
                 when (marketPriceIndex) {
                     is Success -> {
-                        state.copy(marketPriceIndex = marketPriceIndex.data)
+                        Log.e("marketPriceIndex", marketPriceIndex.data.size.toString())
+                        val indexId = marketPriceIndex.data[0].id
+                        val indexPrice = getMarketPriceIndexRelationMetrics(
+                            itemId,
+                            indexId,
+                            listOf(indexId),
+                            expressions = listOf("IndexPrice"),
+                            startDate = formatDate(date = getYearBackDate(1)),
+                            endDate = formatDate(date = getCurrentDate()),
+                            interval = "MONTH"
+                        )
+                        Log.e("indexPrice", indexPrice?.count.toString())
+                        state.copy(
+                            marketPriceIndex = marketPriceIndex.data,
+                            indexPrice = indexPrice,
+                        )
                     }
                     is Error -> {
                         state.copy()
@@ -310,53 +355,35 @@ class ItemDetailsViewModel @Inject constructor(
         return vendorRelationMetrics
     }
 
-    fun getItemMarketPriceIndexRelation(itemId: String, indexId: String) {
-        viewModelScope.launch {
-            val itemMarketPriceIndexRelations = repository.getItemMarketPriceIndexRelation(
-                itemId, indexId
-            )
-            viewModelState.update {
-                when (itemMarketPriceIndexRelations) {
-                    is Success -> {
-                        it.copy(itemMarketPriceIndexRelations = itemMarketPriceIndexRelations.data)
-                    }
-                    is Error -> {
-                        it.copy()
-                    }
-                }
-            }
-        }
-    }
-
-    fun getItemMarketPriceIndexRelationMetrics(
+    private suspend fun getMarketPriceIndexRelationMetrics(
+        itemId: String,
+        indexId: String,
         ids: List<String>,
         expressions: List<String>,
         startDate: String,
         endDate: String,
         interval: String
-    ) {
-        viewModelScope.launch {
-            val itemMarketPriceIndexRelationMetrics =
-                repository.getItemMarketPriceIndexRelationMetrics(
-                    ids,
-                    expressions,
-                    startDate,
-                    endDate,
-                    interval
-                )
-            viewModelState.update {
-                when (itemMarketPriceIndexRelationMetrics) {
+    ): IndexPrice? {
+        when (repository.getItemMarketPriceIndexRelation(itemId, indexId)) {
+            is Success -> {
+                val marketPriceIndexRelationMetrics =
+                    repository.getItemMarketPriceIndexRelationMetrics(
+                        ids,
+                        expressions,
+                        startDate,
+                        endDate,
+                        interval
+                    )
+                when (marketPriceIndexRelationMetrics) {
                     is Success -> {
-                        it.copy(
-                            itemMarketPriceIndexRelationMetrics = itemMarketPriceIndexRelationMetrics.data
-                        )
+                        return marketPriceIndexRelationMetrics.data.result[indexId]?.indexPrice
                     }
-                    is Error -> {
-                        it.copy()
-                    }
+                    is Error -> {}
                 }
             }
+            is Error -> {}
         }
+        return null
     }
 
     /**
@@ -373,6 +400,13 @@ class ItemDetailsViewModel @Inject constructor(
                 }
                 is ItemDetailsEvent.OnStatsTypeSelected -> {
                     state.copy(statsTypeSelected = event.selected)
+                }
+                is ItemDetailsEvent.UpdateSourcingAnalysis -> {
+                    if (state.selectedCrosshairIndex != event.index) {
+                        state.copy(selectedCrosshairIndex = event.index)
+                    } else {
+                        state
+                    }
                 }
             }
         }
