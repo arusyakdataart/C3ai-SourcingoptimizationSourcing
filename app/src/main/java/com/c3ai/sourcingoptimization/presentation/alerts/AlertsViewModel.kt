@@ -74,7 +74,7 @@ private data class AlertsViewModelState(
         if (alerts != null) {
             AlertsUiState.HasData(
                 alerts = convert(alerts),
-                expandedListItemIds = alerts.map { it.id }.toSet(),
+                expandedListItemIds = expandedListItemIds,
                 isLoading = isLoading,
                 errorMessages = errorMessages,
                 searchInput = searchInput

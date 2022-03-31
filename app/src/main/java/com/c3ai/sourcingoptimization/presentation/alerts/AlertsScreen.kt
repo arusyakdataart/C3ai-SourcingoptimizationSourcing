@@ -1,7 +1,12 @@
 package com.c3ai.sourcingoptimization.presentation.alerts
 
+import android.annotation.SuppressLint
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -16,6 +21,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
@@ -110,33 +116,89 @@ fun AlertsScreen(
                                 val categoryList = uiState.alerts.groupBy { it.category?.name }
                                 categoryList.forEach { it, it1 ->
                                     stickyHeader {
-                                        AlertCategoryScreen(it ?: "", onExpandableItemClick)
+                                        val expandableItemIds =
+                                            uiState.alerts.mapNotNull { alert -> if (alert.category?.name == it) alert.id else null }
+                                        val expanded = uiState.expandedListItemIds.contains(expandableItemIds[0])
+
+                                        AlertCategoryScreen(
+                                            it ?: "",
+                                            expanded,
+                                            expandableItemIds,
+                                            onExpandableItemClick
+                                        )
                                     }
 
                                     items(it1) {
                                         when (it.category?.name) {
-                                            AlertTypes.NEW_LOWEST_PRICE.categoryName -> PriceChangeAlert(
-                                                it
-                                            )
-                                            AlertTypes.UNEXPECTED_PRICE_INCREASE.categoryName -> PriceChangeAlert(
-                                                it
-                                            )
-                                            AlertTypes.REQUESTED_DELIVERY_DATE_CHANGE.categoryName -> RequestedDeliveryDateChangeAlert(
-                                                it
-                                            )
-                                            AlertTypes.SHORT_CYCLED_PURCHASE_ORDER.categoryName -> PurchaseOrderAlert(
-                                                it
-                                            )
-                                            AlertTypes.INDEX_PRICE_CHANGE.categoryName -> IndexPriceChangeAlert(
-                                                it
-                                            )
-                                            AlertTypes.CORRELATED_INDEX_PRICING_ANOMALY.categoryName -> IndexPriceAnomalyAlert(
-                                                it
-                                            )
-                                            AlertTypes.D_U_N_S_RISK.categoryName -> DUNSRiskAlert(it)
-                                            AlertTypes.RAPID_RATINGS_RISK.categoryName -> RapidRatingsRiskAlert(
-                                                it
-                                            )
+                                            AlertTypes.NEW_LOWEST_PRICE.categoryName ->
+                                                CollapsableLayout(
+                                                    expanded = uiState.expandedListItemIds.contains(
+                                                        it.id
+                                                    ),
+                                                ) {
+                                                    PriceChangeAlert(it)
+                                                }
+
+                                            AlertTypes.UNEXPECTED_PRICE_INCREASE.categoryName -> CollapsableLayout(
+                                                expanded = uiState.expandedListItemIds.contains(
+                                                    it.id
+                                                ),
+                                            ) {
+                                                PriceChangeAlert(it)
+                                            }
+                                            AlertTypes.REQUESTED_DELIVERY_DATE_CHANGE.categoryName -> CollapsableLayout(
+                                                expanded = uiState.expandedListItemIds.contains(
+                                                    it.id
+                                                ),
+                                            ) {
+                                                RequestedDeliveryDateChangeAlert(
+                                                    it
+                                                )
+                                            }
+                                            AlertTypes.SHORT_CYCLED_PURCHASE_ORDER.categoryName -> CollapsableLayout(
+                                                expanded = uiState.expandedListItemIds.contains(
+                                                    it.id
+                                                ),
+                                            ) {
+                                                PurchaseOrderAlert(
+                                                    it
+                                                )
+                                            }
+                                            AlertTypes.INDEX_PRICE_CHANGE.categoryName -> CollapsableLayout(
+                                                expanded = uiState.expandedListItemIds.contains(
+                                                    it.id
+                                                ),
+                                            ) {
+                                                IndexPriceChangeAlert(
+                                                    it
+                                                )
+                                            }
+
+                                            AlertTypes.CORRELATED_INDEX_PRICING_ANOMALY.categoryName -> CollapsableLayout(
+                                                expanded = uiState.expandedListItemIds.contains(
+                                                    it.id
+                                                ),
+                                            ) {
+                                                IndexPriceAnomalyAlert(
+                                                    it
+                                                )
+                                            }
+                                            AlertTypes.D_U_N_S_RISK.categoryName -> CollapsableLayout(
+                                                expanded = uiState.expandedListItemIds.contains(
+                                                    it.id
+                                                ),
+                                            ) {
+                                                DUNSRiskAlert(it)
+                                            }
+                                            AlertTypes.RAPID_RATINGS_RISK.categoryName -> CollapsableLayout(
+                                                expanded = uiState.expandedListItemIds.contains(
+                                                    it.id
+                                                ),
+                                            ) {
+                                                RapidRatingsRiskAlert(
+                                                    it
+                                                )
+                                            }
                                         }
                                     }
                                 }
@@ -164,17 +226,37 @@ fun AlertsScreen(
     }
 }
 
+@SuppressLint("UnusedTransitionTargetStateParameter")
 @Composable
 private fun AlertCategoryScreen(
     category: String,
+    expanded: Boolean,
+    expandableIds: List<String>,
     onExpandableItemClick: (String) -> Unit
 ) {
+    val transitionState = remember {
+        MutableTransitionState(expanded).apply {
+            targetState = !expanded
+        }
+    }
+    val transition = updateTransition(transitionState, label = "")
+
+    val arrowRotationDegree by transition.animateFloat({
+        tween(durationMillis = 300)
+    }, label = "ArrowRotationAnimation") {
+        if (expanded) 270f else 0f
+    }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = 16.dp, top = 0.dp, end = 16.dp, bottom = 0.dp)
             .background(BackgroundColor)
-            .clickable { onExpandableItemClick(category) },
+            .clickable {
+                expandableIds.forEach {
+                    onExpandableItemClick(it)
+                }
+            },
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -190,7 +272,8 @@ private fun AlertCategoryScreen(
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_baseline_keyboard_arrow_down_24),
-                contentDescription = "Collapse"
+                contentDescription = "Collapse",
+                modifier = Modifier.rotate(arrowRotationDegree),
             )
         }
     }
