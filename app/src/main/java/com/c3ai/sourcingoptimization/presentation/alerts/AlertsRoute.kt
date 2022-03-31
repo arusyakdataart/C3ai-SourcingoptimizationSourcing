@@ -10,6 +10,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.c3ai.sourcingoptimization.presentation.navigateToAlertSettings
 
 /**
  * Displays the Alerts route.
@@ -35,7 +36,7 @@ fun AlertsRoute(
         onRefreshDetails = { viewModel.refreshDetails() },
         onSearchInputChanged = { viewModel.onEvent(AlertsEvent.OnSearchInputChanged(it)) },
         onSortChanged = { viewModel.onEvent(AlertsEvent.OnSortChanged(it)) },
-        onFilterChanged = { viewModel.onEvent(AlertsEvent.OnFilterChanged(it)) },
+        onChangeFilter = { navController.navigateToAlertSettings(it) },
         onBackButtonClick = { navController.navigateUp() },
         onCollapsableItemClick = { viewModel.onEvent(AlertsEvent.OnCollapsableItemClick(it)) }
     )

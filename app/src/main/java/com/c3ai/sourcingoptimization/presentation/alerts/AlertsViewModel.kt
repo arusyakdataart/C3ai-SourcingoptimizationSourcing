@@ -28,6 +28,7 @@ sealed interface AlertsUiState {
     val isLoading: Boolean
     val errorMessages: List<ErrorMessage>
     val searchInput: String
+    val selectedCategories: List<String>
 
     /**
      * There is no data to render.
@@ -38,7 +39,8 @@ sealed interface AlertsUiState {
     data class NoData(
         override val isLoading: Boolean,
         override val errorMessages: List<ErrorMessage>,
-        override val searchInput: String
+        override val searchInput: String,
+        override val selectedCategories: List<String> = emptyList()
     ) : AlertsUiState
 
     /**
@@ -51,6 +53,7 @@ sealed interface AlertsUiState {
         override val isLoading: Boolean,
         override val errorMessages: List<ErrorMessage>,
         override val searchInput: String,
+        override val selectedCategories: List<String> = emptyList()
     ) : AlertsUiState
 }
 

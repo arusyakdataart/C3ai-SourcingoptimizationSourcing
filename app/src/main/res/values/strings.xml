@@ -93,6 +93,7 @@
     <string name="fhr">FHR</string>
     <string name="helpful">Helpful</string>
     <string name="not_helpful">Not helpful</string>
+    <string name="alert_types_settings">Alert Types Settings</string>
     <array name="sort_po">
         <item>Total Cost</item>
         <item>Unit Price</item>

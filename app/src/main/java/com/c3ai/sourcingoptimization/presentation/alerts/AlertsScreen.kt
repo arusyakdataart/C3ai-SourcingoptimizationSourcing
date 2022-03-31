@@ -30,12 +30,14 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import androidx.navigation.NavController
 import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.common.AlertTypes
 import com.c3ai.sourcingoptimization.common.SortType
 import com.c3ai.sourcingoptimization.common.components.*
 import com.c3ai.sourcingoptimization.presentation.views.UiAlert
 import com.c3ai.sourcingoptimization.ui.theme.*
+import com.google.gson.Gson
 import kotlinx.coroutines.launch
 
 /**
@@ -55,7 +57,7 @@ fun AlertsScreen(
     onRefreshDetails: () -> Unit,
     onSearchInputChanged: (String) -> Unit,
     onSortChanged: (String) -> Unit,
-    onFilterChanged: (String) -> Unit,
+    onChangeFilter: (String) -> Unit,
     onBackButtonClick: () -> Unit,
     onCollapsableItemClick: (String) -> Unit
 ) {
@@ -81,12 +83,13 @@ fun AlertsScreen(
             topBar = {
                 TopAppBar(
                     title = stringResource(R.string.alerts),
+                    uiState = uiState,
                     searchInput = uiState.searchInput,
                     onBackButtonClick = onBackButtonClick,
                     onSearchInputChanged = onSearchInputChanged,
                     onClearClick = { onSearchInputChanged("") },
                     onSortChanged = { onSortChanged(it) },
-                    onFilterChanged = { onFilterChanged(it) },
+                    onChangeFilter = { onChangeFilter(it) },
                     onContactsClick = {
                         coroutineScope.launch {
                             if (!bottomState.isVisible) {
@@ -119,7 +122,9 @@ fun AlertsScreen(
                                         val collapsableItemIds =
                                             uiState.alerts.mapNotNull { alert -> if (alert.category?.name == it) alert.id else null }
                                         val expanded =
-                                            !uiState.collapsedListItemIds.contains(collapsableItemIds[0])
+                                            !uiState.collapsedListItemIds.contains(
+                                                collapsableItemIds[0]
+                                            )
 
                                         AlertCategoryScreen(
                                             it ?: "",
@@ -1351,6 +1356,7 @@ private fun RapidRatingsRiskAlert(alert: UiAlert) {
 @Composable
 private fun TopAppBar(
     title: String,
+    uiState: AlertsUiState,
     searchInput: String,
     placeholderText: String = "",
     onBackButtonClick: () -> Unit,
@@ -1358,7 +1364,7 @@ private fun TopAppBar(
     onClearClick: () -> Unit = {},
     onContactsClick: () -> Unit,
     onSortChanged: (String) -> Unit = {},
-    onFilterChanged: (String) -> Unit = {},
+    onChangeFilter: (String) -> Unit = {},
 ) {
     var showClearButton by remember { mutableStateOf(false) }
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -1436,7 +1442,7 @@ private fun TopAppBar(
                     }
                 }
             }
-            IconButton(onClick = { /* TODO: Open settings */ }) {
+            IconButton(onClick = { onChangeFilter(Gson().toJson(uiState.selectedCategories)) }) {
                 Icon(
                     imageVector = Icons.Filled.Settings,
                     contentDescription = stringResource(R.string.cd_settings_menu)
