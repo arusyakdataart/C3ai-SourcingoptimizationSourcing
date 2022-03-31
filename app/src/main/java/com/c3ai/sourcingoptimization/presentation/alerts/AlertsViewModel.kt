@@ -47,7 +47,7 @@ sealed interface AlertsUiState {
      */
     data class HasData(
         val alerts: List<UiAlert>,
-        val expandedListItemIds: Set<String> = emptySet(),
+        val collapsedListItemIds: Set<String> = emptySet(),
         override val isLoading: Boolean,
         override val errorMessages: List<ErrorMessage>,
         override val searchInput: String,
@@ -63,7 +63,7 @@ private data class AlertsViewModelState(
     val isLoading: Boolean = false,
     val errorMessages: List<ErrorMessage> = emptyList(),
     val searchInput: String = "",
-    val expandedListItemIds: Set<String> = emptySet()
+    val collapsedListItemIds: Set<String> = emptySet()
 ) : ViewModelState() {
 
     /**
@@ -74,7 +74,7 @@ private data class AlertsViewModelState(
         if (alerts != null) {
             AlertsUiState.HasData(
                 alerts = convert(alerts),
-                expandedListItemIds = expandedListItemIds,
+                collapsedListItemIds = collapsedListItemIds,
                 isLoading = isLoading,
                 errorMessages = errorMessages,
                 searchInput = searchInput
@@ -146,11 +146,11 @@ class AlertsViewModel @Inject constructor(
                 is AlertsEvent.OnSearchInputChanged -> {
                     state.copy(searchInput = event.searchInput)
                 }
-                is AlertsEvent.OnExpandableItemClick -> {
+                is AlertsEvent.OnCollapsableItemClick -> {
                     state.copy(
-                        expandedListItemIds = state.expandedListItemIds.toMutableSet().apply {
-                            val isRemoved = remove(event.category)
-                            isRemoved || add((event.category))
+                        collapsedListItemIds = state.collapsedListItemIds.toMutableSet().apply {
+                            val isRemoved = remove(event.id)
+                            isRemoved || add((event.id))
                         })
                 }
                 else -> {

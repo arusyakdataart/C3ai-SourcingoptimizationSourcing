@@ -57,7 +57,7 @@ fun AlertsScreen(
     onSortChanged: (String) -> Unit,
     onFilterChanged: (String) -> Unit,
     onBackButtonClick: () -> Unit,
-    onExpandableItemClick: (String) -> Unit
+    onCollapsableItemClick: (String) -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
     val bottomState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
@@ -116,15 +116,16 @@ fun AlertsScreen(
                                 val categoryList = uiState.alerts.groupBy { it.category?.name }
                                 categoryList.forEach { it, it1 ->
                                     stickyHeader {
-                                        val expandableItemIds =
+                                        val collapsableItemIds =
                                             uiState.alerts.mapNotNull { alert -> if (alert.category?.name == it) alert.id else null }
-                                        val expanded = uiState.expandedListItemIds.contains(expandableItemIds[0])
+                                        val expanded =
+                                            !uiState.collapsedListItemIds.contains(collapsableItemIds[0])
 
                                         AlertCategoryScreen(
                                             it ?: "",
                                             expanded,
-                                            expandableItemIds,
-                                            onExpandableItemClick
+                                            collapsableItemIds,
+                                            onCollapsableItemClick
                                         )
                                     }
 
@@ -132,7 +133,7 @@ fun AlertsScreen(
                                         when (it.category?.name) {
                                             AlertTypes.NEW_LOWEST_PRICE.categoryName ->
                                                 CollapsableLayout(
-                                                    expanded = uiState.expandedListItemIds.contains(
+                                                    expanded = !uiState.collapsedListItemIds.contains(
                                                         it.id
                                                     ),
                                                 ) {
@@ -140,14 +141,14 @@ fun AlertsScreen(
                                                 }
 
                                             AlertTypes.UNEXPECTED_PRICE_INCREASE.categoryName -> CollapsableLayout(
-                                                expanded = uiState.expandedListItemIds.contains(
+                                                expanded = !uiState.collapsedListItemIds.contains(
                                                     it.id
                                                 ),
                                             ) {
                                                 PriceChangeAlert(it)
                                             }
                                             AlertTypes.REQUESTED_DELIVERY_DATE_CHANGE.categoryName -> CollapsableLayout(
-                                                expanded = uiState.expandedListItemIds.contains(
+                                                expanded = !uiState.collapsedListItemIds.contains(
                                                     it.id
                                                 ),
                                             ) {
@@ -156,7 +157,7 @@ fun AlertsScreen(
                                                 )
                                             }
                                             AlertTypes.SHORT_CYCLED_PURCHASE_ORDER.categoryName -> CollapsableLayout(
-                                                expanded = uiState.expandedListItemIds.contains(
+                                                expanded = !uiState.collapsedListItemIds.contains(
                                                     it.id
                                                 ),
                                             ) {
@@ -165,7 +166,7 @@ fun AlertsScreen(
                                                 )
                                             }
                                             AlertTypes.INDEX_PRICE_CHANGE.categoryName -> CollapsableLayout(
-                                                expanded = uiState.expandedListItemIds.contains(
+                                                expanded = !uiState.collapsedListItemIds.contains(
                                                     it.id
                                                 ),
                                             ) {
@@ -175,7 +176,7 @@ fun AlertsScreen(
                                             }
 
                                             AlertTypes.CORRELATED_INDEX_PRICING_ANOMALY.categoryName -> CollapsableLayout(
-                                                expanded = uiState.expandedListItemIds.contains(
+                                                expanded = !uiState.collapsedListItemIds.contains(
                                                     it.id
                                                 ),
                                             ) {
@@ -184,14 +185,14 @@ fun AlertsScreen(
                                                 )
                                             }
                                             AlertTypes.D_U_N_S_RISK.categoryName -> CollapsableLayout(
-                                                expanded = uiState.expandedListItemIds.contains(
+                                                expanded = !uiState.collapsedListItemIds.contains(
                                                     it.id
                                                 ),
                                             ) {
                                                 DUNSRiskAlert(it)
                                             }
                                             AlertTypes.RAPID_RATINGS_RISK.categoryName -> CollapsableLayout(
-                                                expanded = uiState.expandedListItemIds.contains(
+                                                expanded = !uiState.collapsedListItemIds.contains(
                                                     it.id
                                                 ),
                                             ) {
@@ -232,7 +233,7 @@ private fun AlertCategoryScreen(
     category: String,
     expanded: Boolean,
     expandableIds: List<String>,
-    onExpandableItemClick: (String) -> Unit
+    onCollapsableItemClick: (String) -> Unit
 ) {
     val transitionState = remember {
         MutableTransitionState(expanded).apply {
@@ -244,7 +245,7 @@ private fun AlertCategoryScreen(
     val arrowRotationDegree by transition.animateFloat({
         tween(durationMillis = 300)
     }, label = "ArrowRotationAnimation") {
-        if (expanded) 270f else 0f
+        if (expanded) 0f else 270f
     }
 
     Row(
@@ -254,7 +255,7 @@ private fun AlertCategoryScreen(
             .background(BackgroundColor)
             .clickable {
                 expandableIds.forEach {
-                    onExpandableItemClick(it)
+                    onCollapsableItemClick(it)
                 }
             },
         horizontalArrangement = Arrangement.SpaceBetween,

@@ -37,6 +37,6 @@ fun AlertsRoute(
         onSortChanged = { viewModel.onEvent(AlertsEvent.OnSortChanged(it)) },
         onFilterChanged = { viewModel.onEvent(AlertsEvent.OnFilterChanged(it)) },
         onBackButtonClick = { navController.navigateUp() },
-        onExpandableItemClick = { viewModel.onEvent(AlertsEvent.OnExpandableItemClick(it)) }
+        onCollapsableItemClick = { viewModel.onEvent(AlertsEvent.OnCollapsableItemClick(it)) }
     )
 }
