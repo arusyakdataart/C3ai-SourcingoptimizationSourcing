@@ -1395,15 +1395,10 @@ private fun TopAppBar(
                 onDismissRequest = { sortMenuExpanded = false }
             ) {
                 val resources = listOf(
-                    "totalCost.value" to "PO Line Value",
-                    "unitPrice.value" to "Unit Price",
-                    "totalQuantity.value" to "Quantity",
-                    "orderCreationDate" to "Opened Date",
-                    "closedDate" to "Closed Date",
-                    "requestedDeliveryDate" to "Requested Delivery Date",
-                    "promisedDeliveryDate" to "Promised Delivery Date",
-                    "actualLeadTime" to "Actual Lead Time",
-                    "plannedLeadTime" to "Planned Lead Time"
+                    "timestamp" to "Alert Creation Date",
+                    "flagged" to "Alert Flag Status",
+                    "currentState" to "Alert State",
+                    "readStatus" to "Alert Status"
                 )
                 resources.map { it ->
                     DropdownMenuItem(

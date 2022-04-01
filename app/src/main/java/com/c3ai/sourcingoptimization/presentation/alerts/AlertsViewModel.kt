@@ -120,11 +120,11 @@ class AlertsViewModel @Inject constructor(
     /**
      * Refresh alerts data and update the UI state accordingly
      */
-    fun refreshDetails() {
+    fun refreshDetails(sortOrder: String = "") {
         viewModelState.update { it.copy(isLoading = true) }
 
         viewModelScope.launch {
-            val result = useCases.getAlerts("")
+            val result = useCases.getAlerts(sortOrder)
             viewModelState.update {
                 when (result) {
                     is C3Result.Success -> it.copy(alerts = result.data, isLoading = false)
@@ -159,6 +159,12 @@ class AlertsViewModel @Inject constructor(
                 else -> {
                     state.copy()
                 }
+            }
+        }
+
+        when (event) {
+            is AlertsEvent.OnSortChanged -> {
+                refreshDetails(event.sortOption)
             }
         }
     }
