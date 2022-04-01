@@ -10,6 +10,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.c3ai.sourcingoptimization.presentation.supplier_details.SupplierDetailsEvent
 
 /**
  * Displays the Home route.
@@ -44,5 +45,6 @@ fun ItemDetailsRoute(
         onSupplierClick = {},
         onIndexClick = {},
         onChartViewMoveOver = { viewModel.onEvent(ItemDetailsEvent.UpdateSourcingAnalysis(it)) },
+        onSortChanged = { viewModel.onEvent(ItemDetailsEvent.OnSortChanged(it)) },
     )
 }

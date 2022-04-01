@@ -5,4 +5,5 @@ sealed class ItemDetailsEvent {
     data class OnDateRangeSelected(val selected: Int) : ItemDetailsEvent()
     data class OnStatsTypeSelected(val selected: Int) : ItemDetailsEvent()
     data class UpdateSourcingAnalysis(val index: Int) : ItemDetailsEvent()
+    data class OnSortChanged(val sortOption: String) : ItemDetailsEvent()
 }

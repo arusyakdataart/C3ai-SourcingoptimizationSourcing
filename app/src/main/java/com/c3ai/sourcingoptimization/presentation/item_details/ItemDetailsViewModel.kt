@@ -2,23 +2,28 @@ package com.c3ai.sourcingoptimization.presentation.item_details
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.common.*
+import com.c3ai.sourcingoptimization.data.C3Result
 import com.c3ai.sourcingoptimization.data.C3Result.Error
 import com.c3ai.sourcingoptimization.data.C3Result.Success
 import com.c3ai.sourcingoptimization.data.repository.C3Repository
 import com.c3ai.sourcingoptimization.domain.model.*
 import com.c3ai.sourcingoptimization.domain.settings.C3AppSettingsProvider
 import com.c3ai.sourcingoptimization.domain.settings.FakeC3AppSettingsProvider
+import com.c3ai.sourcingoptimization.domain.use_case.SuppliersDetailsUseCases
 import com.c3ai.sourcingoptimization.presentation.ViewModelState
 import com.c3ai.sourcingoptimization.presentation.views.*
 import com.c3ai.sourcingoptimization.presentation.views.itemdetails.IndexPriceCharts
 import com.c3ai.sourcingoptimization.presentation.views.itemdetails.SuppliersCharts
+import com.c3ai.sourcingoptimization.utilities.ErrorMessage
 import com.c3ai.sourcingoptimization.utilities.PAGINATED_RESPONSE_LIMIT
 import com.c3ai.sourcingoptimization.utilities.VISIBLE_THRESHOLD
 import com.c3ai.sourcingoptimization.utilities.extentions.formatNumberLocal
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import java.util.*
 import javax.inject.Inject
 
 /**
@@ -61,6 +66,7 @@ sealed interface ItemDetailsUiState {
         val indexPriceChart: IndexPriceCharts?,
         val vendorRelationMetrics: Map<String, List<Double>>? = null,
         val chartsHashCode: Int,
+        val poLineItems: List<UiPurchaseOrder.Line>,
         override val isLoading: Boolean,
         override val itemId: String,
         override val tabIndex: Int,
@@ -83,6 +89,7 @@ private data class ItemDetailsViewModelState(
     val vendorRelationMetrics: Map<String, List<Double>>? = null,
     val saStartDate: String = formatDate(date = getMonthBackDate(3)),
     val saEndDate: String = formatDate(date = getCurrentDate()),
+    val poLineItems: List<PurchaseOrder.Line> = emptyList(),
     val isLoading: Boolean = false,
     val itemId: String = "",
     val tabIndex: Int = 0,
@@ -100,7 +107,12 @@ private data class ItemDetailsViewModelState(
         return if (item != null) {
             ItemDetailsUiState.HasItem(
                 item = convert(item),
-                savingsOpportunity = savingsOpportunity?.let { convert(savingsOpportunity, item.id) },
+                savingsOpportunity = savingsOpportunity?.let {
+                    convert(
+                        savingsOpportunity,
+                        item.id
+                    )
+                },
                 ocPOLineQty = convert(openClosedPOLineQty, item.id),
                 suppliersChart = SuppliersCharts(
                     categories = suppliers.map { it.name },
@@ -161,7 +173,8 @@ private data class ItemDetailsViewModelState(
                 tabIndex = tabIndex,
                 dateRangeSelected = dateRangeSelected,
                 statsTypeSelected = statsTypeSelected,
-                chartsHashCode = chartsHashCode
+                chartsHashCode = chartsHashCode,
+                poLineItems = poLineItems.map { convert(it) }
             )
         } else {
             ItemDetailsUiState.NoItem(
@@ -193,7 +206,7 @@ private data class ItemDetailsViewModelState(
 @HiltViewModel
 class ItemDetailsViewModel @Inject constructor(
     settings: C3AppSettingsProvider,
-    private val repository: C3Repository,
+    private val useCases: SuppliersDetailsUseCases
 ) : ViewModel() {
 
     private val viewModelState = MutableStateFlow(ItemDetailsViewModelState(settings))
@@ -221,71 +234,104 @@ class ItemDetailsViewModel @Inject constructor(
         viewModelState.update { it.copy(isLoading = true) }
 
         viewModelScope.launch {
-            val itemsResult = repository.getItemDetails(itemId)
-            viewModelState.update { state ->
-                when (itemsResult) {
-                    is Success -> {
-                        offset += PAGINATED_RESPONSE_LIMIT
-                        state.copy(
-                            item = itemsResult.data,
-                            isLoading = false
-                        )
-                    }
-                    is Error -> {
-                        state.copy(isLoading = false)
-                    }
-                }
+            when (viewModelState.value.tabIndex) {
+                0 -> loadOverview()
+                1 -> loadPOLines()
+                2 -> loadSuppliers()
             }
-
-            var expressions: List<String> = listOf("OpenPOLineQuantity", "ClosedPOLineQuantity")
-            var startDate: String = formatDate(date = getYearBackDate(1))
-            var endDate: String = formatDate(date = getCurrentDate())
-            var interval = "YEAR"
-            val openClosedPOLineQtyResult = repository.getEvalMetricsForPOLineQty(
-                itemId,
-                expressions,
-                startDate,
-                endDate,
-                interval
-            )
-            viewModelState.update { state ->
-                when (openClosedPOLineQtyResult) {
-                    is Success -> {
-                        state.copy(openClosedPOLineQty = openClosedPOLineQtyResult.data)
-                    }
-                    is Error -> {
-                        state.copy()
-                    }
-                }
-            }
-
-            expressions = listOf("SavingsOpportunityCompound")
-            startDate = formatDate(date = getMonthBackDate(3))
-            endDate = formatDate(date = getCurrentDate())
-            interval = "MONTH"
-            val savingsOpportunityResult = repository.getEvalMetricsForSavingsOpportunity(
-                itemId,
-                expressions,
-                startDate,
-                endDate,
-                interval
-            )
-            viewModelState.update { state ->
-                when (savingsOpportunityResult) {
-                    is Success -> {
-                        state.copy(savingsOpportunity = savingsOpportunityResult.data)
-                    }
-                    is Error -> {
-                        state.copy()
-                    }
-                }
-            }
-
-            updateSourcingAnalysis(
-                viewModelState.value.saStartDate,
-                viewModelState.value.saEndDate
-            )
         }
+    }
+
+    private suspend fun loadOverview() {
+        val itemsResult = repository.getItemDetails(itemId)
+        viewModelState.update { state ->
+            when (itemsResult) {
+                is Success -> {
+                    offset += PAGINATED_RESPONSE_LIMIT
+                    state.copy(
+                        item = itemsResult.data,
+                        isLoading = false
+                    )
+                }
+                is Error -> {
+                    state.copy(isLoading = false)
+                }
+            }
+        }
+
+        var expressions: List<String> = listOf("OpenPOLineQuantity", "ClosedPOLineQuantity")
+        var startDate: String = formatDate(date = getYearBackDate(1))
+        var endDate: String = formatDate(date = getCurrentDate())
+        var interval = "YEAR"
+        val openClosedPOLineQtyResult = repository.getEvalMetricsForPOLineQty(
+            itemId,
+            expressions,
+            startDate,
+            endDate,
+            interval
+        )
+        viewModelState.update { state ->
+            when (openClosedPOLineQtyResult) {
+                is Success -> {
+                    state.copy(openClosedPOLineQty = openClosedPOLineQtyResult.data)
+                }
+                is Error -> {
+                    state.copy()
+                }
+            }
+        }
+
+        expressions = listOf("SavingsOpportunityCompound")
+        startDate = formatDate(date = getMonthBackDate(3))
+        endDate = formatDate(date = getCurrentDate())
+        interval = "MONTH"
+        val savingsOpportunityResult = repository.getEvalMetricsForSavingsOpportunity(
+            itemId,
+            expressions,
+            startDate,
+            endDate,
+            interval
+        )
+        viewModelState.update { state ->
+            when (savingsOpportunityResult) {
+                is Success -> {
+                    state.copy(savingsOpportunity = savingsOpportunityResult.data)
+                }
+                is Error -> {
+                    state.copy()
+                }
+            }
+        }
+
+        updateSourcingAnalysis(
+            viewModelState.value.saStartDate,
+            viewModelState.value.saEndDate
+        )
+    }
+
+    private suspend fun loadPOLines() {
+        val result = repository.getPOLines(
+            itemId = itemId,
+            orderId = null,
+            order = ""
+        )
+        viewModelState.update {
+            when (result) {
+                is Success -> {
+                    it.copy(
+                        poLineItems = result.data,
+                        isLoading = false
+                    )
+                }
+                is Error -> {
+                    it.copy(isLoading = false)
+                }
+            }
+        }
+    }
+
+    private suspend fun loadSuppliers() {
+
     }
 
     private suspend fun updateSourcingAnalysis(startDate: String, endDate: String) {
@@ -416,6 +462,13 @@ class ItemDetailsViewModel @Inject constructor(
         viewModelState.update { state ->
             when (event) {
                 is ItemDetailsEvent.OnTabItemClick -> {
+                    viewModelScope.launch {
+                        when (event.tabIndex) {
+                            0 -> loadOverview()
+                            1 -> loadPOLines()
+                            2 -> loadSuppliers()
+                        }
+                    }
                     state.copy(tabIndex = event.tabIndex)
                 }
                 is ItemDetailsEvent.OnDateRangeSelected -> {
@@ -452,6 +505,39 @@ class ItemDetailsViewModel @Inject constructor(
                         state.copy(selectedChartsCrosshairIndex = event.index)
                     } else {
                         state
+                    }
+                }
+                is ItemDetailsEvent.OnSortChanged -> {
+                    when (state.tabIndex) {
+                        1 -> {
+                            viewModelState.update { it.copy(isLoading = true) }
+                            viewModelScope.launch {
+                                val result = useCases.getPOsForSupplier("supplier0", order)
+                                viewModelState.update {
+                                    when (result) {
+                                        is C3Result.Success -> it.copy(
+                                            poLines = result.data,
+                                            isLoading = viewModelState.value.items == null || viewModelState.value.supplier == null
+                                        )
+                                        is C3Result.Error -> {
+                                            val errorMessages = it.errorMessages + ErrorMessage(
+                                                id = UUID.randomUUID().mostSignificantBits,
+                                                messageId = R.string.load_error
+                                            )
+                                            it.copy(errorMessages = errorMessages, isLoading = false)
+                                        }
+                                    }
+                                }
+                            }
+                            state
+                        }
+                        2 -> {
+
+                            state
+                        }
+                        else -> {
+                            state
+                        }
                     }
                 }
             }
