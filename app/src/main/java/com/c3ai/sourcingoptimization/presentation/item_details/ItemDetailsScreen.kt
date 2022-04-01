@@ -1,10 +1,12 @@
 package com.c3ai.sourcingoptimization.presentation.item_details
 
 import android.content.Context
+import android.util.Log
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -12,6 +14,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -27,8 +30,6 @@ import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.common.components.*
 import com.c3ai.sourcingoptimization.data.C3Result
 import com.c3ai.sourcingoptimization.data.repository.C3MockRepositoryImpl
-import com.c3ai.sourcingoptimization.presentation.item_details.overview.ItemDetailsUiState
-import com.c3ai.sourcingoptimization.presentation.item_details.overview.PreviewItemDetailsUiState
 import com.c3ai.sourcingoptimization.presentation.views.itemdetails.IndexPriceCharts
 import com.c3ai.sourcingoptimization.presentation.views.itemdetails.SuppliersCharts
 import com.c3ai.sourcingoptimization.presentation.views.UiSavingsOpportunityItem
@@ -72,9 +73,14 @@ fun ItemDetailsScreen(
     onStatsTypeSelected: (Int) -> Unit,
     onSupplierClick: (String) -> Unit,
     onIndexClick: (String) -> Unit,
+    onChartViewMoveOver: (Int) -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
     val bottomState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+
+    val chartsSynchronizer: ChartsSynchronizer by remember {
+        mutableStateOf(ChartsSynchronizer(onChartViewMoveOver))
+    }
 
     var phoneNumber: String by remember {
         mutableStateOf("")
@@ -145,6 +151,7 @@ fun ItemDetailsScreen(
                                                 onStatsTypeSelected,
                                                 onSupplierClick,
                                                 onIndexClick,
+                                                chartsSynchronizer,
                                             )
                                         }
 
@@ -291,10 +298,13 @@ private fun ItemDetailsInfo(
                     }
                 },
                 update = { view ->
-                    savingsOpportunity?.let {
-                        view.aa_drawChartWithChartModel(
-                            configureGradientColorAreaChart(it)
-                        )
+                    if (view.tag != uiState.chartsHashCode) {
+                        view.tag = uiState.chartsHashCode
+                        savingsOpportunity?.let {
+                            view.aa_drawChartWithChartModel(
+                                configureGradientColorAreaChart(it)
+                            )
+                        }
                     }
                 },
                 modifier = Modifier
@@ -415,6 +425,7 @@ private fun SourcingAnalysis(
     onStatsTypeSelected: (Int) -> Unit,
     onSupplierClick: (String) -> Unit,
     onIndexClick: (String) -> Unit,
+    chartsSynchronizer: ChartsSynchronizer,
 ) {
     val context = LocalContext.current
     val item = uiState.item
@@ -432,9 +443,13 @@ private fun SourcingAnalysis(
                 divider,
                 supplierTitle,
                 supplierRoute,
+                supplierDate,
+                supplierList,
                 divider2,
                 indexTitle,
                 indexRoute,
+                indexDate,
+                indexData,
                 divider3,
                 bottomGraphCard,
             ) = createRefs()
@@ -452,7 +467,8 @@ private fun SourcingAnalysis(
             )
             Spinner(
                 items = stringArrayResource(R.array.dateRange).asList(),
-                onItemSelectedListener = { position, _ -> onStatsTypeSelected(position) },
+                onItemSelectedListener = { position, _ -> onDateRangeSelected(position) },
+                selectedPosition = uiState.dateRangeSelected,
                 modifier = Modifier
                     .constrainAs(dateRange) {
                         top.linkTo(parent.top)
@@ -461,7 +477,7 @@ private fun SourcingAnalysis(
             )
             CardMenu(
                 items = stringArrayResource(R.array.sourcingAnalysisStatsType).asList(),
-                onItemSelectedListener = { position, _ -> onDateRangeSelected(position) },
+                onItemSelectedListener = { position, _ -> onStatsTypeSelected(position) },
                 modifier = Modifier
                     .constrainAs(statsMenu) {
                         top.linkTo(dateRange.bottom, margin = 16.dp)
@@ -475,16 +491,21 @@ private fun SourcingAnalysis(
                     }
                 },
                 update = { view ->
-                    uiState.suppliersChart?.let {
-                        val model = configureColumnChart(it)
-                        val aaColumn = AAColumn().groupPadding(0.01f).borderWidth(0f)
+                    Log.e("chartsHashCode", uiState.chartsHashCode.toString())
+                    Log.e("view.tag", view.tag?.toString() ?: "")
+                    if (view.tag != uiState.chartsHashCode) {
+                        view.tag = uiState.chartsHashCode
+                        uiState.suppliersChart?.let {
+                            val model = configureColumnChart(it)
+                            val aaColumn = AAColumn().groupPadding(0.01f).borderWidth(0f)
 
-                        val aaOptions = model.aa_toAAOptions()
-                        aaOptions.xAxis?.lineColor = AAColor.Clear
-                        aaOptions.plotOptions?.column = aaColumn
-                        model.aa_toAAOptions()
-                        aaOptions.plotOptions?.series?.dataLabels?.format(it.dataLabelsFormat)
-                        view.aa_drawChartWithChartOptions(aaOptions)
+                            val aaOptions = model.aa_toAAOptions()
+                            aaOptions.xAxis?.lineColor = AAColor.Clear
+                            aaOptions.plotOptions?.column = aaColumn
+                            model.aa_toAAOptions()
+                            aaOptions.plotOptions?.series?.dataLabels?.format(it.dataLabelsFormat)
+                            view.aa_drawChartWithChartOptions(aaOptions)
+                        }
                     }
                 },
                 modifier = Modifier
@@ -522,7 +543,33 @@ private fun SourcingAnalysis(
                     tint = MaterialTheme.colors.primary
                 )
             }
-            ListDivider(Modifier.constrainAs(divider2) { top.linkTo(supplierTitle.bottom) })
+            Text(
+                uiState.indexPriceChart?.dateText ?: "",
+                style = MaterialTheme.typography.subtitle2,
+                color = MaterialTheme.colors.secondary,
+                modifier = Modifier
+                    .constrainAs(supplierDate) {
+                        top.linkTo(supplierTitle.bottom, margin = 4.dp)
+                        start.linkTo(parent.start)
+                    }
+            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .constrainAs(supplierList) {
+                        top.linkTo(supplierDate.bottom, margin = 8.dp)
+                    }
+                    .horizontalScroll(rememberScrollState())
+            ) {
+                uiState.suppliersChart?.suppliers?.forEach { (key, value) -> 
+                    NameValue(
+                        name = key,
+                        value = value,
+                        modifier = Modifier.padding(end = 30.dp)
+                    )
+                }
+            }
+            ListDivider(Modifier.constrainAs(divider2) { top.linkTo(supplierList.bottom) })
             Text(
                 stringResource(R.string.index),
                 style = MaterialTheme.typography.h3,
@@ -549,14 +596,35 @@ private fun SourcingAnalysis(
                     tint = MaterialTheme.colors.primary
                 )
             }
-            ListDivider(Modifier.constrainAs(divider3) { top.linkTo(indexTitle.bottom) })
+            Text(
+                uiState.indexPriceChart?.dateText ?: "",
+                style = MaterialTheme.typography.subtitle2,
+                color = MaterialTheme.colors.secondary,
+                modifier = Modifier
+                    .constrainAs(indexDate) {
+                        top.linkTo(indexTitle.bottom, margin = 4.dp)
+                        start.linkTo(parent.start)
+                    }
+            )
+            NameValue(
+                name = uiState.indexPriceChart?.nameText ?: "",
+                value = uiState.indexPriceChart?.priceText ?: "",
+                modifier = Modifier
+                    .constrainAs(indexData) {
+                        top.linkTo(indexDate.bottom, margin = 8.dp)
+                        start.linkTo(parent.start)
+                    }
+            )
+            ListDivider(Modifier.constrainAs(divider3) { top.linkTo(indexData.bottom) })
             C3SimpleCard(
                 backgroundColor = CardBackgroundSecondary,
                 border = BorderStroke(1.dp, CardBackgroundSecondary),
                 modifier = Modifier
                     .constrainAs(bottomGraphCard) { top.linkTo(divider3.bottom) }
             ) {
-                Column {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
                     Text(
                         stringResource(R.string.supplier_avg_price_symbol, "$"),
                         style = MaterialTheme.typography.h6,
@@ -570,19 +638,23 @@ private fun SourcingAnalysis(
                             }
                         },
                         update = { view ->
-                            uiState.vendorRelationMetrics?.let {
-                                val model = configureMultiLineChart(context, it)
-                                val aaOptions = model.aa_toAAOptions().apply {
-                                    xAxis?.crosshair(AACrosshair().width(1f))
-                                    yAxis?.apply {
-                                        lineWidth(0f)
-                                        gridLineColor(AAColor.Clear)
-                                        lineColor(AAColor.Clear)
+                            if (view.tag != uiState.chartsHashCode) {
+                                view.tag = uiState.chartsHashCode
+                                uiState.vendorRelationMetrics?.let {
+                                    val model = configureMultiLineChart(context, it)
+                                    val aaOptions = model.aa_toAAOptions().apply {
+                                        xAxis?.crosshair(AACrosshair().width(1f))
+                                        yAxis?.apply {
+                                            lineWidth(0f)
+                                            gridLineColor(AAColor.Clear)
+                                            lineColor(AAColor.Clear)
+                                        }
                                     }
+                                    view.isClearBackgroundColor = true
+                                    chartsSynchronizer.views.add(view)
+                                    view.callBack = chartsSynchronizer
+                                    view.aa_drawChartWithChartOptions(aaOptions)
                                 }
-                                view.isClearBackgroundColor = true
-//                            view.callBack = ChartCallback()
-                                view.aa_drawChartWithChartOptions(aaOptions)
                             }
                         },
                         modifier = Modifier
@@ -602,29 +674,61 @@ private fun SourcingAnalysis(
                             }
                         },
                         update = { view ->
-                            uiState.indexPriceChart?.let {
-                                val model = configureDashedLineChart(context, it)
-                                val aaOptions = model.aa_toAAOptions().apply {
-                                    xAxis?.apply {
-                                        crosshair(AACrosshair().width(1f))
-                                        gridLineColor(AAColor.Clear)
-                                            .lineColor(AAColor.Clear)
-                                            .labels?.autoRotationLimit(0f)?.step(3)
+                            if (view.tag != uiState.chartsHashCode) {
+                                view.tag = uiState.chartsHashCode
+                                uiState.indexPriceChart?.let {
+                                    val model = configureDashedLineChart(context, it)
+                                    val aaOptions = model.aa_toAAOptions().apply {
+                                        xAxis?.apply {
+                                            crosshair(AACrosshair().width(1f))
+                                            gridLineColor(AAColor.Clear)
+                                                .lineColor(AAColor.Clear)
+                                                .labels?.autoRotationLimit(0f)?.step(3)
+                                        }
+                                        yAxis?.gridLineColor(AAColor.Clear)
+                                            ?.lineColor(AAColor.Clear)
                                     }
-                                    yAxis?.gridLineColor(AAColor.Clear)?.lineColor(AAColor.Clear)
+                                    view.isClearBackgroundColor = true
+                                    chartsSynchronizer.views.add(view)
+                                    view.callBack = chartsSynchronizer
+                                    view.aa_drawChartWithChartOptions(aaOptions)
                                 }
-                                view.isClearBackgroundColor = true
-//                            view.callBack = ChartCallback()
-                                view.aa_drawChartWithChartOptions(aaOptions)
                             }
                         },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(200.dp)
                     )
+                    Text(
+                        uiState.indexPriceChart?.graphYearFormat ?: "",
+                        style = MaterialTheme.typography.h6,
+                        color = MaterialTheme.colors.secondary,
+                        modifier = Modifier.padding(all = 8.dp)
+                    )
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun NameValue(
+    name: String,
+    value: String,
+    modifier: Modifier,
+) {
+    Column(modifier = modifier) {
+        Text(
+            name,
+            style = MaterialTheme.typography.subtitle2,
+            color = MaterialTheme.colors.secondary,
+        )
+        Text(
+            value,
+            style = MaterialTheme.typography.h5,
+            color = MaterialTheme.colors.secondary,
+            modifier = Modifier.padding(top = 4.dp)
+        )
     }
 }
 
@@ -776,28 +880,33 @@ private fun configureDashedLineChart(
     return aaChartModel
 }
 
-private class ChartCallback(
-    val lineChartView: AAChartView,
-    val dashedLineChartView: AAChartView,
+private class ChartsSynchronizer(
     val update: (Int) -> Unit
 ) : AAChartView.AAChartViewCallBack {
 
-    override fun chartViewDidFinishLoad(view: AAChartView) {}
+    val views: MutableSet<AAChartView> = mutableSetOf()
+    var index = -1
+
+    override fun chartViewDidFinishLoad(aaChartView: AAChartView) {}
 
     override fun chartViewMoveOverEventMessage(
-        view: AAChartView,
+        aaChartView: AAChartView,
         messageModel: AAMoveOverEventMessageModel
     ) {
-        val index = messageModel.index ?: -1
-        val addPlotLine1 = "aaGlobalChart.series[0].points[$index].onMouseOver()"
-        view.post {
-            if (view == lineChartView) {
-                dashedLineChartView.aa_evaluateTheJavaScriptStringFunction(addPlotLine1)
-            } else {
-                lineChartView.aa_evaluateTheJavaScriptStringFunction(addPlotLine1)
+        messageModel.index?.let {
+            if (index != it) {
+                index = it
+                update(index)
+                val addPlotLine1 = "aaGlobalChart.series[0].points[$index].onMouseOver()"
+                aaChartView.post {
+                    views.forEach { view ->
+                        if (aaChartView != view) {
+                            view.aa_evaluateTheJavaScriptStringFunction(addPlotLine1)
+                        }
+                    }
+                }
             }
         }
-        update(index)
     }
 }
 
@@ -837,6 +946,7 @@ fun ItemDetailsPreview() {
             onStatsTypeSelected = {},
             onSupplierClick = {},
             onIndexClick = {},
+            onChartViewMoveOver = {},
         )
     }
 }
@@ -862,6 +972,7 @@ fun ItemDetailsPOLinesTabPreview() {
             onStatsTypeSelected = {},
             onSupplierClick = {},
             onIndexClick = {},
+            onChartViewMoveOver = {},
         )
     }
 }

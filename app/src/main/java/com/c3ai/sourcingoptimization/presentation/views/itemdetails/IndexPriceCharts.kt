@@ -6,5 +6,6 @@ data class IndexPriceCharts(
     val maxValue: Double,
     val graphYearFormat: String,
     val dateText: String,
+    val nameText: String,
     val priceText: String,
 )

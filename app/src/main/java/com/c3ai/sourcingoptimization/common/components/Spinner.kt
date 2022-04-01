@@ -15,11 +15,12 @@ import androidx.compose.ui.unit.sp
 fun Spinner(
     modifier: Modifier = Modifier,
     items: List<String> = emptyList(),
+    selectedPosition: Int = 0,
     onItemSelectedListener: (Int, String) -> Unit,
 ) {
 
     // State variables
-    var selected: String by remember { mutableStateOf(items[0]) }
+    var selected: String by remember { mutableStateOf(items[selectedPosition]) }
     var expanded by remember { mutableStateOf(false) }
 
     Box(

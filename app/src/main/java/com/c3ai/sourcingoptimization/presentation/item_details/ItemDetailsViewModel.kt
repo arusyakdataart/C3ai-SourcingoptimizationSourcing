@@ -1,10 +1,7 @@
-package com.c3ai.sourcingoptimization.presentation.item_details.overview
+package com.c3ai.sourcingoptimization.presentation.item_details
 
-import android.util.Log
-import android.widget.TextView
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.common.*
 import com.c3ai.sourcingoptimization.data.C3Result.Error
 import com.c3ai.sourcingoptimization.data.C3Result.Success
@@ -13,7 +10,6 @@ import com.c3ai.sourcingoptimization.domain.model.*
 import com.c3ai.sourcingoptimization.domain.settings.C3AppSettingsProvider
 import com.c3ai.sourcingoptimization.domain.settings.FakeC3AppSettingsProvider
 import com.c3ai.sourcingoptimization.presentation.ViewModelState
-import com.c3ai.sourcingoptimization.presentation.item_details.ItemDetailsEvent
 import com.c3ai.sourcingoptimization.presentation.views.*
 import com.c3ai.sourcingoptimization.presentation.views.itemdetails.IndexPriceCharts
 import com.c3ai.sourcingoptimization.presentation.views.itemdetails.SuppliersCharts
@@ -36,6 +32,7 @@ sealed interface ItemDetailsUiState {
     val isLoading: Boolean
     val itemId: String
     val tabIndex: Int
+    val dateRangeSelected: Int
     val statsTypeSelected: Int
 
     /**
@@ -48,6 +45,7 @@ sealed interface ItemDetailsUiState {
         override val isLoading: Boolean,
         override val itemId: String,
         override val tabIndex: Int,
+        override val dateRangeSelected: Int,
         override val statsTypeSelected: Int
     ) : ItemDetailsUiState
 
@@ -60,11 +58,13 @@ sealed interface ItemDetailsUiState {
         val savingsOpportunity: UiSavingsOpportunityItem? = null,
         val ocPOLineQty: UiOpenClosedPOLineQtyItem,
         val suppliersChart: SuppliersCharts?,
-        val indexPriceChart: IndexPriceCharts? = null,
+        val indexPriceChart: IndexPriceCharts?,
         val vendorRelationMetrics: Map<String, List<Double>>? = null,
+        val chartsHashCode: Int,
         override val isLoading: Boolean,
         override val itemId: String,
         override val tabIndex: Int,
+        override val dateRangeSelected: Int,
         override val statsTypeSelected: Int
     ) : ItemDetailsUiState
 }
@@ -80,21 +80,16 @@ private data class ItemDetailsViewModelState(
     val suppliers: List<C3Vendor> = emptyList(),
     val marketPriceIndex: List<MarketPriceIndex> = emptyList(),
     val indexPrice: IndexPrice? = null,
-    val po_expressions: List<String> = listOf("OpenPOLineQuantity", "ClosedPOLineQuantity"),
     val vendorRelationMetrics: Map<String, List<Double>>? = null,
-    val po_startDate: String = formatDate(date = getYearBackDate(1)),
-    val po_endDate: String = formatDate(date = getCurrentDate()),
-    val po_interval: String = "YEAR",
-    val so_expressions: List<String> = listOf("SavingsOpportunityCompound"),
-    val so_startDate: String = formatDate(date = getMonthBackDate(1)),
-    val so_endDate: String = formatDate(date = getCurrentDate()),
-    val so_interval: String = "MONTH",
+    val saStartDate: String = formatDate(date = getMonthBackDate(3)),
+    val saEndDate: String = formatDate(date = getCurrentDate()),
     val isLoading: Boolean = false,
     val itemId: String = "",
     val tabIndex: Int = 0,
     val dateRangeSelected: Int = 0,
     val statsTypeSelected: Int = 0,
-    var selectedCrosshairIndex: Int = -1,
+    var selectedChartsCrosshairIndex: Int = -1,
+    val chartsHashCode: Int = -1,
 ) : ViewModelState() {
 
     /**
@@ -114,13 +109,15 @@ private data class ItemDetailsViewModelState(
                     dataLabelsFormat = if (statsTypeSelected == 0) "{point.y:,.2f}M" else "{point.y:,.0f} %",
                     suppliers = vendorRelationMetrics?.let { metrics ->
                         val textsMap = mutableMapOf<String, String>()
-                        suppliers.forEach {
-                            textsMap[it.name] = String.format(
-                                "%s%s", "$",
-                                String.format(
-                                    "%.2f", metrics[it.id]?.get(selectedCrosshairIndex)
+                        if (selectedChartsCrosshairIndex != -1) {
+                            suppliers.forEach {
+                                textsMap[it.name] = String.format(
+                                    "%s%s", "$",
+                                    String.format(
+                                        "%.2f", metrics[it.id]?.get(selectedChartsCrosshairIndex)
+                                    )
                                 )
-                            )
+                            }
                         }
                         textsMap
                     }
@@ -139,34 +136,45 @@ private data class ItemDetailsViewModelState(
                         )
                     } ?: "",
                     dateText = indexPrice?.dates?.let { dates ->
-                        val date = dates[selectedCrosshairIndex]
-                        getMonth(date) + " " + getYear(date)
+                        if (selectedChartsCrosshairIndex != -1) {
+                            val date = dates[selectedChartsCrosshairIndex]
+                            getMonth(date) + " " + getYear(date)
+                        } else {
+                            ""
+                        }
                     } ?: "",
-                    priceText = String.format(
-                        "%s%s", "$",
-                        String.format(
-                            "%.2f", indexPrice?.data?.get(selectedCrosshairIndex) ?: ""
-                        )
-                    ),
+                    nameText = item.name ?: "",
+                    priceText = indexPrice?.data?.let {
+                        if (selectedChartsCrosshairIndex != -1) {
+                            String.format(
+                                "%s%s", "$",
+                                String.format("%.2f", it[selectedChartsCrosshairIndex])
+                            )
+                        } else {
+                            ""
+                        }
+                    } ?: "",
                 ),
                 vendorRelationMetrics = vendorRelationMetrics,
                 isLoading = isLoading,
                 itemId = itemId,
                 tabIndex = tabIndex,
-                statsTypeSelected = statsTypeSelected
+                dateRangeSelected = dateRangeSelected,
+                statsTypeSelected = statsTypeSelected,
+                chartsHashCode = chartsHashCode
             )
         } else {
             ItemDetailsUiState.NoItem(
                 isLoading = isLoading,
                 itemId = itemId,
                 tabIndex = tabIndex,
+                dateRangeSelected = dateRangeSelected,
                 statsTypeSelected = statsTypeSelected
             )
         }
     }
 
     fun formatSuppliersChartData(): List<Double> {
-        Log.e("formatSuppliersChart", statsTypeSelected.toString())
         if (statsTypeSelected == 0) {
             return suppliers.map { it.spend.value.formatNumberLocal() }
         }
@@ -229,12 +237,16 @@ class ItemDetailsViewModel @Inject constructor(
                 }
             }
 
+            var expressions: List<String> = listOf("OpenPOLineQuantity", "ClosedPOLineQuantity")
+            var startDate: String = formatDate(date = getYearBackDate(1))
+            var endDate: String = formatDate(date = getCurrentDate())
+            var interval = "YEAR"
             val openClosedPOLineQtyResult = repository.getEvalMetricsForPOLineQty(
                 itemId,
-                viewModelState.value.po_expressions,
-                viewModelState.value.po_startDate,
-                viewModelState.value.po_endDate,
-                viewModelState.value.po_interval
+                expressions,
+                startDate,
+                endDate,
+                interval
             )
             viewModelState.update { state ->
                 when (openClosedPOLineQtyResult) {
@@ -247,12 +259,16 @@ class ItemDetailsViewModel @Inject constructor(
                 }
             }
 
+            expressions = listOf("SavingsOpportunityCompound")
+            startDate = formatDate(date = getMonthBackDate(3))
+            endDate = formatDate(date = getCurrentDate())
+            interval = "MONTH"
             val savingsOpportunityResult = repository.getEvalMetricsForSavingsOpportunity(
                 itemId,
-                viewModelState.value.so_expressions,
-                viewModelState.value.so_startDate,
-                viewModelState.value.so_endDate,
-                viewModelState.value.so_interval
+                expressions,
+                startDate,
+                endDate,
+                interval
             )
             viewModelState.update { state ->
                 when (savingsOpportunityResult) {
@@ -265,53 +281,60 @@ class ItemDetailsViewModel @Inject constructor(
                 }
             }
 
-            val suppliersResult = repository.getItemDetailsSuppliers(itemId)
-            viewModelState.update { state ->
-                when (suppliersResult) {
-                    is Success -> {
-                        val vendorRelationMetrics = getVendorRelationMetrics(
-                            itemId,
-                            supplierIds = suppliersResult.data.map { it.id },
-                            expressions = listOf("OrderLineValue"),
-                            startDate = formatDate(date = getYearBackDate(1)),
-                            endDate = formatDate(date = getCurrentDate()),
-                            interval = "MONTH"
-                        )
-                        state.copy(
-                            suppliers = suppliersResult.data,
-                            vendorRelationMetrics = vendorRelationMetrics
-                        )
-                    }
-                    is Error -> {
-                        state.copy()
-                    }
+            updateSourcingAnalysis(
+                viewModelState.value.saStartDate,
+                viewModelState.value.saEndDate
+            )
+        }
+    }
+
+    private suspend fun updateSourcingAnalysis(startDate: String, endDate: String) {
+        val suppliersResult = repository.getItemDetailsSuppliers(itemId)
+        viewModelState.update { state ->
+            when (suppliersResult) {
+                is Success -> {
+                    val vendorRelationMetrics = getVendorRelationMetrics(
+                        itemId,
+                        supplierIds = suppliersResult.data.map { it.id },
+                        expressions = listOf("OrderLineValue"),
+                        startDate = startDate,
+                        endDate = endDate,
+                        interval = "MONTH"
+                    )
+                    state.copy(
+                        suppliers = suppliersResult.data,
+                        vendorRelationMetrics = vendorRelationMetrics,
+                        chartsHashCode = vendorRelationMetrics.hashCode()
+                    )
+                }
+                is Error -> {
+                    state.copy()
                 }
             }
+        }
 
-            val marketPriceIndex = repository.getMarketPriceIndex()
-            viewModelState.update { state ->
-                when (marketPriceIndex) {
-                    is Success -> {
-                        Log.e("marketPriceIndex", marketPriceIndex.data.size.toString())
-                        val indexId = marketPriceIndex.data[0].id
-                        val indexPrice = getMarketPriceIndexRelationMetrics(
-                            itemId,
-                            indexId,
-                            listOf(indexId),
-                            expressions = listOf("IndexPrice"),
-                            startDate = formatDate(date = getYearBackDate(1)),
-                            endDate = formatDate(date = getCurrentDate()),
-                            interval = "MONTH"
-                        )
-                        Log.e("indexPrice", indexPrice?.count.toString())
-                        state.copy(
-                            marketPriceIndex = marketPriceIndex.data,
-                            indexPrice = indexPrice,
-                        )
-                    }
-                    is Error -> {
-                        state.copy()
-                    }
+        val marketPriceIndex = repository.getMarketPriceIndex()
+        viewModelState.update { state ->
+            when (marketPriceIndex) {
+                is Success -> {
+                    val indexId = marketPriceIndex.data[0].id
+                    val indexPrice = getMarketPriceIndexRelationMetrics(
+                        itemId,
+                        indexId,
+                        listOf(indexId),
+                        expressions = listOf("IndexPrice"),
+                        startDate = startDate,
+                        endDate = endDate,
+                        interval = "MONTH"
+                    )
+                    state.copy(
+                        marketPriceIndex = marketPriceIndex.data,
+                        indexPrice = indexPrice,
+                        chartsHashCode = indexPrice.hashCode()
+                    )
+                }
+                is Error -> {
+                    state.copy()
                 }
             }
         }
@@ -396,14 +419,37 @@ class ItemDetailsViewModel @Inject constructor(
                     state.copy(tabIndex = event.tabIndex)
                 }
                 is ItemDetailsEvent.OnDateRangeSelected -> {
-                    state.copy(dateRangeSelected = event.selected)
+                    var saStartDate: String = formatDate(date = getMonthBackDate(3))
+                    val saEndDate: String = formatDate(date = getCurrentDate())
+                    when (event.selected) {
+                        1 -> {
+                            saStartDate = formatDate(date = getMonthBackDate(6))
+                        }
+                        2 -> {
+                            saStartDate = formatDate(date = getYearBackDate(1))
+                        }
+                        3 -> {
+                            saStartDate = formatDate(date = getYearBackDate(6))
+                        }
+                    }
+                    viewModelScope.launch {
+                        updateSourcingAnalysis(saStartDate, saEndDate)
+                    }
+                    state.copy(
+                        saStartDate = saStartDate,
+                        saEndDate = saEndDate,
+                        dateRangeSelected = event.selected
+                    )
                 }
                 is ItemDetailsEvent.OnStatsTypeSelected -> {
-                    state.copy(statsTypeSelected = event.selected)
+                    state.copy(
+                        statsTypeSelected = event.selected,
+                        chartsHashCode = event.selected.hashCode()
+                    )
                 }
                 is ItemDetailsEvent.UpdateSourcingAnalysis -> {
-                    if (state.selectedCrosshairIndex != event.index) {
-                        state.copy(selectedCrosshairIndex = event.index)
+                    if (state.selectedChartsCrosshairIndex != event.index) {
+                        state.copy(selectedChartsCrosshairIndex = event.index)
                     } else {
                         state
                     }
