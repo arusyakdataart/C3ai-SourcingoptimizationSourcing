@@ -27,12 +27,17 @@ fun AlertSettingsScreen(
     onCategoriesChanged: (String) -> Unit,
 ) {
 
+    val selectedCategoriesList = mutableListOf<String>()
+
     Scaffold(
         scaffoldState = scaffoldState,
         topBar = {
             C3TopAppBar(
                 title = stringResource(id = R.string.alert_types_settings),
-                onBackButtonClick = onBackButtonClick
+                onBackButtonClick = {
+                    onCategoriesChanged(Gson().toJson(selectedCategoriesList))
+                    onBackButtonClick()
+                }
             )
         },
         snackbarHost = { C3SnackbarHost(hostState = it) },
@@ -47,7 +52,7 @@ fun AlertSettingsScreen(
             AlertTypes.D_U_N_S_RISK.categoryName,
             AlertTypes.RAPID_RATINGS_RISK.categoryName
         )
-        val selectedCategoriesList = mutableListOf<String>()
+
         if (selectedCategories.isEmpty()) {
             selectedCategoriesList.addAll(categories)
         } else {
@@ -80,7 +85,6 @@ fun AlertSettingsScreen(
                             } else {
                                 selectedCategoriesList.remove(category)
                             }
-                            onCategoriesChanged(Gson().toJson(selectedCategoriesList))
                         },
                         colors = CheckboxDefaults.colors(Blue)
                     )

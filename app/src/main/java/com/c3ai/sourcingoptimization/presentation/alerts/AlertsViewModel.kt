@@ -157,10 +157,7 @@ class AlertsViewModel @Inject constructor(
                         })
                 }
                 is AlertsEvent.OnFilterChanged -> {
-                    state.copy(selectedCategoriesList = state.selectedCategoriesList.toMutableSet().apply {
-                        val isRemoved = removeAll(event.categories.toMutableSet())
-                        isRemoved || addAll((event.categories))
-                    })
+                    state.copy(selectedCategoriesList = event.categories.toMutableSet())
                 }
                 else -> {
                     state.copy()

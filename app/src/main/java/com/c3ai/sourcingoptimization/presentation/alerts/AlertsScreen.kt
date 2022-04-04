@@ -122,11 +122,15 @@ fun AlertsScreen(
                     LazyColumn(modifier = Modifier.fillMaxSize(), listState) {
                         when (uiState) {
                             is AlertsUiState.HasData -> {
-                                val categoryList = uiState.alerts.groupBy { it.category?.name }
+                                val filteredList =
+                                    if (uiState.selectedCategoriesList.isNullOrEmpty()) uiState.alerts else uiState.alerts.filter {
+                                        uiState.selectedCategoriesList.contains(it.category?.name)
+                                    }
+                                val categoryList = filteredList.groupBy { it.category?.name }
                                 categoryList.forEach { it, it1 ->
                                     stickyHeader {
                                         val collapsableItemIds =
-                                            uiState.alerts.mapNotNull { alert -> if (alert.category?.name == it) alert.id else null }
+                                            filteredList.mapNotNull { alert -> if (alert.category?.name == it) alert.id else null }
                                         val expanded =
                                             !uiState.collapsedListItemIds.contains(
                                                 collapsableItemIds[0]
