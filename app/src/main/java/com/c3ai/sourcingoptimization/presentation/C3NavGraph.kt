@@ -83,8 +83,10 @@ fun C3NavGraph(
         composable(
             C3Destinations.ALERTS_ROUTE
         ) { entry ->
+            val data = entry.savedStateHandle.get<String>("categories")
             AlertsRoute(
-                navController = navController
+                navController = navController,
+                selectedCategories = data ?: ""
             )
         }
         composable(

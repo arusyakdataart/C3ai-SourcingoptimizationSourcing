@@ -28,7 +28,6 @@ sealed interface AlertsUiState {
     val isLoading: Boolean
     val errorMessages: List<ErrorMessage>
     val searchInput: String
-    val selectedCategories: List<String>
 
     /**
      * There is no data to render.
@@ -39,8 +38,7 @@ sealed interface AlertsUiState {
     data class NoData(
         override val isLoading: Boolean,
         override val errorMessages: List<ErrorMessage>,
-        override val searchInput: String,
-        override val selectedCategories: List<String> = emptyList()
+        override val searchInput: String
     ) : AlertsUiState
 
     /**
@@ -50,10 +48,10 @@ sealed interface AlertsUiState {
     data class HasData(
         val alerts: List<UiAlert>,
         val collapsedListItemIds: Set<String> = emptySet(),
+        val selectedCategoriesList: Set<String> = emptySet(),
         override val isLoading: Boolean,
         override val errorMessages: List<ErrorMessage>,
-        override val searchInput: String,
-        override val selectedCategories: List<String> = emptyList()
+        override val searchInput: String
     ) : AlertsUiState
 }
 
@@ -66,7 +64,8 @@ private data class AlertsViewModelState(
     val isLoading: Boolean = false,
     val errorMessages: List<ErrorMessage> = emptyList(),
     val searchInput: String = "",
-    val collapsedListItemIds: Set<String> = emptySet()
+    val collapsedListItemIds: Set<String> = emptySet(),
+    val selectedCategoriesList: Set<String> = emptySet()
 ) : ViewModelState() {
 
     /**
@@ -78,6 +77,7 @@ private data class AlertsViewModelState(
             AlertsUiState.HasData(
                 alerts = convert(alerts),
                 collapsedListItemIds = collapsedListItemIds,
+                selectedCategoriesList = selectedCategoriesList,
                 isLoading = isLoading,
                 errorMessages = errorMessages,
                 searchInput = searchInput
@@ -155,6 +155,12 @@ class AlertsViewModel @Inject constructor(
                             val isRemoved = remove(event.id)
                             isRemoved || add((event.id))
                         })
+                }
+                is AlertsEvent.OnFilterChanged -> {
+                    state.copy(selectedCategoriesList = state.selectedCategoriesList.toMutableSet().apply {
+                        val isRemoved = removeAll(event.categories.toMutableSet())
+                        isRemoved || addAll((event.categories))
+                    })
                 }
                 else -> {
                     state.copy()

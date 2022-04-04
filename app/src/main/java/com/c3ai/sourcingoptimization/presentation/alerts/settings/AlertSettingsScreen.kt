@@ -17,12 +17,14 @@ import com.c3ai.sourcingoptimization.common.AlertTypes
 import com.c3ai.sourcingoptimization.common.components.C3SnackbarHost
 import com.c3ai.sourcingoptimization.common.components.C3TopAppBar
 import com.c3ai.sourcingoptimization.ui.theme.Blue
+import com.google.gson.Gson
 
 @Composable
 fun AlertSettingsScreen(
     scaffoldState: ScaffoldState,
     selectedCategories: List<String>,
-    onBackButtonClick: () -> Unit
+    onBackButtonClick: () -> Unit,
+    onCategoriesChanged: (String) -> Unit,
 ) {
 
     Scaffold(
@@ -78,6 +80,7 @@ fun AlertSettingsScreen(
                             } else {
                                 selectedCategoriesList.remove(category)
                             }
+                            onCategoriesChanged(Gson().toJson(selectedCategoriesList))
                         },
                         colors = CheckboxDefaults.colors(Blue)
                     )

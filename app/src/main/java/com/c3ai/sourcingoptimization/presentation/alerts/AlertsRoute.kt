@@ -11,6 +11,7 @@ import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.c3ai.sourcingoptimization.presentation.navigateToAlertSettings
+import com.google.gson.Gson
 
 /**
  * Displays the Alerts route.
@@ -27,12 +28,15 @@ fun AlertsRoute(
     navController: NavController,
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     viewModel: AlertsViewModel = hiltViewModel(),
+    selectedCategories: String
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
     AlertsScreen(
         scaffoldState = scaffoldState,
+        viewModel = viewModel,
         uiState = uiState,
+        selectedCategories = Gson().fromJson(selectedCategories, Array<String>::class.java)?.asList(),
         onRefreshDetails = { viewModel.refreshDetails() },
         onSearchInputChanged = { viewModel.onEvent(AlertsEvent.OnSearchInputChanged(it)) },
         onSortChanged = { viewModel.onEvent(AlertsEvent.OnSortChanged(it)) },

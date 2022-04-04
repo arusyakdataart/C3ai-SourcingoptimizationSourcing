@@ -15,11 +15,18 @@ import androidx.navigation.NavController
 fun AlertSettingsRoute(
     navController: NavController,
     categories: List<String>,
-    scaffoldState: ScaffoldState = rememberScaffoldState(),
+    scaffoldState: ScaffoldState = rememberScaffoldState()
 ) {
     AlertSettingsScreen(
         scaffoldState,
         selectedCategories = categories,
-        onBackButtonClick = { navController.navigateUp() }
+        onCategoriesChanged = { data ->
+            navController.previousBackStackEntry
+                ?.savedStateHandle
+                ?.set("categories", data)
+        },
+        onBackButtonClick = {
+            navController.navigateUp()
+        }
     )
 }

@@ -53,7 +53,9 @@ import kotlinx.coroutines.launch
 @Composable
 fun AlertsScreen(
     scaffoldState: ScaffoldState,
+    viewModel: AlertsViewModel,
     uiState: AlertsUiState,
+    selectedCategories: List<String>?,
     onRefreshDetails: () -> Unit,
     onSearchInputChanged: (String) -> Unit,
     onSortChanged: (String) -> Unit,
@@ -70,6 +72,10 @@ fun AlertsScreen(
 
     var emailAddress: String by remember {
         mutableStateOf("")
+    }
+
+    if (selectedCategories != null) {
+        viewModel.onEvent(AlertsEvent.OnFilterChanged(selectedCategories))
     }
 
     ModalBottomSheetLayout(
@@ -273,6 +279,9 @@ private fun AlertCategoryScreen(
         )
         IconButton(
             onClick = {
+                expandableIds.forEach {
+                    onCollapsableItemClick(it)
+                }
                 //viewModel.onEvent(ToggleOrderSection)
             },
         ) {
@@ -1437,7 +1446,11 @@ private fun TopAppBar(
                     }
                 }
             }
-            IconButton(onClick = { onChangeFilter(Gson().toJson(uiState.selectedCategories)) }) {
+            IconButton(
+                onClick = {
+                    onChangeFilter(Gson().toJson((uiState as AlertsUiState.HasData).selectedCategoriesList))
+                }
+            ) {
                 Icon(
                     imageVector = Icons.Filled.Settings,
                     contentDescription = stringResource(R.string.cd_settings_menu)
