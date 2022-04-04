@@ -11,7 +11,7 @@ data class UiVendor(
     val diversity: Boolean,
     val hasActiveContracts: Boolean,
     val hasActiveAlerts: Boolean,
-    val numberOfActiveAlerts: Int?,
+    val numberOfActiveAlerts: String,
     val location: C3Location?,
     val email: String?,
     val phone: String?,

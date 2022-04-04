@@ -1,4 +1,4 @@
-package com.c3ai.sourcingoptimization.presentation.item_details.overview
+package com.c3ai.sourcingoptimization.presentation.item_details.components
 
 import android.content.Context
 import android.util.Log
@@ -47,7 +47,7 @@ private val chartColors: Array<Any> = arrayOf("#82B0FF", "#C799FF", "#F2950A", "
 
 /**
  * Decomposition of item details[ItemDetailsDataScreen] with separate component for overview tab
- * to make a code support easier[OverviewComponent].
+ * to make a code supporting easier[OverviewComponent].
  * */
 @Composable
 fun OverviewComponent(

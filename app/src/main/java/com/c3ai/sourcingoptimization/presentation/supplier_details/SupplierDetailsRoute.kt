@@ -9,6 +9,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.c3ai.sourcingoptimization.presentation.item_details.ItemDetailsActivity
+import com.c3ai.sourcingoptimization.presentation.navigateToItemDetails
 import com.c3ai.sourcingoptimization.presentation.navigateToPoDetails
 
 /**
@@ -40,11 +41,7 @@ fun SupplierDetailsRoute(
         onExpandableItemClick = { viewModel.onEvent(SupplierDetailsEvent.OnExpandableItemClick(it)) },
         onPOItemClick = { navController.navigateToPoDetails(it) },
         onAlertsClick = { navController.navigateToPoDetails(it) },
-        onC3ItemClick = {
-            val intent = Intent(context, ItemDetailsActivity::class.java)
-            intent.putExtra("id", it)
-            context.startActivity(intent)
-        },
+        onC3ItemClick = { navController.navigateToItemDetails(it) },
         onSortChanged = { viewModel.onEvent(SupplierDetailsEvent.OnSortChanged(it)) },
         onBackButtonClick = { navController.navigateUp() },
     )

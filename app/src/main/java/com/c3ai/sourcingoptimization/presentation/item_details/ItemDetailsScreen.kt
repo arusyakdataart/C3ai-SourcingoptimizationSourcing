@@ -16,8 +16,9 @@ import com.c3ai.sourcingoptimization.common.SortType
 import com.c3ai.sourcingoptimization.common.components.*
 import com.c3ai.sourcingoptimization.data.C3Result
 import com.c3ai.sourcingoptimization.data.repository.C3MockRepositoryImpl
-import com.c3ai.sourcingoptimization.presentation.item_details.overview.OverviewComponent
-import com.c3ai.sourcingoptimization.presentation.item_details.po_lines.POLinesComponent
+import com.c3ai.sourcingoptimization.presentation.item_details.components.OverviewComponent
+import com.c3ai.sourcingoptimization.presentation.item_details.components.POLinesComponent
+import com.c3ai.sourcingoptimization.presentation.item_details.components.SuppliersComponent
 import com.c3ai.sourcingoptimization.ui.theme.*
 import com.github.aachartmodel.aainfographics.aachartcreator.*
 import kotlinx.coroutines.runBlocking
@@ -128,11 +129,18 @@ fun ItemDetailsScreen(
                                     1 -> {
                                         POLinesComponent(
                                             uiState = uiState,
+                                            loadData = loadData,
                                             onAlertsClick = onAlertsClick,
                                         )
                                     }
                                     2 -> {
-
+                                        SuppliersComponent(
+                                            uiState = uiState,
+                                            loadData = loadData,
+                                            onSupplierClick = onSupplierClick,
+                                            onAlertsClick = onAlertsClick,
+                                            onContactClick = {},
+                                        )
                                     }
                                 }
                             }
@@ -235,9 +243,6 @@ private fun TopAppBar(
                         "name" to "Item Name",
                         "openPOValue.value" to "Open PO Line Value",
                         "closedPOValue.value" to "Closed PO Line Value",
-                        "shareOpen" to "Share % (Open)",
-                        "shareClosed" to "Share % (Closed)",
-                        "moq" to "Minimum Order Quantity (MoQ)",
                         "averageUnitPricePaid.value" to "Average Unit Price"
                     )
 

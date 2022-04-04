@@ -2,28 +2,23 @@ package com.c3ai.sourcingoptimization.presentation.item_details
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.common.*
-import com.c3ai.sourcingoptimization.data.C3Result
 import com.c3ai.sourcingoptimization.data.C3Result.Error
 import com.c3ai.sourcingoptimization.data.C3Result.Success
-import com.c3ai.sourcingoptimization.data.repository.C3Repository
 import com.c3ai.sourcingoptimization.domain.model.*
 import com.c3ai.sourcingoptimization.domain.settings.C3AppSettingsProvider
 import com.c3ai.sourcingoptimization.domain.settings.FakeC3AppSettingsProvider
-import com.c3ai.sourcingoptimization.domain.use_case.SuppliersDetailsUseCases
+import com.c3ai.sourcingoptimization.domain.use_case.ItemDetailsUseCases
 import com.c3ai.sourcingoptimization.presentation.ViewModelState
 import com.c3ai.sourcingoptimization.presentation.views.*
 import com.c3ai.sourcingoptimization.presentation.views.itemdetails.IndexPriceCharts
 import com.c3ai.sourcingoptimization.presentation.views.itemdetails.SuppliersCharts
-import com.c3ai.sourcingoptimization.utilities.ErrorMessage
 import com.c3ai.sourcingoptimization.utilities.PAGINATED_RESPONSE_LIMIT
 import com.c3ai.sourcingoptimization.utilities.VISIBLE_THRESHOLD
 import com.c3ai.sourcingoptimization.utilities.extentions.formatNumberLocal
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import java.util.*
 import javax.inject.Inject
 
 /**
@@ -67,6 +62,7 @@ sealed interface ItemDetailsUiState {
         val vendorRelationMetrics: Map<String, List<Double>>? = null,
         val chartsHashCode: Int,
         val poLineItems: List<UiPurchaseOrder.Line>,
+        val suppliers: List<UiVendor>,
         override val isLoading: Boolean,
         override val itemId: String,
         override val tabIndex: Int,
@@ -83,13 +79,14 @@ private data class ItemDetailsViewModelState(
     val item: C3Item? = null,
     val openClosedPOLineQty: OpenClosedPOLineQtyItem? = null,
     val savingsOpportunity: SavingsOpportunityItem? = null,
-    val suppliers: List<C3Vendor> = emptyList(),
+    val itemDetailsSuppliers: List<C3Vendor> = emptyList(),
     val marketPriceIndex: List<MarketPriceIndex> = emptyList(),
     val indexPrice: IndexPrice? = null,
     val vendorRelationMetrics: Map<String, List<Double>>? = null,
     val saStartDate: String = formatDate(date = getMonthBackDate(3)),
     val saEndDate: String = formatDate(date = getCurrentDate()),
     val poLineItems: List<PurchaseOrder.Line> = emptyList(),
+    val suppliers: List<C3Vendor> = emptyList(),
     val isLoading: Boolean = false,
     val itemId: String = "",
     val tabIndex: Int = 0,
@@ -97,6 +94,8 @@ private data class ItemDetailsViewModelState(
     val statsTypeSelected: Int = 0,
     var selectedChartsCrosshairIndex: Int = -1,
     val chartsHashCode: Int = -1,
+    val polineSortOption: String = "",
+    val suppliersSortOption: String = "",
 ) : ViewModelState() {
 
     /**
@@ -115,14 +114,14 @@ private data class ItemDetailsViewModelState(
                 },
                 ocPOLineQty = convert(openClosedPOLineQty, item.id),
                 suppliersChart = SuppliersCharts(
-                    categories = suppliers.map { it.name },
+                    categories = itemDetailsSuppliers.map { it.name },
                     data = formatSuppliersChartData(),
                     maxValue = formatSuppliersChartData().maxOrNull(),
                     dataLabelsFormat = if (statsTypeSelected == 0) "{point.y:,.2f}M" else "{point.y:,.0f} %",
                     suppliers = vendorRelationMetrics?.let { metrics ->
                         val textsMap = mutableMapOf<String, String>()
                         if (selectedChartsCrosshairIndex != -1) {
-                            suppliers.forEach {
+                            itemDetailsSuppliers.forEach {
                                 textsMap[it.name] = String.format(
                                     "%s%s", "$",
                                     String.format(
@@ -174,7 +173,8 @@ private data class ItemDetailsViewModelState(
                 dateRangeSelected = dateRangeSelected,
                 statsTypeSelected = statsTypeSelected,
                 chartsHashCode = chartsHashCode,
-                poLineItems = poLineItems.map { convert(it) }
+                poLineItems = poLineItems.map { convert(it) },
+                suppliers = suppliers.map { convert(it) },
             )
         } else {
             ItemDetailsUiState.NoItem(
@@ -189,14 +189,14 @@ private data class ItemDetailsViewModelState(
 
     fun formatSuppliersChartData(): List<Double> {
         if (statsTypeSelected == 0) {
-            return suppliers.map { it.spend.value.formatNumberLocal() }
+            return itemDetailsSuppliers.map { it.spend.value.formatNumberLocal() }
         }
 
-        val total = suppliers.sumOf { it.spend.value }
+        val total = itemDetailsSuppliers.sumOf { it.spend.value }
         if (total == 0.0) {
             return emptyList()
         }
-        return suppliers.map { ((it.spend.value / total) * 100) }
+        return itemDetailsSuppliers.map { ((it.spend.value / total) * 100) }
     }
 }
 
@@ -206,7 +206,7 @@ private data class ItemDetailsViewModelState(
 @HiltViewModel
 class ItemDetailsViewModel @Inject constructor(
     settings: C3AppSettingsProvider,
-    private val useCases: SuppliersDetailsUseCases
+    private val useCases: ItemDetailsUseCases,
 ) : ViewModel() {
 
     private val viewModelState = MutableStateFlow(ItemDetailsViewModelState(settings))
@@ -224,7 +224,7 @@ class ItemDetailsViewModel @Inject constructor(
 
     fun loadData(itemId: String) {
         this.itemId = itemId
-        refresh()
+        load()
     }
 
     /**
@@ -232,7 +232,10 @@ class ItemDetailsViewModel @Inject constructor(
      */
     fun refresh() {
         viewModelState.update { it.copy(isLoading = true) }
+        load()
+    }
 
+    private fun load() {
         viewModelScope.launch {
             when (viewModelState.value.tabIndex) {
                 0 -> loadOverview()
@@ -243,7 +246,7 @@ class ItemDetailsViewModel @Inject constructor(
     }
 
     private suspend fun loadOverview() {
-        val itemsResult = repository.getItemDetails(itemId)
+        val itemsResult = useCases.getItemDetails(itemId)
         viewModelState.update { state ->
             when (itemsResult) {
                 is Success -> {
@@ -263,7 +266,7 @@ class ItemDetailsViewModel @Inject constructor(
         var startDate: String = formatDate(date = getYearBackDate(1))
         var endDate: String = formatDate(date = getCurrentDate())
         var interval = "YEAR"
-        val openClosedPOLineQtyResult = repository.getEvalMetricsForPOLineQty(
+        val openClosedPOLineQtyResult = useCases.getEvalMetricsForPOLineQty(
             itemId,
             expressions,
             startDate,
@@ -285,7 +288,7 @@ class ItemDetailsViewModel @Inject constructor(
         startDate = formatDate(date = getMonthBackDate(3))
         endDate = formatDate(date = getCurrentDate())
         interval = "MONTH"
-        val savingsOpportunityResult = repository.getEvalMetricsForSavingsOpportunity(
+        val savingsOpportunityResult = useCases.getEvalMetricsForSavingsOpportunity(
             itemId,
             expressions,
             startDate,
@@ -310,11 +313,7 @@ class ItemDetailsViewModel @Inject constructor(
     }
 
     private suspend fun loadPOLines() {
-        val result = repository.getPOLines(
-            itemId = itemId,
-            orderId = null,
-            order = ""
-        )
+        val result = useCases.getPOLines(itemId, viewModelState.value.polineSortOption)
         viewModelState.update {
             when (result) {
                 is Success -> {
@@ -331,11 +330,24 @@ class ItemDetailsViewModel @Inject constructor(
     }
 
     private suspend fun loadSuppliers() {
-
+        val result = useCases.getSuppliers(itemId, viewModelState.value.suppliersSortOption)
+        viewModelState.update { state ->
+            when (result) {
+                is Success -> {
+                    state.copy(
+                        suppliers = result.data,
+                        isLoading = false
+                    )
+                }
+                is Error -> {
+                    state.copy(isLoading = false)
+                }
+            }
+        }
     }
 
     private suspend fun updateSourcingAnalysis(startDate: String, endDate: String) {
-        val suppliersResult = repository.getItemDetailsSuppliers(itemId)
+        val suppliersResult = useCases.getItemDetailsSuppliers(itemId)
         viewModelState.update { state ->
             when (suppliersResult) {
                 is Success -> {
@@ -348,7 +360,7 @@ class ItemDetailsViewModel @Inject constructor(
                         interval = "MONTH"
                     )
                     state.copy(
-                        suppliers = suppliersResult.data,
+                        itemDetailsSuppliers = suppliersResult.data,
                         vendorRelationMetrics = vendorRelationMetrics,
                         chartsHashCode = vendorRelationMetrics.hashCode()
                     )
@@ -359,7 +371,7 @@ class ItemDetailsViewModel @Inject constructor(
             }
         }
 
-        val marketPriceIndex = repository.getMarketPriceIndex()
+        val marketPriceIndex = useCases.getMarketPriceIndex()
         viewModelState.update { state ->
             when (marketPriceIndex) {
                 is Success -> {
@@ -394,29 +406,19 @@ class ItemDetailsViewModel @Inject constructor(
         endDate: String,
         interval: String
     ): Map<String, List<Double>> {
-        val vendorRelationMetrics = mutableMapOf<String, List<Double>>()
+        var vendorRelationMetrics = mapOf<String, List<Double>>()
         if (supplierIds.isNotEmpty()) {
-            val itemVendorRelations =
-                repository.getItemVendorRelation(itemId, supplierIds = supplierIds)
-            when (itemVendorRelations) {
+            val result = useCases.getVendorRelationMetrics(
+                itemId,
+                supplierIds,
+                expressions,
+                startDate,
+                endDate,
+                interval
+            )
+            when (result) {
                 is Success -> {
-                    val itemVendorRelationMetrics = repository.getItemVendorRelationMetrics(
-                        itemVendorRelations.data.map { it.id },
-                        expressions,
-                        startDate,
-                        endDate,
-                        interval
-                    )
-                    when (itemVendorRelationMetrics) {
-                        is Success -> {
-                            itemVendorRelations.data.forEach { relation ->
-                                vendorRelationMetrics[relation.to.id] =
-                                    itemVendorRelationMetrics.data.result[relation.id]
-                                        ?.OrderLineValue?.data ?: listOf()
-                            }
-                        }
-                        is Error -> {}
-                    }
+                    vendorRelationMetrics = result.data
                 }
                 is Error -> {}
             }
@@ -433,22 +435,18 @@ class ItemDetailsViewModel @Inject constructor(
         endDate: String,
         interval: String
     ): IndexPrice? {
-        when (repository.getItemMarketPriceIndexRelation(itemId, indexId)) {
+        val result = useCases.getMarketPriceIndexRelationMetrics(
+            itemId,
+            indexId,
+            ids,
+            expressions,
+            startDate,
+            endDate,
+            interval
+        )
+        when (result) {
             is Success -> {
-                val marketPriceIndexRelationMetrics =
-                    repository.getItemMarketPriceIndexRelationMetrics(
-                        ids,
-                        expressions,
-                        startDate,
-                        endDate,
-                        interval
-                    )
-                when (marketPriceIndexRelationMetrics) {
-                    is Success -> {
-                        return marketPriceIndexRelationMetrics.data.result[indexId]?.indexPrice
-                    }
-                    is Error -> {}
-                }
+                result.data.result[indexId]?.indexPrice
             }
             is Error -> {}
         }
@@ -462,13 +460,6 @@ class ItemDetailsViewModel @Inject constructor(
         viewModelState.update { state ->
             when (event) {
                 is ItemDetailsEvent.OnTabItemClick -> {
-                    viewModelScope.launch {
-                        when (event.tabIndex) {
-                            0 -> loadOverview()
-                            1 -> loadPOLines()
-                            2 -> loadSuppliers()
-                        }
-                    }
                     state.copy(tabIndex = event.tabIndex)
                 }
                 is ItemDetailsEvent.OnDateRangeSelected -> {
@@ -508,23 +499,20 @@ class ItemDetailsViewModel @Inject constructor(
                     }
                 }
                 is ItemDetailsEvent.OnSortChanged -> {
+                    viewModelState.update { it.copy(isLoading = true) }
                     when (state.tabIndex) {
                         1 -> {
-                            viewModelState.update { it.copy(isLoading = true) }
                             viewModelScope.launch {
-                                val result = useCases.getPOsForSupplier("supplier0", order)
-                                viewModelState.update {
+                                val result = useCases.getPOLines(itemId, event.sortOption)
+                                viewModelState.update { status ->
                                     when (result) {
-                                        is C3Result.Success -> it.copy(
-                                            poLines = result.data,
-                                            isLoading = viewModelState.value.items == null || viewModelState.value.supplier == null
+                                        is Success -> status.copy(
+                                            polineSortOption = event.sortOption,
+                                            poLineItems = result.data,
+                                            isLoading = false
                                         )
-                                        is C3Result.Error -> {
-                                            val errorMessages = it.errorMessages + ErrorMessage(
-                                                id = UUID.randomUUID().mostSignificantBits,
-                                                messageId = R.string.load_error
-                                            )
-                                            it.copy(errorMessages = errorMessages, isLoading = false)
+                                        is Error -> {
+                                            status.copy(isLoading = false)
                                         }
                                     }
                                 }
@@ -532,7 +520,21 @@ class ItemDetailsViewModel @Inject constructor(
                             state
                         }
                         2 -> {
-
+                            viewModelScope.launch {
+                                val result = useCases.getSuppliers(itemId, event.sortOption)
+                                viewModelState.update { status ->
+                                    when (result) {
+                                        is Success -> status.copy(
+                                            suppliersSortOption = event.sortOption,
+                                            suppliers = result.data,
+                                            isLoading = false
+                                        )
+                                        is Error -> {
+                                            status.copy(isLoading = false)
+                                        }
+                                    }
+                                }
+                            }
                             state
                         }
                         else -> {

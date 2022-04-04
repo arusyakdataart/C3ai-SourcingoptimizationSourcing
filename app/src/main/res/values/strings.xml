@@ -57,7 +57,8 @@
     <string name="open_po_item_value">Open PO Item Value</string>
     <string name="moq">MOQ</string>
     <string name="_share">% Share</string>
-    <string name="avg_unit_price">% Avg. Unit Price</string>
+    <string name="avg_unit_price">Avg. Unit Price</string>
+    <string name="_avg_unit_price">% Avg. Unit Price</string>
     <string name="saving_opportunity">Saving Opportunity</string>
     <string name="suppliers_with_contract">Suppliers with Contract</string>
     <string name="suppliers">"Suppliers"</string>

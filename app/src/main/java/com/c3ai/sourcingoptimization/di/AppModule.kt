@@ -50,6 +50,21 @@ object AppModule {
     }
 
     @Provides
+    fun provideItemDetailsUseCases(repository: C3Repository): ItemDetailsUseCases {
+        return ItemDetailsUseCases(
+            getItemDetails = GetItemDetails(repository),
+            getEvalMetricsForPOLineQty = GetEvalMetricsForPOLineQty(repository),
+            getEvalMetricsForSavingsOpportunity = GetEvalMetricsForSavingsOpportunity(repository),
+            getItemDetailsSuppliers = GetItemDetailsSuppliers(repository),
+            getMarketPriceIndex = GetMarketPriceIndex(repository),
+            getVendorRelationMetrics = GetVendorRelationMetrics(repository),
+            getMarketPriceIndexRelationMetrics = GetMarketPriceIndexRelationMetrics(repository),
+            getPOLines = GetPOLinesByItem(repository),
+            getSuppliers = GetSuppliers(repository),
+        )
+    }
+
+    @Provides
     fun provideSuppliersDetailsUseCases(repository: C3Repository): SuppliersDetailsUseCases {
         return SuppliersDetailsUseCases(
             getSupplierDetails = GetSupplierDetails(repository),
