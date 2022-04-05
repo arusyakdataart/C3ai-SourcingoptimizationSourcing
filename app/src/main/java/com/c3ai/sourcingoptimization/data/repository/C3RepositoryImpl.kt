@@ -174,4 +174,11 @@ class C3RepositoryImpl @Inject constructor(private val api: C3ApiService) : C3Re
     ): C3Result<List<AlertFeedback>>  = C3Result.on {
         api.getAlertsFeedbacks(AlertFeedbackParameters(alertIds, userId)).objs
     }
+
+    override suspend fun updateAlert(
+        alertIds: List<String>,
+        userId: String,
+        statusType: String,
+        statusValue: Boolean
+    ) = api.updateAlert(UpdateAlertParameters(alertIds, userId, statusType, statusValue))
 }

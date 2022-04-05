@@ -21,7 +21,7 @@ data class C3Spec(
 )
 
 /**
- * Interface for Eval Metrics parameters, including specification[C3Spec] with request details.
+ * Interface for Eval Metrics parameters, including specification[EMSpec] with request details.
  * @see C3ApiService
  * */
 interface EMRequestParameters {
@@ -30,7 +30,7 @@ interface EMRequestParameters {
 
 /**
  * Base specification for parameters.
- * @see RequestParameters
+ * @see EMRequestParameters
  * */
 data class EMSpec(
     val ids: List<String>? = null,
@@ -39,3 +39,14 @@ data class EMSpec(
     val end: String? = null,
     val interval: String? = null
 )
+
+/**
+ * Interface for Update Status History parameters
+ * @see C3ApiService
+ * */
+interface StatusParameters {
+    val alertIds: List<String>
+    val userId: String
+    val statusType: String
+    val statusValue: Boolean
+}

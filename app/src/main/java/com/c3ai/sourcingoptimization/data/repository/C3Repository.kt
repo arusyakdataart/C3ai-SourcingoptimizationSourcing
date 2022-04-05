@@ -78,4 +78,6 @@ interface C3Repository {
     suspend fun getAlertsForUser(order: String): C3Result<List<Alert>>
 
     suspend fun getAlertsFeedbacks(alertIds: List<String>, userId: String): C3Result<List<AlertFeedback>>
+
+    suspend fun updateAlert(alertIds: List<String>, userId: String, statusType: String, statusValue: Boolean)
 }

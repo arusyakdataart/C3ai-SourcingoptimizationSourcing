@@ -149,7 +149,7 @@ class AlertsViewModel @Inject constructor(
         }
     }
 
-    fun getFeedbacks(alertIds: List<String>) {
+    private fun getFeedbacks(alertIds: List<String>) {
         viewModelScope.launch {
             val result = useCases.getAlertsFeedbacks(alertIds)
             viewModelState.update {
@@ -164,6 +164,24 @@ class AlertsViewModel @Inject constructor(
                     }
                 }
             }
+        }
+    }
+
+    fun updateAlerts(alertIds: List<String>, statusType: String, statusValue: Boolean) {
+        viewModelScope.launch {
+            val result = useCases.updateAlerts(alertIds, statusType, statusValue)
+//            viewModelState.update {
+//                when (result) {
+//                    is C3Result.Success -> it.copy(alertsFeedBacks = result.data, isLoading = false)
+//                    is C3Result.Error -> {
+//                        val errorMessages = it.errorMessages + ErrorMessage(
+//                            id = UUID.randomUUID().mostSignificantBits,
+//                            messageId = R.string.load_error
+//                        )
+//                        it.copy(errorMessages = errorMessages, isLoading = false)
+//                    }
+//                }
+//            }
         }
     }
 

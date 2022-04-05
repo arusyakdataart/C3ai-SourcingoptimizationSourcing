@@ -1,5 +1,9 @@
 package com.c3ai.sourcingoptimization.data.network.requests
 
+/**
+ * Data class with parameters for AlertFeedback[getAlertsFeedbacks] request
+ * @see C3ApiService
+ * */
 data class AlertFeedbackParameters(
     @Transient val alertIds: List<String>,
     @Transient val userId: String

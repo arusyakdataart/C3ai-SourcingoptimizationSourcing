@@ -19,7 +19,19 @@ class GetAlertsFeedbacks(private val repository: C3Repository) {
     }
 }
 
+class UpdateAlerts(private val repository: C3Repository) {
+
+    suspend operator fun invoke(
+        alertIds: List<String>,
+        statusType: String,
+        statusValue: Boolean
+    ) {
+        return repository.updateAlert(alertIds, "BA", statusType, statusValue)
+    }
+}
+
 data class AlertsUseCases(
     val getAlerts: GetAlertsForUser,
-    val getAlertsFeedbacks: GetAlertsFeedbacks
+    val getAlertsFeedbacks: GetAlertsFeedbacks,
+    val updateAlerts: UpdateAlerts
 )

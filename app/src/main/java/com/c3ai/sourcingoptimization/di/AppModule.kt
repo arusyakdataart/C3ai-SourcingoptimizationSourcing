@@ -86,7 +86,8 @@ object AppModule {
     fun provideAlertsUseCases(repository: C3Repository): AlertsUseCases {
         return AlertsUseCases(
             getAlerts = GetAlertsForUser(repository),
-            getAlertsFeedbacks = GetAlertsFeedbacks(repository)
+            getAlertsFeedbacks = GetAlertsFeedbacks(repository),
+            updateAlerts = UpdateAlerts(repository)
         )
     }
 }
