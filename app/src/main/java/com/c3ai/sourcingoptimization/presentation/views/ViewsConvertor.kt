@@ -33,6 +33,18 @@ fun ViewModelState.convert(vendor: C3Vendor): UiVendor = UiVendor(
     name = vendor.name,
     allPOValue = vendor.allPOValue?.format() ?: "",
     openPOValue = vendor.openPOValue?.format() ?: "",
+    closedPOValue = vendor.allPOValue?.let {
+        C3UnitValue(
+            it.unit,
+            it.value - (vendor.openPOValue?.value ?: 0.0)
+        ).format()
+    } ?: "",
+    avgPOValue = vendor.allPOValue?.let {
+        C3UnitValue(
+            it.unit,
+            it.value / 2
+        ).format()
+    } ?: "",
     active = vendor.active ?: false,
     diversity = vendor.diversity ?: false,
     hasActiveContracts = vendor.hasActiveContracts ?: false,

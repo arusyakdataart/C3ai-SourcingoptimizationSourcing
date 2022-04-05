@@ -40,12 +40,13 @@ fun ItemDetailsRoute(
         onTabItemClick = { viewModel.onEvent(ItemDetailsEvent.OnTabItemClick(it)) },
         onBackButtonClick = { navController.navigateUp() },
         loadData = { itemId?.let { viewModel.loadData(it) } },
-        onAlertsClick = {},
         onDateRangeSelected = { viewModel.onEvent(ItemDetailsEvent.OnDateRangeSelected(it)) },
         onStatsTypeSelected = { viewModel.onEvent(ItemDetailsEvent.OnStatsTypeSelected(it)) },
         onSupplierClick = { navController.navigateToItemDetails(it) },
         onIndexClick = {},
         onChartViewMoveOver = { viewModel.onEvent(ItemDetailsEvent.UpdateSourcingAnalysis(it)) },
         onSortChanged = { viewModel.onEvent(ItemDetailsEvent.OnSortChanged(it)) },
+        onAlertsClick = {},
+        onContactClick = { viewModel.onEvent(ItemDetailsEvent.OnSupplierContactSelected(it))},
     )
 }

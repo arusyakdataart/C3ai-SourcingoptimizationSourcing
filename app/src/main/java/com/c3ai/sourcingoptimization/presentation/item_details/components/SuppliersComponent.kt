@@ -23,6 +23,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.common.components.*
+import com.c3ai.sourcingoptimization.domain.model.C3VendorContact
 import com.c3ai.sourcingoptimization.presentation.item_details.ItemDetailsUiState
 import com.c3ai.sourcingoptimization.ui.theme.Green40
 import com.c3ai.sourcingoptimization.ui.theme.Lila40
@@ -92,23 +93,13 @@ fun SuppliersComponent(
                         ) {
                             Icon(Icons.Filled.Link, "", tint = MaterialTheme.colors.primary)
                         }
-                        C3IconButton(
-                            onClick = { onAlertsClick(item.id) },
-                            badgeText = item.numberOfActiveAlerts,
-                            modifier = Modifier
-                                .constrainAs(alerts) {
-                                    top.linkTo(parent.top)
-                                    end.linkTo(parent.end)
-                                }) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.alert_white),
-                                contentDescription = stringResource(R.string.cd_read_more)
-                            )
-                        }
                         BusinessCard(
-                            label = stringResource(R.string.delivery_facility),
                             title = "FA",
                             subtitle = "",
+                            image1 = R.drawable.person_card,
+                            image2 = R.drawable.alert,
+                            onIcon1Click = { onContactClick(item.id) },
+                            onIcon2Click = { onAlertsClick(item.id) },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .constrainAs(facility) {
@@ -119,7 +110,7 @@ fun SuppliersComponent(
                         ListDivider(Modifier.constrainAs(divider) { top.linkTo(facility.bottom) })
                         LabeledValue(
                             label = stringResource(R.string.closed_pol_value),
-                            value = "",
+                            value = item.closedPOValue,
                             modifier = Modifier
                                 .constrainAs(closedPOLValue) {
                                     top.linkTo(divider.bottom)
@@ -130,7 +121,7 @@ fun SuppliersComponent(
                         )
                         LabeledValue(
                             label = stringResource(R.string.open_pol_value),
-                            value = item.openPOValue ?: "",
+                            value = item.openPOValue,
                             modifier = Modifier
                                 .constrainAs(openPOLValue) {
                                     top.linkTo(divider.bottom)
@@ -140,8 +131,8 @@ fun SuppliersComponent(
                                 },
                         )
                         LabeledValue(
-                            label = stringResource(R.string.avg_unit_price),
-                            value = "",
+                            label = stringResource(R.string.avg_unit_price) + "\n",
+                            value = item.avgPOValue,
                             modifier = Modifier
                                 .constrainAs(avgUnitPrice) {
                                     top.linkTo(divider.bottom)

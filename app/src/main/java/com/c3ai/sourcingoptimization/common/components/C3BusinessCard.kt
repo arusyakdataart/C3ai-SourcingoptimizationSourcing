@@ -24,7 +24,7 @@ import com.c3ai.sourcingoptimization.ui.theme.Gray70
 @Composable
 fun BusinessCard(
     modifier: Modifier = Modifier,
-    label: String,
+    label: String? = null,
     title: String,
     subtitle: String,
     image1: Int? = null,
@@ -36,17 +36,19 @@ fun BusinessCard(
         val (header, image, titleText, subtitleText, icon1, icon2) = createRefs()
         val nameShort = title.split(" ")
             .joinToString("") { it[0].toString() }.uppercase()
-        Text(
-            label.uppercase(),
-            style = MaterialTheme.typography.subtitle2,
-            color = MaterialTheme.colors.secondary,
-            modifier = Modifier
-                .fillMaxWidth()
-                .constrainAs(header) {
-                    top to parent.top
-                    start to parent.start
-                }
-        )
+        label?.let {
+            Text(
+                label.uppercase(),
+                style = MaterialTheme.typography.subtitle2,
+                color = MaterialTheme.colors.secondary,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .constrainAs(header) {
+                        top to parent.top
+                        start to parent.start
+                    }
+            )
+        }
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
@@ -54,7 +56,7 @@ fun BusinessCard(
                 .clip(CircleShape)
                 .background(Gray70)
                 .constrainAs(image) {
-                    top.linkTo(header.bottom, margin = 16.dp)
+                    top.linkTo(header.bottom, margin = 8.dp)
                     start to parent.start
                 }) {
             Text(
@@ -71,7 +73,7 @@ fun BusinessCard(
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier
                 .constrainAs(titleText) {
-                    top.linkTo(header.bottom, margin = 16.dp)
+                    top.linkTo(image.top)
                     start.linkTo(image.end, margin = 16.dp)
                 }
         )
@@ -95,7 +97,7 @@ fun BusinessCard(
                     .size(24.dp)
                     .constrainAs(icon1) {
                         top.linkTo(header.bottom, margin = 16.dp)
-                        end.linkTo(parent.end)
+                        end.linkTo(icon2.start)
                     }) {
                 Icon(
                     painter = painterResource(id = image1),
@@ -111,7 +113,7 @@ fun BusinessCard(
                     .size(24.dp)
                     .constrainAs(icon2) {
                         top.linkTo(header.bottom, margin = 16.dp)
-                        end.linkTo(icon1.start)
+                        end.linkTo(parent.end)
                     }) {
                 Icon(
                     painter = painterResource(id = image2),

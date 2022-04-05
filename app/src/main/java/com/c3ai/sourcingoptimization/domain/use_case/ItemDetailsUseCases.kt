@@ -180,4 +180,5 @@ data class ItemDetailsUseCases(
     val getMarketPriceIndexRelationMetrics: GetMarketPriceIndexRelationMetrics,
     val getPOLines: GetPOLinesByItem,
     val getSuppliers: GetSuppliers,
+    val getSupplierContacts: GetSupplierContacts
 )

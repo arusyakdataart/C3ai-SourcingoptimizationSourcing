@@ -61,6 +61,7 @@ object AppModule {
             getMarketPriceIndexRelationMetrics = GetMarketPriceIndexRelationMetrics(repository),
             getPOLines = GetPOLinesByItem(repository),
             getSuppliers = GetSuppliers(repository),
+            getSupplierContacts = GetSupplierContacts(repository)
         )
     }
 

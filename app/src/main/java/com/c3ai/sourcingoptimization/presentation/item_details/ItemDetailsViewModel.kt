@@ -34,6 +34,7 @@ sealed interface ItemDetailsUiState {
     val tabIndex: Int
     val dateRangeSelected: Int
     val statsTypeSelected: Int
+    val selectedSupplierContact: C3VendorContact?
 
     /**
      * There are no item to render.
@@ -46,7 +47,8 @@ sealed interface ItemDetailsUiState {
         override val itemId: String,
         override val tabIndex: Int,
         override val dateRangeSelected: Int,
-        override val statsTypeSelected: Int
+        override val statsTypeSelected: Int,
+        override val selectedSupplierContact: C3VendorContact? = null,
     ) : ItemDetailsUiState
 
     /**
@@ -67,7 +69,8 @@ sealed interface ItemDetailsUiState {
         override val itemId: String,
         override val tabIndex: Int,
         override val dateRangeSelected: Int,
-        override val statsTypeSelected: Int
+        override val statsTypeSelected: Int,
+        override val selectedSupplierContact: C3VendorContact? = null,
     ) : ItemDetailsUiState
 }
 
@@ -87,6 +90,7 @@ private data class ItemDetailsViewModelState(
     val saEndDate: String = formatDate(date = getCurrentDate()),
     val poLineItems: List<PurchaseOrder.Line> = emptyList(),
     val suppliers: List<C3Vendor> = emptyList(),
+    val selectedSupplierContact: C3VendorContact? = null,
     val isLoading: Boolean = false,
     val itemId: String = "",
     val tabIndex: Int = 0,
@@ -175,6 +179,7 @@ private data class ItemDetailsViewModelState(
                 chartsHashCode = chartsHashCode,
                 poLineItems = poLineItems.map { convert(it) },
                 suppliers = suppliers.map { convert(it) },
+                selectedSupplierContact = selectedSupplierContact
             )
         } else {
             ItemDetailsUiState.NoItem(
@@ -504,15 +509,15 @@ class ItemDetailsViewModel @Inject constructor(
                         1 -> {
                             viewModelScope.launch {
                                 val result = useCases.getPOLines(itemId, event.sortOption)
-                                viewModelState.update { status ->
+                                viewModelState.update { state ->
                                     when (result) {
-                                        is Success -> status.copy(
+                                        is Success -> state.copy(
                                             polineSortOption = event.sortOption,
                                             poLineItems = result.data,
                                             isLoading = false
                                         )
                                         is Error -> {
-                                            status.copy(isLoading = false)
+                                            state.copy(isLoading = false)
                                         }
                                     }
                                 }
@@ -522,25 +527,40 @@ class ItemDetailsViewModel @Inject constructor(
                         2 -> {
                             viewModelScope.launch {
                                 val result = useCases.getSuppliers(itemId, event.sortOption)
-                                viewModelState.update { status ->
+                                viewModelState.update { state ->
                                     when (result) {
-                                        is Success -> status.copy(
+                                        is Success -> state.copy(
                                             suppliersSortOption = event.sortOption,
                                             suppliers = result.data,
                                             isLoading = false
                                         )
                                         is Error -> {
-                                            status.copy(isLoading = false)
+                                            state.copy(isLoading = false)
                                         }
                                     }
                                 }
                             }
                             state
-                        }
-                        else -> {
+                        } else -> {
                             state
                         }
                     }
+                }
+                is ItemDetailsEvent.OnSupplierContactSelected -> {
+                    viewModelScope.launch {
+                        val result = useCases.getSupplierContacts(event.supplierId)
+                        viewModelState.update { state ->
+                            when (result) {
+                                is Success -> state.copy(
+                                    selectedSupplierContact = result.data
+                                )
+                                is Error -> {
+                                    state.copy(isLoading = false)
+                                }
+                            }
+                        }
+                    }
+                    state
                 }
             }
         }

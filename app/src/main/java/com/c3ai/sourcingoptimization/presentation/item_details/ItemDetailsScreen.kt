@@ -21,6 +21,8 @@ import com.c3ai.sourcingoptimization.presentation.item_details.components.POLine
 import com.c3ai.sourcingoptimization.presentation.item_details.components.SuppliersComponent
 import com.c3ai.sourcingoptimization.ui.theme.*
 import com.github.aachartmodel.aainfographics.aachartcreator.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 
@@ -47,24 +49,17 @@ fun ItemDetailsScreen(
     onTabItemClick: (Int) -> Unit,
     onBackButtonClick: () -> Unit,
     loadData: () -> Unit,
-    onAlertsClick: (String) -> Unit,
     onDateRangeSelected: (Int) -> Unit,
     onStatsTypeSelected: (Int) -> Unit,
     onSupplierClick: (String) -> Unit,
     onIndexClick: (String) -> Unit,
     onChartViewMoveOver: (Int) -> Unit,
-    onSortChanged: (String) -> Unit = {}
+    onSortChanged: (String) -> Unit = {},
+    onAlertsClick: (String) -> Unit,
+    onContactClick: (String) -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
     val bottomState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
-
-    val phoneNumber: String by remember {
-        mutableStateOf("")
-    }
-
-    val emailAddress: String by remember {
-        mutableStateOf("")
-    }
 
     LaunchedEffect(itemId) {
         loadData()
@@ -73,17 +68,22 @@ fun ItemDetailsScreen(
     ModalBottomSheetLayout(
         sheetState = bottomState,
         sheetContent = {
-            ContactSupplierBottomSheetContent(phoneNumber, emailAddress)
+            ContactSupplierBottomSheetContent(
+                uiState.selectedSupplierContact?.phone ?: "",
+                uiState.selectedSupplierContact?.email ?: "",
+            )
         }
     ) {
         Scaffold(
             scaffoldState = scaffoldState,
             topBar = {
                 TopAppBar(
+                    coroutineScope = coroutineScope,
                     title = stringResource(R.string.item_, itemId),
                     selectedTabIndex = uiState.tabIndex,
                     onBackButtonClick = onBackButtonClick,
                     onSortChanged = onSortChanged,
+                    bottomState = bottomState
                 )
             },
             snackbarHost = { C3SnackbarHost(hostState = it) },
@@ -139,7 +139,14 @@ fun ItemDetailsScreen(
                                             loadData = loadData,
                                             onSupplierClick = onSupplierClick,
                                             onAlertsClick = onAlertsClick,
-                                            onContactClick = {},
+                                            onContactClick = {
+                                                onContactClick(it)
+                                                coroutineScope.launch {
+                                                    if (!bottomState.isVisible) {
+                                                        bottomState.show()
+                                                    }
+                                                }
+                                            }
                                         )
                                     }
                                 }
@@ -198,13 +205,15 @@ fun ItemDetailsScreen(
 /**
  * TopAppBar for the suppliers details screen[ItemDetailsScreen]
  */
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterialApi::class)
 @Composable
 private fun TopAppBar(
+    coroutineScope: CoroutineScope,
     title: String,
     selectedTabIndex: Int,
     onBackButtonClick: () -> Unit,
-    onSortChanged: (String) -> Unit = {}
+    onSortChanged: (String) -> Unit = {},
+    bottomState: ModalBottomSheetState,
 ) {
     var sortMenuExpanded by remember { mutableStateOf(false) }
     var firstTabSortApplied by remember { mutableStateOf("") }
@@ -327,13 +336,14 @@ fun ItemDetailsPreview() {
             onTabItemClick = {},
             onBackButtonClick = {},
             loadData = {},
-            onAlertsClick = {},
             onDateRangeSelected = {},
             onStatsTypeSelected = {},
             onSupplierClick = {},
             onIndexClick = {},
             onChartViewMoveOver = {},
             onSortChanged = {},
+            onAlertsClick = {},
+            onContactClick = {},
         )
     }
 }
@@ -354,13 +364,14 @@ fun ItemDetailsPOLinesTabPreview() {
             onTabItemClick = {},
             onBackButtonClick = {},
             loadData = {},
-            onAlertsClick = {},
             onDateRangeSelected = {},
             onStatsTypeSelected = {},
             onSupplierClick = {},
             onIndexClick = {},
             onChartViewMoveOver = {},
             onSortChanged = {},
+            onAlertsClick = {},
+            onContactClick = {},
         )
     }
 }
