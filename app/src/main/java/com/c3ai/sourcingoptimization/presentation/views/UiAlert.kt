@@ -1,5 +1,6 @@
 package com.c3ai.sourcingoptimization.presentation.views
 
+import com.c3ai.sourcingoptimization.domain.model.AlertFeedback
 import com.c3ai.sourcingoptimization.domain.model.C3Category
 
 data class UiAlert(
@@ -11,5 +12,6 @@ data class UiAlert(
     val readStatus: String?,
     val flagged: Boolean?,
     val timestamp: String?,
-    val redirectUrl: String?
+    val redirectUrl: String?,
+    val feedback: AlertFeedback?
 )

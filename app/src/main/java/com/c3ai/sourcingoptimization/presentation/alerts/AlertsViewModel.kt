@@ -5,11 +5,13 @@ import androidx.lifecycle.viewModelScope
 import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.data.C3Result
 import com.c3ai.sourcingoptimization.domain.model.Alert
+import com.c3ai.sourcingoptimization.domain.model.AlertFeedback
 import com.c3ai.sourcingoptimization.domain.settings.C3AppSettingsProvider
 import com.c3ai.sourcingoptimization.domain.use_case.AlertsUseCases
 import com.c3ai.sourcingoptimization.presentation.ViewModelState
 import com.c3ai.sourcingoptimization.presentation.views.UiAlert
 import com.c3ai.sourcingoptimization.presentation.views.convert
+import com.c3ai.sourcingoptimization.presentation.views.filterByCategory
 import com.c3ai.sourcingoptimization.utilities.ErrorMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -47,6 +49,7 @@ sealed interface AlertsUiState {
      */
     data class HasData(
         val alerts: List<UiAlert>,
+        val filteredAlerts: List<UiAlert>,
         val collapsedListItemIds: Set<String> = emptySet(),
         val selectedCategoriesList: Set<String> = emptySet(),
         override val isLoading: Boolean,
@@ -61,6 +64,7 @@ sealed interface AlertsUiState {
 private data class AlertsViewModelState(
     override val settings: C3AppSettingsProvider,
     val alerts: List<Alert>? = null,
+    val alertsFeedBacks: List<AlertFeedback>? = null,
     val isLoading: Boolean = false,
     val errorMessages: List<ErrorMessage> = emptyList(),
     val searchInput: String = "",
@@ -73,11 +77,13 @@ private data class AlertsViewModelState(
      * a more strongly typed [AlertsUiState] for driving the ui.
      */
     fun toUiState(): AlertsUiState =
-        if (alerts != null) {
+        if (alerts != null && alertsFeedBacks != null) {
+            val uiAlert = convert(alerts, alertsFeedBacks)
             AlertsUiState.HasData(
-                alerts = convert(alerts),
+                alerts = uiAlert,
                 collapsedListItemIds = collapsedListItemIds,
                 selectedCategoriesList = selectedCategoriesList,
+                filteredAlerts =filterByCategory(uiAlert, selectedCategoriesList),
                 isLoading = isLoading,
                 errorMessages = errorMessages,
                 searchInput = searchInput
@@ -127,7 +133,28 @@ class AlertsViewModel @Inject constructor(
             val result = useCases.getAlerts(sortOrder)
             viewModelState.update {
                 when (result) {
-                    is C3Result.Success -> it.copy(alerts = result.data, isLoading = false)
+                    is C3Result.Success -> {
+                        getFeedbacks(result.data.map { it.id })
+                        it.copy(alerts = result.data)
+                    }
+                    is C3Result.Error -> {
+                        val errorMessages = it.errorMessages + ErrorMessage(
+                            id = UUID.randomUUID().mostSignificantBits,
+                            messageId = R.string.load_error
+                        )
+                        it.copy(errorMessages = errorMessages, isLoading = false)
+                    }
+                }
+            }
+        }
+    }
+
+    fun getFeedbacks(alertIds: List<String>) {
+        viewModelScope.launch {
+            val result = useCases.getAlertsFeedbacks(alertIds)
+            viewModelState.update {
+                when (result) {
+                    is C3Result.Success -> it.copy(alertsFeedBacks = result.data, isLoading = false)
                     is C3Result.Error -> {
                         val errorMessages = it.errorMessages + ErrorMessage(
                             id = UUID.randomUUID().mostSignificantBits,

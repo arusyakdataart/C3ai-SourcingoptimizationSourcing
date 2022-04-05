@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.Flag
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -122,15 +123,11 @@ fun AlertsScreen(
                     LazyColumn(modifier = Modifier.fillMaxSize(), listState) {
                         when (uiState) {
                             is AlertsUiState.HasData -> {
-                                val filteredList =
-                                    if (uiState.selectedCategoriesList.isNullOrEmpty()) uiState.alerts else uiState.alerts.filter {
-                                        uiState.selectedCategoriesList.contains(it.category?.name)
-                                    }
-                                val categoryList = filteredList.groupBy { it.category?.name }
+                                val categoryList = uiState.filteredAlerts.groupBy { it.category?.name }
                                 categoryList.forEach { it, it1 ->
                                     stickyHeader {
                                         val collapsableItemIds =
-                                            filteredList.mapNotNull { alert -> if (alert.category?.name == it) alert.id else null }
+                                            uiState.filteredAlerts.mapNotNull { alert -> if (alert.category?.name == it) alert.id else null }
                                         val expanded =
                                             !uiState.collapsedListItemIds.contains(
                                                 collapsableItemIds[0]
@@ -332,7 +329,7 @@ private fun PriceChangeAlert(alert: UiAlert) {
                             end.linkTo(parent.end)
                         }) {
                     Icon(
-                        painter = painterResource(id = R.drawable.flag),
+                        imageVector = if (alert.flagged == true) Icons.Filled.Flag else Icons.Outlined.Flag,
                         tint = MaterialTheme.colors.onBackground,
                         contentDescription = "flag"
                     )
@@ -397,13 +394,13 @@ private fun PriceChangeAlert(alert: UiAlert) {
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_baseline_thumb_up_alt_24),
-                        tint = SecondaryVariantColor,
+                        tint = if (alert.feedback?.helpful == true) Green40 else SecondaryVariantColor,
                         contentDescription = "Helpful"
                     )
                     Text(
                         text = stringResource(id = R.string.helpful),
                         style = MaterialTheme.typography.h3,
-                        color = SecondaryVariantColor,
+                        color = if (alert.feedback?.helpful == true) Green40 else SecondaryVariantColor,
                         modifier = Modifier.padding(
                             start = 4.dp,
                             top = 0.dp,
@@ -477,7 +474,7 @@ private fun IndexPriceChangeAlert(alert: UiAlert) {
                             end.linkTo(parent.end)
                         }) {
                     Icon(
-                        painter = painterResource(id = R.drawable.flag),
+                        imageVector = if (alert.flagged == true) Icons.Filled.Flag else Icons.Outlined.Flag,
                         tint = MaterialTheme.colors.onBackground,
                         contentDescription = "flag"
                     )
@@ -542,13 +539,13 @@ private fun IndexPriceChangeAlert(alert: UiAlert) {
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_baseline_thumb_up_alt_24),
-                        tint = SecondaryVariantColor,
+                        tint = if (alert.feedback?.helpful == true) Green40 else SecondaryVariantColor,
                         contentDescription = "Helpful"
                     )
                     Text(
                         text = stringResource(id = R.string.helpful),
                         style = MaterialTheme.typography.h3,
-                        color = SecondaryVariantColor,
+                        color = if (alert.feedback?.helpful == true) Green40 else SecondaryVariantColor,
                         modifier = Modifier.padding(
                             start = 4.dp,
                             top = 0.dp,
@@ -622,7 +619,7 @@ private fun IndexPriceAnomalyAlert(alert: UiAlert) {
                             end.linkTo(parent.end)
                         }) {
                     Icon(
-                        painter = painterResource(id = R.drawable.flag),
+                        imageVector = if (alert.flagged == true) Icons.Filled.Flag else Icons.Outlined.Flag,
                         tint = MaterialTheme.colors.onBackground,
                         contentDescription = "flag"
                     )
@@ -676,13 +673,13 @@ private fun IndexPriceAnomalyAlert(alert: UiAlert) {
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_baseline_thumb_up_alt_24),
-                        tint = SecondaryVariantColor,
+                        tint = if (alert.feedback?.helpful == true) Green40 else SecondaryVariantColor,
                         contentDescription = "Helpful"
                     )
                     Text(
                         text = stringResource(id = R.string.helpful),
                         style = MaterialTheme.typography.h3,
-                        color = SecondaryVariantColor,
+                        color = if (alert.feedback?.helpful == true) Green40 else SecondaryVariantColor,
                         modifier = Modifier.padding(
                             start = 4.dp,
                             top = 0.dp,
@@ -756,7 +753,7 @@ private fun RequestedDeliveryDateChangeAlert(alert: UiAlert) {
                             end.linkTo(parent.end)
                         }) {
                     Icon(
-                        painter = painterResource(id = R.drawable.flag),
+                        imageVector = if (alert.flagged == true) Icons.Filled.Flag else Icons.Outlined.Flag,
                         tint = MaterialTheme.colors.onBackground,
                         contentDescription = "flag"
                     )
@@ -821,13 +818,13 @@ private fun RequestedDeliveryDateChangeAlert(alert: UiAlert) {
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_baseline_thumb_up_alt_24),
-                        tint = SecondaryVariantColor,
+                        tint = if (alert.feedback?.helpful == true) Green40 else SecondaryVariantColor,
                         contentDescription = "Helpful"
                     )
                     Text(
                         text = stringResource(id = R.string.helpful),
                         style = MaterialTheme.typography.h3,
-                        color = SecondaryVariantColor,
+                        color = if (alert.feedback?.helpful == true) Green40 else SecondaryVariantColor,
                         modifier = Modifier.padding(
                             start = 4.dp,
                             top = 0.dp,
@@ -914,7 +911,7 @@ private fun PurchaseOrderAlert(alert: UiAlert) {
                             end.linkTo(parent.end)
                         }) {
                     Icon(
-                        painter = painterResource(id = R.drawable.flag),
+                        imageVector = if (alert.flagged == true) Icons.Filled.Flag else Icons.Outlined.Flag,
                         tint = MaterialTheme.colors.onBackground,
                         contentDescription = "flag"
                     )
@@ -987,13 +984,13 @@ private fun PurchaseOrderAlert(alert: UiAlert) {
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_baseline_thumb_up_alt_24),
-                        tint = SecondaryVariantColor,
+                        tint = if (alert.feedback?.helpful == true) Green40 else SecondaryVariantColor,
                         contentDescription = "Helpful"
                     )
                     Text(
                         text = stringResource(id = R.string.helpful),
                         style = MaterialTheme.typography.h3,
-                        color = SecondaryVariantColor,
+                        color = if (alert.feedback?.helpful == true) Green40 else SecondaryVariantColor,
                         modifier = Modifier.padding(
                             start = 4.dp,
                             top = 0.dp,
@@ -1080,7 +1077,7 @@ private fun DUNSRiskAlert(alert: UiAlert) {
                             end.linkTo(parent.end)
                         }) {
                     Icon(
-                        painter = painterResource(id = R.drawable.flag),
+                        imageVector = if (alert.flagged == true) Icons.Filled.Flag else Icons.Outlined.Flag,
                         tint = MaterialTheme.colors.onBackground,
                         contentDescription = "flag"
                     )
@@ -1156,13 +1153,13 @@ private fun DUNSRiskAlert(alert: UiAlert) {
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_baseline_thumb_up_alt_24),
-                        tint = SecondaryVariantColor,
+                        tint = if (alert.feedback?.helpful == true) Green40 else SecondaryVariantColor,
                         contentDescription = "Helpful"
                     )
                     Text(
                         text = stringResource(id = R.string.helpful),
                         style = MaterialTheme.typography.h3,
-                        color = SecondaryVariantColor,
+                        color = if (alert.feedback?.helpful == true) Green40 else SecondaryVariantColor,
                         modifier = Modifier.padding(
                             start = 4.dp,
                             top = 0.dp,
@@ -1249,7 +1246,8 @@ private fun RapidRatingsRiskAlert(alert: UiAlert) {
                             end.linkTo(parent.end)
                         }) {
                     Icon(
-                        painter = painterResource(id = R.drawable.flag),
+                        imageVector = if (alert.flagged == true) Icons.Filled.Flag else Icons.Outlined.Flag,
+                        //painter = painterResource(id = R.drawable.flag),
                         tint = MaterialTheme.colors.onBackground,
                         contentDescription = "flag"
                     )
@@ -1303,13 +1301,13 @@ private fun RapidRatingsRiskAlert(alert: UiAlert) {
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_baseline_thumb_up_alt_24),
-                        tint = SecondaryVariantColor,
+                        tint = if (alert.feedback?.helpful == true) Green40 else SecondaryVariantColor,
                         contentDescription = "Helpful"
                     )
                     Text(
                         text = stringResource(id = R.string.helpful),
                         style = MaterialTheme.typography.h3,
-                        color = SecondaryVariantColor,
+                        color = if (alert.feedback?.helpful == true) Green40 else SecondaryVariantColor,
                         modifier = Modifier.padding(
                             start = 4.dp,
                             top = 0.dp,

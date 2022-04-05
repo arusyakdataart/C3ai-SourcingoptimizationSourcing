@@ -83,7 +83,7 @@ fun ViewModelState.convert(line: PurchaseOrder.Line): UiPurchaseOrder.Line =
         order = line.order?.let { convert(it) },
     )
 
-fun ViewModelState.convert(alerts: List<Alert>): List<UiAlert> {
+fun ViewModelState.convert(alerts: List<Alert>, feedBacks: List<AlertFeedback>): List<UiAlert> {
     val uiAlerts = alerts.map {
         UiAlert(
             id = it.id,
@@ -94,10 +94,24 @@ fun ViewModelState.convert(alerts: List<Alert>): List<UiAlert> {
             readStatus = it.readStatus,
             flagged = it.flagged,
             timestamp = settings.format(it.timestamp),
-            redirectUrl = it.redirectUrl
+            redirectUrl = it.redirectUrl,
+            feedback = feedBacks.find { it1 -> it.id == it1.parent?.id }
         )
     }
     return uiAlerts
+}
+
+fun filterByCategory(alerts: List<UiAlert>, categories: Set<String>): List<UiAlert> {
+    if (categories.isEmpty()) {
+       return alerts
+    }
+    val filteredAlerts = mutableListOf<UiAlert>()
+    alerts.forEach {
+        if (categories.contains(it.category?.name)) {
+            filteredAlerts.add(it)
+        }
+    }
+    return filteredAlerts
 }
 
 fun C3AppSettingsProvider.format(date: Date?): String {
