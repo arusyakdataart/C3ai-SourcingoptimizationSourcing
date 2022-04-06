@@ -83,7 +83,7 @@ fun ViewModelState.convert(line: PurchaseOrder.Line): UiPurchaseOrder.Line =
         order = line.order?.let { convert(it) },
     )
 
-fun ViewModelState.convert(alerts: List<Alert>, feedBacks: List<AlertFeedback>): List<UiAlert> {
+fun ViewModelState.convert(alerts: List<Alert>, feedBacks: Set<AlertFeedback>): List<UiAlert> {
     val uiAlerts = alerts.map {
         UiAlert(
             id = it.id,

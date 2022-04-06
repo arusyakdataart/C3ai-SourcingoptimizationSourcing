@@ -6,6 +6,7 @@ import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.data.C3Result
 import com.c3ai.sourcingoptimization.domain.model.Alert
 import com.c3ai.sourcingoptimization.domain.model.AlertFeedback
+import com.c3ai.sourcingoptimization.domain.model.C3Number
 import com.c3ai.sourcingoptimization.domain.settings.C3AppSettingsProvider
 import com.c3ai.sourcingoptimization.domain.use_case.AlertsUseCases
 import com.c3ai.sourcingoptimization.presentation.ViewModelState
@@ -64,7 +65,7 @@ sealed interface AlertsUiState {
 private data class AlertsViewModelState(
     override val settings: C3AppSettingsProvider,
     val alerts: List<Alert>? = null,
-    val alertsFeedBacks: List<AlertFeedback>? = null,
+    val alertsFeedBacks: Set<AlertFeedback>? = null,
     val isLoading: Boolean = false,
     val errorMessages: List<ErrorMessage> = emptyList(),
     val searchInput: String = "",
@@ -83,7 +84,7 @@ private data class AlertsViewModelState(
                 alerts = uiAlert,
                 collapsedListItemIds = collapsedListItemIds,
                 selectedCategoriesList = selectedCategoriesList,
-                filteredAlerts =filterByCategory(uiAlert, selectedCategoriesList),
+                filteredAlerts = filterByCategory(uiAlert, selectedCategoriesList),
                 isLoading = isLoading,
                 errorMessages = errorMessages,
                 searchInput = searchInput
@@ -154,7 +155,9 @@ class AlertsViewModel @Inject constructor(
             val result = useCases.getAlertsFeedbacks(alertIds)
             viewModelState.update {
                 when (result) {
-                    is C3Result.Success -> it.copy(alertsFeedBacks = result.data, isLoading = false)
+                    is C3Result.Success -> it.copy(
+                        alertsFeedBacks = result.data?.toSet() ?: setOf(), isLoading = false
+                    )
                     is C3Result.Error -> {
                         val errorMessages = it.errorMessages + ErrorMessage(
                             id = UUID.randomUUID().mostSignificantBits,
@@ -169,19 +172,7 @@ class AlertsViewModel @Inject constructor(
 
     fun updateAlerts(alertIds: List<String>, statusType: String, statusValue: Boolean) {
         viewModelScope.launch {
-            val result = useCases.updateAlerts(alertIds, statusType, statusValue)
-//            viewModelState.update {
-//                when (result) {
-//                    is C3Result.Success -> it.copy(alertsFeedBacks = result.data, isLoading = false)
-//                    is C3Result.Error -> {
-//                        val errorMessages = it.errorMessages + ErrorMessage(
-//                            id = UUID.randomUUID().mostSignificantBits,
-//                            messageId = R.string.load_error
-//                        )
-//                        it.copy(errorMessages = errorMessages, isLoading = false)
-//                    }
-//                }
-//            }
+            useCases.updateAlerts(alertIds, statusType, statusValue)
         }
     }
 
@@ -203,6 +194,37 @@ class AlertsViewModel @Inject constructor(
                 }
                 is AlertsEvent.OnFilterChanged -> {
                     state.copy(selectedCategoriesList = event.categories.toMutableSet())
+                }
+                is AlertsEvent.OnFeedbackChanged -> {
+                    val feedback = state.alertsFeedBacks?.find { it.parent?.id == event.alertId }
+                    if (feedback == null) {
+                        state.copy(
+                            alertsFeedBacks = state.alertsFeedBacks?.toMutableSet()?.apply {
+                                add(
+                                    AlertFeedback(
+                                        id = Random().toString(),
+                                        helpful = event.statusValue,
+                                        parent = C3Number(id = event.alertId, number = "")
+                                    )
+                                )
+                            })
+                    } else {
+                        state.copy(
+                            alertsFeedBacks = state.alertsFeedBacks.toMutableSet().apply {
+                                val feedback =
+                                    state.alertsFeedBacks.filter { it.parent?.id == event.alertId }
+                                        .toSet()
+                                removeAll(feedback)
+                                add(
+                                    AlertFeedback(
+                                        id = Random().toString(),
+                                        helpful = event.statusValue,
+                                        parent = C3Number(id = event.alertId, number = "")
+                                    )
+                                )
+                            }
+                        )
+                    }
                 }
                 else -> {
                     state.copy()

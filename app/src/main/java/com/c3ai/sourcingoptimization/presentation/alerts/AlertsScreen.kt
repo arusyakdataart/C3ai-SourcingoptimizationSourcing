@@ -48,7 +48,6 @@ import kotlinx.coroutines.launch
  * loading and error handling.
  */
 
-@RequiresApi(Build.VERSION_CODES.N)
 @ExperimentalMaterialApi
 @ExperimentalFoundationApi
 @Composable
@@ -125,7 +124,7 @@ fun AlertsScreen(
                             is AlertsUiState.HasData -> {
                                 val categoryList =
                                     uiState.filteredAlerts.groupBy { it.category?.name }
-                                categoryList.forEach { it, it1 ->
+                                categoryList.keys.forEach {
                                     stickyHeader {
                                         val collapsableItemIds =
                                             uiState.filteredAlerts.mapNotNull { alert -> if (alert.category?.name == it) alert.id else null }
@@ -142,111 +141,122 @@ fun AlertsScreen(
                                         )
                                     }
 
-                                    items(it1) {
-                                        when (it.category?.name) {
-                                            AlertTypes.NEW_LOWEST_PRICE.categoryName ->
-                                                CollapsableLayout(
-                                                    expanded = !uiState.collapsedListItemIds.contains(
-                                                        it.id
-                                                    ),
-                                                ) {
-                                                    PriceChangeAlert(
-                                                        it,
-                                                        {
-                                                            changeFeedbackHelpful(
-                                                                it,
-                                                                viewModel,
-                                                                true
-                                                            )
-                                                        },
-                                                        {
-                                                            changeFeedbackHelpful(
-                                                                it,
-                                                                viewModel,
-                                                                false
-                                                            )
-                                                        }
-                                                    )
-                                                }
-
-                                            AlertTypes.UNEXPECTED_PRICE_INCREASE.categoryName -> CollapsableLayout(
-                                                expanded = !uiState.collapsedListItemIds.contains(
-                                                    it.id
-                                                ),
-                                            ) {
-                                                PriceChangeAlert(
-                                                    it,
-                                                    { changeFeedbackHelpful(it, viewModel, true) },
-                                                    { changeFeedbackHelpful(it, viewModel, false) }
-                                                )
-                                            }
-                                            AlertTypes.REQUESTED_DELIVERY_DATE_CHANGE.categoryName -> CollapsableLayout(
-                                                expanded = !uiState.collapsedListItemIds.contains(
-                                                    it.id
-                                                ),
-                                            ) {
-                                                RequestedDeliveryDateChangeAlert(
-                                                    it,
-                                                    { changeFeedbackHelpful(it, viewModel, true) },
-                                                    { changeFeedbackHelpful(it, viewModel, false) }
-                                                )
-                                            }
-                                            AlertTypes.SHORT_CYCLED_PURCHASE_ORDER.categoryName -> CollapsableLayout(
-                                                expanded = !uiState.collapsedListItemIds.contains(
-                                                    it.id
-                                                ),
-                                            ) {
-                                                PurchaseOrderAlert(
-                                                    it,
-                                                    { changeFeedbackHelpful(it, viewModel, true) },
-                                                    { changeFeedbackHelpful(it, viewModel, false) }
-                                                )
-                                            }
-                                            AlertTypes.INDEX_PRICE_CHANGE.categoryName -> CollapsableLayout(
-                                                expanded = !uiState.collapsedListItemIds.contains(
-                                                    it.id
-                                                ),
-                                            ) {
-                                                IndexPriceChangeAlert(
-                                                    it,
-                                                    { changeFeedbackHelpful(it, viewModel, true) },
-                                                    { changeFeedbackHelpful(it, viewModel, false) }
-                                                )
-                                            }
-
-                                            AlertTypes.CORRELATED_INDEX_PRICING_ANOMALY.categoryName -> CollapsableLayout(
-                                                expanded = !uiState.collapsedListItemIds.contains(
-                                                    it.id
-                                                ),
-                                            ) {
-                                                IndexPriceAnomalyAlert(
-                                                    it,
-                                                    { changeFeedbackHelpful(it, viewModel, true) },
-                                                    { changeFeedbackHelpful(it, viewModel, false) }
-                                                )
-                                            }
-                                            AlertTypes.D_U_N_S_RISK.categoryName -> CollapsableLayout(
-                                                expanded = !uiState.collapsedListItemIds.contains(
-                                                    it.id
-                                                ),
-                                            ) {
-                                                DUNSRiskAlert(
-                                                    it,
-                                                    { changeFeedbackHelpful(it, viewModel, true) },
-                                                    { changeFeedbackHelpful(it, viewModel, false) }
-                                                )
-                                            }
-                                            AlertTypes.RAPID_RATINGS_RISK.categoryName -> CollapsableLayout(
-                                                expanded = !uiState.collapsedListItemIds.contains(
-                                                    it.id
-                                                ),
-                                            ) {
-                                                RapidRatingsRiskAlert(
-                                                    it,
-                                                    { changeFeedbackHelpful(it, viewModel, true) },
-                                                    { changeFeedbackHelpful(it, viewModel, false) })
-                                            }
+                                    items(categoryList.getValue(it)) {
+                                        CollapsableLayout(
+                                            expanded = !uiState.collapsedListItemIds.contains(
+                                                it.id
+                                            ),
+                                        ) {
+                                            RapidRatingsRiskAlert(
+                                                it,
+                                                { changeFeedbackHelpful(it, viewModel, true) },
+                                                { changeFeedbackHelpful(it, viewModel, false) }
+                                            )
                                         }
+//                                        when (it.category?.name) {
+//                                            AlertTypes.NEW_LOWEST_PRICE.categoryName ->
+//                                                CollapsableLayout(
+//                                                    expanded = !uiState.collapsedListItemIds.contains(
+//                                                        it.id
+//                                                    ),
+//                                                ) {
+//                                                    PriceChangeAlert(
+//                                                        it,
+//                                                        {
+//                                                            changeFeedbackHelpful(
+//                                                                it,
+//                                                                viewModel,
+//                                                                true
+//                                                            )
+//                                                        },
+//                                                        {
+//                                                            changeFeedbackHelpful(
+//                                                                it,
+//                                                                viewModel,
+//                                                                false
+//                                                            )
+//                                                        }
+//                                                    )
+//                                                }
+//
+//                                            AlertTypes.UNEXPECTED_PRICE_INCREASE.categoryName -> CollapsableLayout(
+//                                                expanded = !uiState.collapsedListItemIds.contains(
+//                                                    it.id
+//                                                ),
+//                                            ) {
+//                                                PriceChangeAlert(
+//                                                    it,
+//                                                    { changeFeedbackHelpful(it, viewModel, true) },
+//                                                    { changeFeedbackHelpful(it, viewModel, false) }
+//                                                )
+//                                            }
+//                                            AlertTypes.REQUESTED_DELIVERY_DATE_CHANGE.categoryName -> CollapsableLayout(
+//                                                expanded = !uiState.collapsedListItemIds.contains(
+//                                                    it.id
+//                                                ),
+//                                            ) {
+//                                                RequestedDeliveryDateChangeAlert(
+//                                                    it,
+//                                                    { changeFeedbackHelpful(it, viewModel, true) },
+//                                                    { changeFeedbackHelpful(it, viewModel, false) }
+//                                                )
+//                                            }
+//                                            AlertTypes.SHORT_CYCLED_PURCHASE_ORDER.categoryName -> CollapsableLayout(
+//                                                expanded = !uiState.collapsedListItemIds.contains(
+//                                                    it.id
+//                                                ),
+//                                            ) {
+//                                                PurchaseOrderAlert(
+//                                                    it,
+//                                                    { changeFeedbackHelpful(it, viewModel, true) },
+//                                                    { changeFeedbackHelpful(it, viewModel, false) }
+//                                                )
+//                                            }
+//                                            AlertTypes.INDEX_PRICE_CHANGE.categoryName -> CollapsableLayout(
+//                                                expanded = !uiState.collapsedListItemIds.contains(
+//                                                    it.id
+//                                                ),
+//                                            ) {
+//                                                IndexPriceChangeAlert(
+//                                                    it,
+//                                                    { changeFeedbackHelpful(it, viewModel, true) },
+//                                                    { changeFeedbackHelpful(it, viewModel, false) }
+//                                                )
+//                                            }
+//
+//                                            AlertTypes.CORRELATED_INDEX_PRICING_ANOMALY.categoryName -> CollapsableLayout(
+//                                                expanded = !uiState.collapsedListItemIds.contains(
+//                                                    it.id
+//                                                ),
+//                                            ) {
+//                                                IndexPriceAnomalyAlert(
+//                                                    it,
+//                                                    { changeFeedbackHelpful(it, viewModel, true) },
+//                                                    { changeFeedbackHelpful(it, viewModel, false) }
+//                                                )
+//                                            }
+//                                            AlertTypes.D_U_N_S_RISK.categoryName -> CollapsableLayout(
+//                                                expanded = !uiState.collapsedListItemIds.contains(
+//                                                    it.id
+//                                                ),
+//                                            ) {
+//                                                DUNSRiskAlert(
+//                                                    it,
+//                                                    { changeFeedbackHelpful(it, viewModel, true) },
+//                                                    { changeFeedbackHelpful(it, viewModel, false) }
+//                                                )
+//                                            }
+//                                            AlertTypes.RAPID_RATINGS_RISK.categoryName -> CollapsableLayout(
+//                                                expanded = !uiState.collapsedListItemIds.contains(
+//                                                    it.id
+//                                                ),
+//                                            ) {
+//                                                RapidRatingsRiskAlert(
+//                                                    it,
+//                                                    { changeFeedbackHelpful(it, viewModel, true) },
+//                                                    { changeFeedbackHelpful(it, viewModel, false) })
+//                                            }
+//                                        }
                                     }
                                 }
                             }
@@ -277,7 +287,8 @@ private fun changeFeedbackHelpful(alert: UiAlert, viewModel: AlertsViewModel, he
     if (alert.feedback?.helpful == helpful) {
         return
     }
-    viewModel.updateAlerts(listOf(alert.id), "feedBack", helpful)
+    viewModel.updateAlerts(listOf(alert.id), "feedback", helpful)
+    viewModel.onEvent(AlertsEvent.OnFeedbackChanged(alert.id, helpful))
 }
 
 @SuppressLint("UnusedTransitionTargetStateParameter")
