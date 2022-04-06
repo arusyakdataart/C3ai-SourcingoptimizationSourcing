@@ -9,7 +9,7 @@ data class Alert(
     val description: String,
     val currentState: C3Category?,
     val readStatus: String?,
-    val flagged: Boolean?,
+    var flagged: Boolean?,
     val timestamp: Date?,
     val redirectUrl: String?
 )

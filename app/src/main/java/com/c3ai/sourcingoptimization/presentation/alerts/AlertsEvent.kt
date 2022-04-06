@@ -6,4 +6,5 @@ sealed class AlertsEvent {
     data class OnSortChanged(val sortOption: String) : AlertsEvent()
     data class OnFilterChanged(val categories: List<String>) : AlertsEvent()
     data class OnFeedbackChanged(val alertId: String, val statusValue: Boolean) : AlertsEvent()
+    data class OnFlaggedChanged(val alertId: String, val statusValue: Boolean) : AlertsEvent()
 }

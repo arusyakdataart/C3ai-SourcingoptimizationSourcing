@@ -64,7 +64,7 @@ sealed interface AlertsUiState {
  */
 private data class AlertsViewModelState(
     override val settings: C3AppSettingsProvider,
-    val alerts: List<Alert>? = null,
+    val alerts: Set<Alert>? = null,
     val alertsFeedBacks: Set<AlertFeedback>? = null,
     val isLoading: Boolean = false,
     val errorMessages: List<ErrorMessage> = emptyList(),
@@ -136,7 +136,7 @@ class AlertsViewModel @Inject constructor(
                 when (result) {
                     is C3Result.Success -> {
                         getFeedbacks(result.data.map { it.id })
-                        it.copy(alerts = result.data)
+                        it.copy(alerts = result.data.toSet())
                     }
                     is C3Result.Error -> {
                         val errorMessages = it.errorMessages + ErrorMessage(
@@ -225,6 +225,15 @@ class AlertsViewModel @Inject constructor(
                             }
                         )
                     }
+                }
+                is AlertsEvent.OnFlaggedChanged -> {
+                    state.copy(
+                        alerts = state.alerts?.toMutableSet()?.apply {
+                            val alert = state.alerts.find { it.id == event.alertId }
+                            alert?.flagged = event.statusValue
+                        }
+                    )
+
                 }
                 else -> {
                     state.copy()

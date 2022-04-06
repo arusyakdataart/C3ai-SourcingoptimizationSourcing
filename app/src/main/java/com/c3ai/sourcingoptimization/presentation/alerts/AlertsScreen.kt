@@ -149,6 +149,7 @@ fun AlertsScreen(
                                         ) {
                                             RapidRatingsRiskAlert(
                                                 it,
+                                                { changeFlaggedStatus(it, viewModel, !(it.flagged ?: false)) },
                                                 { changeFeedbackHelpful(it, viewModel, true) },
                                                 { changeFeedbackHelpful(it, viewModel, false) }
                                             )
@@ -291,6 +292,12 @@ private fun changeFeedbackHelpful(alert: UiAlert, viewModel: AlertsViewModel, he
     viewModel.onEvent(AlertsEvent.OnFeedbackChanged(alert.id, helpful))
 }
 
+private fun changeFlaggedStatus(alert: UiAlert, viewModel: AlertsViewModel, flagged: Boolean) {
+
+    viewModel.updateAlerts(listOf(alert.id), "flagged", flagged)
+    viewModel.onEvent(AlertsEvent.OnFlaggedChanged(alert.id, flagged))
+}
+
 @SuppressLint("UnusedTransitionTargetStateParameter")
 @Composable
 private fun AlertCategoryScreen(
@@ -335,7 +342,6 @@ private fun AlertCategoryScreen(
                 expandableIds.forEach {
                     onCollapsableItemClick(it)
                 }
-                //viewModel.onEvent(ToggleOrderSection)
             },
         ) {
             Icon(

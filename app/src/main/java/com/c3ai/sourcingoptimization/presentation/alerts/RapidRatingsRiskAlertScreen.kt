@@ -30,6 +30,7 @@ import com.c3ai.sourcingoptimization.ui.theme.SecondaryVariantColor
 @Composable
 fun RapidRatingsRiskAlert(
     alert: UiAlert,
+    onChangeFlaggedStatus: () -> Unit,
     onChangeFeedbackHelpful: () -> Unit,
     onChangeFeedbackUnhelpful: () -> Unit
 ) {
@@ -58,7 +59,7 @@ fun RapidRatingsRiskAlert(
                         .padding(start = 16.dp, top = 8.dp, end = 16.dp, bottom = 0.dp)
                 )
                 C3IconButton(
-                    onClick = { },
+                    onClick = onChangeFlaggedStatus,
                     modifier = Modifier
                         .constrainAs(flag) {
                             top.linkTo(parent.top)

@@ -83,7 +83,7 @@ fun ViewModelState.convert(line: PurchaseOrder.Line): UiPurchaseOrder.Line =
         order = line.order?.let { convert(it) },
     )
 
-fun ViewModelState.convert(alerts: List<Alert>, feedBacks: Set<AlertFeedback>): List<UiAlert> {
+fun ViewModelState.convert(alerts: Set<Alert>, feedBacks: Set<AlertFeedback>): List<UiAlert> {
     val uiAlerts = alerts.map {
         UiAlert(
             id = it.id,
@@ -95,7 +95,7 @@ fun ViewModelState.convert(alerts: List<Alert>, feedBacks: Set<AlertFeedback>): 
             flagged = it.flagged,
             timestamp = settings.format(it.timestamp),
             redirectUrl = it.redirectUrl,
-            feedback = feedBacks.find { it1 -> it.id == it1.parent?.id }
+            feedback = feedBacks.findLast { it1 -> it.id == it1.parent?.id }
         )
     }
     return uiAlerts
