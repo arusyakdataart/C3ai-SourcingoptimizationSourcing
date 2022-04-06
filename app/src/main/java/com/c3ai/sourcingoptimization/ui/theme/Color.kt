@@ -23,5 +23,6 @@ val Green40 = Color(0xFF49BFA9)
 val Lila40 = Color(0xFFC799FF)
 val Gray70 = Color(0xFF50545C)
 val Accent = Color(0xFF4F8DFF)
+val Orange = Color(0xFFD47C00)
 
 val Blue = Color(0xFF37A2FF)

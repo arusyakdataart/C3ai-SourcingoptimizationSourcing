@@ -12,6 +12,8 @@ object C3Destinations {
     const val PO_DETAILS_ROUTE = "po_details/{orderId}"
     const val EDIT_SUPPLIERS_ROUTE = "edit_suppliers?itemId={itemId}&supplierIds={supplierIds}"
     const val EDIT_INDEX_ROUTE = "edit_index?indexId={indexId}"
+    const val ALERTS_ROUTE = "alerts"
+    const val ALERT_SETTINGS_ROUTE = "alert_settings?categories={categories}"
 }
 
 /**
@@ -51,6 +53,20 @@ fun NavController.navigateToEditSuppliers(
 fun NavController.navigateToEditIndex(
     indexId: String
 ) = navigate("edit_index?indexId=$indexId")
+
+/**
+ * Navigate to the alerts[AlertsRoute]
+ */
+fun NavController.navigateToAlerts() = navigate("alerts")
+
+/**
+ * Navigate to the alert settings [AlertSettingsRoute]
+ *
+ * @param categories the selected alert categories
+ */
+fun NavController.navigateToAlertSettings(
+    categories: String
+) = navigate("alert_settings?categories=$categories")
 
 /**
  * Models the navigation actions in the app.

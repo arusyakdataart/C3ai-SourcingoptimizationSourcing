@@ -87,6 +87,18 @@ interface C3ApiService {
     @POST("${MAIN_API_URL}ItemMarketPriceIndexRelation?action=evalMetrics")
     suspend fun getItemMarketPriceIndexRelationMetrics(@Body request: EvalMetricsParameters): ItemMarketPriceIndexRelationMetrics
 
+    @Headers("Accept: application/json")
+    @POST("${MAIN_API_URL}SoAlertHelper?action=fetchForCurrentUser")
+    suspend fun getAlertsForUser(@Body request: AlertsParameters): C3Response<Alert>
+
+    @Headers("Accept: application/json")
+    @POST("${MAIN_API_URL}SoAlertFeedbackHistory?action=fetch")
+    suspend fun getAlertsFeedbacks(@Body request: AlertFeedbackParameters): C3Response<AlertFeedback>
+
+    @Headers("Accept: application/json")
+    @POST("${MAIN_API_URL}SoAlert?action=updateStatusHistoryForUser")
+    suspend fun updateAlert(@Body request: UpdateAlertParameters)
+
     companion object {
 
         fun create(okHttpClient: OkHttpClient): C3ApiService {

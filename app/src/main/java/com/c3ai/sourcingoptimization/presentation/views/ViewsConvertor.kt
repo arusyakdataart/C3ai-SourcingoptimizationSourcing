@@ -1,9 +1,6 @@
 package com.c3ai.sourcingoptimization.presentation.views
 
-import com.c3ai.sourcingoptimization.domain.model.C3Item
-import com.c3ai.sourcingoptimization.domain.model.C3UnitValue
-import com.c3ai.sourcingoptimization.domain.model.C3Vendor
-import com.c3ai.sourcingoptimization.domain.model.PurchaseOrder
+import com.c3ai.sourcingoptimization.domain.model.*
 import com.c3ai.sourcingoptimization.domain.settings.C3AppSettingsProvider
 import com.c3ai.sourcingoptimization.presentation.ViewModelState
 import java.util.*
@@ -85,6 +82,37 @@ fun ViewModelState.convert(line: PurchaseOrder.Line): UiPurchaseOrder.Line =
         actualLeadTime = Date().daysBefore(line.promisedDeliveryDate),
         order = line.order?.let { convert(it) },
     )
+
+fun ViewModelState.convert(alerts: Set<Alert>, feedBacks: Set<AlertFeedback>): List<UiAlert> {
+    val uiAlerts = alerts.map {
+        UiAlert(
+            id = it.id,
+            alertType = it.alertType,
+            category = it.category,
+            description = it.description,
+            currentState = it.currentState,
+            readStatus = it.readStatus,
+            flagged = it.flagged,
+            timestamp = settings.format(it.timestamp),
+            redirectUrl = it.redirectUrl,
+            feedback = feedBacks.findLast { it1 -> it.id == it1.parent?.id }
+        )
+    }
+    return uiAlerts
+}
+
+fun filterByCategory(alerts: List<UiAlert>, categories: Set<String>): List<UiAlert> {
+    if (categories.isEmpty()) {
+       return alerts
+    }
+    val filteredAlerts = mutableListOf<UiAlert>()
+    alerts.forEach {
+        if (categories.contains(it.category?.name)) {
+            filteredAlerts.add(it)
+        }
+    }
+    return filteredAlerts
+}
 
 fun C3AppSettingsProvider.format(date: Date?): String {
     return date?.let { getDateFormatter().format(date) } ?: "-"

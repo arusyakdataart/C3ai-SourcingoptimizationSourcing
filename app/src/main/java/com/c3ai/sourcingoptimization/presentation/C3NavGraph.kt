@@ -10,6 +10,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.c3ai.sourcingoptimization.presentation.alerts.AlertsRoute
+import com.c3ai.sourcingoptimization.presentation.alerts.settings.AlertSettingsRoute
 import com.c3ai.sourcingoptimization.presentation.po_details.PODetailsRoute
 import com.c3ai.sourcingoptimization.presentation.search.SearchRoute
 import com.c3ai.sourcingoptimization.presentation.supplier_details.SupplierDetailsRoute
@@ -76,6 +78,29 @@ fun C3NavGraph(
             EditIndexRoute(
                 navController = navController,
                 indexId = entry.arguments?.getString("indexId")
+            )
+        }
+        composable(
+            C3Destinations.ALERTS_ROUTE
+        ) { entry ->
+            val data = entry.savedStateHandle.get<String>("categories")
+            AlertsRoute(
+                navController = navController,
+                selectedCategories = data ?: ""
+            )
+        }
+        composable(
+            C3Destinations.ALERT_SETTINGS_ROUTE,
+            arguments = listOf(
+                navArgument("categories") { type = NavType.StringType }
+            )
+        ) { entry ->
+            AlertSettingsRoute(
+                navController = navController,
+                categories = Gson().fromJson(
+                    entry.arguments?.getString("categories"),
+                    Array<String>::class.java
+                ).asList()
             )
         }
     }
