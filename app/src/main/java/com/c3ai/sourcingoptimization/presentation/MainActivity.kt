@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.ExperimentalFoundationApi
 import com.c3ai.sourcingoptimization.data.C3Result
 import com.c3ai.sourcingoptimization.data.mock.fake
 import com.c3ai.sourcingoptimization.data.repository.C3MockRepositoryImpl
@@ -17,6 +18,7 @@ import kotlinx.coroutines.runBlocking
  * the main navigation.
  * @see SearchScreen
  * */
+@ExperimentalFoundationApi
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 

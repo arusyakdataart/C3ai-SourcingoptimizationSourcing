@@ -96,12 +96,12 @@ class C3RepositoryImpl @Inject constructor(private val api: C3ApiService) : C3Re
         )
     }
 
-    override suspend fun getItemDetailsSuppliers(itemId: String): C3Result<List<C3Vendor>> =
+    override suspend fun getItemDetailsSuppliers(itemId: String, limit: Int): C3Result<List<C3Vendor>> =
         C3Result.on {
             api.getSuppliers(
                 SuppliersParameters(
                     itemId = itemId,
-                    limit = 5,
+                    limit = limit,
                     order = "descending(spend.value)"
                 )
             ).objs
@@ -138,8 +138,8 @@ class C3RepositoryImpl @Inject constructor(private val api: C3ApiService) : C3Re
         )
     }
 
-    override suspend fun getMarketPriceIndex(): C3Result<List<MarketPriceIndex>> = C3Result.on {
-        api.getMarketPriceIndex().objs
+    override suspend fun getMarketPriceIndexes(): C3Result<List<MarketPriceIndex>> = C3Result.on {
+        api.getMarketPriceIndexes().objs
     }
 
     override suspend fun getItemMarketPriceIndexRelation(
@@ -171,4 +171,22 @@ class C3RepositoryImpl @Inject constructor(private val api: C3ApiService) : C3Re
             )
         )
     }
+
+    override suspend fun getAlertsForUser(order: String): C3Result<List<Alert>> = C3Result.on {
+        api.getAlertsForUser(AlertsParameters(order)).objs
+    }
+
+    override suspend fun getAlertsFeedbacks(
+        alertIds: List<String>,
+        userId: String
+    ): C3Result<List<AlertFeedback>>  = C3Result.on {
+        api.getAlertsFeedbacks(AlertFeedbackParameters(alertIds, userId)).objs
+    }
+
+    override suspend fun updateAlert(
+        alertIds: List<String>,
+        userId: String,
+        statusType: String,
+        statusValue: Boolean
+    ) = api.updateAlert(UpdateAlertParameters(alertIds, userId, statusType, statusValue))
 }

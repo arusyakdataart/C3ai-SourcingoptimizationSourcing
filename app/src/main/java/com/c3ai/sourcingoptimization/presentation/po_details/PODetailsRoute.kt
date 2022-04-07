@@ -11,7 +11,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 
 /**
- * Displays the Home route.
+ * Displays the PO Details route.
  *
  * Note: AAC ViewModels don't work with Compose Previews currently.
  *

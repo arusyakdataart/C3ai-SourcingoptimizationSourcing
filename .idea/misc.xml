@@ -3,13 +3,28 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
-        <entry key="../../../../../layout/compose-model-1647860520364.xml" value="0.1" />
-        <entry key="../../../../../layout/compose-model-1648819369044.xml" value="0.1" />
-        <entry key="app/src/main/res/drawable/graph_background.xml" value="0.186" />
-        <entry key="app/src/main/res/layout/activity_item_details.xml" value="0.10869565217391304" />
-        <entry key="app/src/main/res/layout/fragment_item_details_overview.xml" value="0.17325227963525835" />
-        <entry key="app/src/main/res/layout/fragment_item_details_po_lines.xml" value="0.17325227963525835" />
-        <entry key="app/src/main/res/layout/supplier_item_view.xml" value="0.10869565217391304" />
+        <entry key="../../../../layout/compose-model-1644318013421.xml" value="1.089430894308943" />
+        <entry key="../../../../layout/compose-model-1644323507964.xml" value="0.1" />
+        <entry key="../../../../layout/compose-model-1644328483843.xml" value="0.5" />
+        <entry key="../../../../layout/compose-model-1644329552572.xml" value="0.46368243243243246" />
+        <entry key="../../../../layout/compose-model-1644329835377.xml" value="0.46368243243243246" />
+        <entry key="../../../../layout/compose-model-1644330482119.xml" value="0.46368243243243246" />
+        <entry key="../../../../layout/compose-model-1644341138742.xml" value="0.46368243243243246" />
+        <entry key="../../../../layout/compose-model-1644397370477.xml" value="0.46368243243243246" />
+        <entry key="../../../../layout/compose-model-1644409416237.xml" value="0.33" />
+        <entry key="../../../../layout/compose-model-1644422336200.xml" value="0.2719594594594595" />
+        <entry key="../../../../layout/compose-model-1644481200215.xml" value="0.46368243243243246" />
+        <entry key="../../../../layout/compose-model-1644493942494.xml" value="0.2719594594594595" />
+        <entry key="../../../../layout/compose-model-1644587118008.xml" value="0.33" />
+        <entry key="../../../../layout/compose-model-1644588705123.xml" value="0.5" />
+        <entry key="../../../../layout/compose-model-1644589499588.xml" value="0.5" />
+        <entry key="../../../../layout/compose-model-1644589867089.xml" value="0.46368243243243246" />
+        <entry key="../../../../layout/compose-model-1644599807532.xml" value="0.33" />
+        <entry key="../../../../layout/compose-model-1644601760217.xml" value="0.33" />
+        <entry key="../../../../layout/compose-model-1644602299484.xml" value="0.1346153846153846" />
+        <entry key="..\:/Users/arhovhannisyan/AndroidStudioProjects/C3/C3ai-SourcingoptimizationSourcing/app/src/main/res/drawable/ic_baseline_thumb_down_alt_24.xml" value="0.1" />
+        <entry key="..\:/Users/arhovhannisyan/AndroidStudioProjects/C3/C3ai-SourcingoptimizationSourcing/app/src/main/res/drawable/ic_baseline_thumb_up_alt_24.xml" value="0.1" />
+        <entry key="..\:/Users/arhovhannisyan/AndroidStudioProjects/C3/C3ai-SourcingoptimizationSourcing/app/src/main/res/layout/fragment_item_details_overview.xml" value="0.17753623188405798" />
       </map>
     </option>
   </component>

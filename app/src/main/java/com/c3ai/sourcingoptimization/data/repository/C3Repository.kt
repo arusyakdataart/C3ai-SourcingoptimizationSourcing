@@ -2,6 +2,7 @@ package com.c3ai.sourcingoptimization.data.repository
 
 import com.c3ai.sourcingoptimization.data.C3Result
 import com.c3ai.sourcingoptimization.domain.model.*
+import com.c3ai.sourcingoptimization.utilities.PAGINATED_RESPONSE_LIMIT
 
 /**
  * General repository interface describes all methods for data that is needed in the application.
@@ -18,9 +19,16 @@ interface C3Repository {
 
     suspend fun getPODetails(orderId: String): C3Result<PurchaseOrder.Order>
 
-    suspend fun getPOLines(itemId: String?, orderId: String?, order: String): C3Result<List<PurchaseOrder.Line>>
+    suspend fun getPOLines(
+        itemId: String?,
+        orderId: String?,
+        order: String
+    ): C3Result<List<PurchaseOrder.Line>>
 
-    suspend fun getPOsForVendor(vendorId: String, order: String): C3Result<List<PurchaseOrder.Order>>
+    suspend fun getPOsForVendor(
+        vendorId: String,
+        order: String
+    ): C3Result<List<PurchaseOrder.Order>>
 
     suspend fun getSupplierContacts(id: String): C3Result<C3VendorContact>
 
@@ -38,7 +46,10 @@ interface C3Repository {
         endDate: String, interval: String
     ): C3Result<SavingsOpportunityItem>
 
-    suspend fun getItemDetailsSuppliers(itemId: String): C3Result<List<C3Vendor>>
+    suspend fun getItemDetailsSuppliers(
+        itemId: String,
+        limit: Int = PAGINATED_RESPONSE_LIMIT
+    ): C3Result<List<C3Vendor>>
 
     suspend fun getItemVendorRelation(itemId: String, supplierIds: List<String>):
             C3Result<List<ItemRelation>>
@@ -51,7 +62,7 @@ interface C3Repository {
         interval: String
     ): C3Result<ItemVendorRelationMetrics>
 
-    suspend fun getMarketPriceIndex(): C3Result<List<MarketPriceIndex>>
+    suspend fun getMarketPriceIndexes(): C3Result<List<MarketPriceIndex>>
 
     suspend fun getItemMarketPriceIndexRelation(
         itemId: String,
@@ -65,4 +76,10 @@ interface C3Repository {
         endDate: String,
         interval: String
     ): C3Result<ItemMarketPriceIndexRelationMetrics>
+
+    suspend fun getAlertsForUser(order: String): C3Result<List<Alert>>
+
+    suspend fun getAlertsFeedbacks(alertIds: List<String>, userId: String): C3Result<List<AlertFeedback>>
+
+    suspend fun updateAlert(alertIds: List<String>, userId: String, statusType: String, statusValue: Boolean)
 }

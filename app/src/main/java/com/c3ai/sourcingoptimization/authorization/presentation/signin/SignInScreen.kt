@@ -3,6 +3,7 @@ package com.c3ai.sourcingoptimization.authorization.presentation.signin
 import android.app.Activity
 import android.content.Intent
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
@@ -32,6 +33,7 @@ import kotlinx.coroutines.flow.collectLatest
 /**
  * Sign in screen launches if user is unauthorized.
  * */
+@OptIn(ExperimentalFoundationApi::class)
 @ExperimentalAnimationApi
 @Composable
 fun SignInScreen(

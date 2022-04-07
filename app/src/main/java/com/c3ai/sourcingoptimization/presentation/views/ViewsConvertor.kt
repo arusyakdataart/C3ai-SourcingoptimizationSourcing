@@ -124,6 +124,37 @@ fun ViewModelState.convert(
     ),
 )
 
+fun ViewModelState.convert(alerts: Set<Alert>, feedBacks: Set<AlertFeedback>): List<UiAlert> {
+    val uiAlerts = alerts.map {
+        UiAlert(
+            id = it.id,
+            alertType = it.alertType,
+            category = it.category,
+            description = it.description,
+            currentState = it.currentState,
+            readStatus = it.readStatus,
+            flagged = it.flagged,
+            timestamp = settings.format(it.timestamp),
+            redirectUrl = it.redirectUrl,
+            feedback = feedBacks.findLast { it1 -> it.id == it1.parent?.id }
+        )
+    }
+    return uiAlerts
+}
+
+fun filterByCategory(alerts: List<UiAlert>, categories: Set<String>): List<UiAlert> {
+    if (categories.isEmpty()) {
+       return alerts
+    }
+    val filteredAlerts = mutableListOf<UiAlert>()
+    alerts.forEach {
+        if (categories.contains(it.category?.name)) {
+            filteredAlerts.add(it)
+        }
+    }
+    return filteredAlerts
+}
+
 fun C3AppSettingsProvider.format(date: Date?): String {
     return date?.let { getDateFormatter().format(date) } ?: "-"
 }

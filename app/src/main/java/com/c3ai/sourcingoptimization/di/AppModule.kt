@@ -83,4 +83,27 @@ object AppModule {
             getBuyerContacts = GetBuyerContacts(repository)
         )
     }
+
+    @Provides
+    fun provideEditSuppliersUseCases(repository: C3Repository): EditSuppliersUseCases {
+        return EditSuppliersUseCases(
+            getSuppliers = GetSuppliersForItem(repository)
+        )
+    }
+
+    @Provides
+    fun provideEditIndexUseCases(repository: C3Repository): EditIndexUseCases {
+        return EditIndexUseCases(
+            getIndexes = GetMarketPriceIndexes(repository)
+        )
+    }
+
+    @Provides
+    fun provideAlertsUseCases(repository: C3Repository): AlertsUseCases {
+        return AlertsUseCases(
+            getAlerts = GetAlertsForUser(repository),
+            getAlertsFeedbacks = GetAlertsFeedbacks(repository),
+            updateAlerts = UpdateAlerts(repository)
+        )
+    }
 }
