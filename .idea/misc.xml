@@ -6,7 +6,9 @@
         <entry key="../../../../../layout/compose-model-1647860520364.xml" value="0.1" />
         <entry key="../../../../../layout/compose-model-1648819369044.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/graph_background.xml" value="0.186" />
+        <entry key="app/src/main/res/layout/activity_item_details.xml" value="0.10869565217391304" />
         <entry key="app/src/main/res/layout/fragment_item_details_overview.xml" value="0.17325227963525835" />
+        <entry key="app/src/main/res/layout/fragment_item_details_po_lines.xml" value="0.17325227963525835" />
         <entry key="app/src/main/res/layout/supplier_item_view.xml" value="0.10869565217391304" />
       </map>
     </option>

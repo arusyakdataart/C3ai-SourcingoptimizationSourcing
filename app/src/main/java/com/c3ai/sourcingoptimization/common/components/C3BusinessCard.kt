@@ -93,8 +93,7 @@ fun BusinessCard(
             IconButton(
                 onClick = { onIcon1Click() },
                 modifier = Modifier
-                    .padding(start = 16.dp)
-                    .size(24.dp)
+                    .size(48.dp)
                     .constrainAs(icon1) {
                         top.linkTo(header.bottom, margin = 16.dp)
                         end.linkTo(icon2.start)
@@ -110,7 +109,8 @@ fun BusinessCard(
             IconButton(
                 onClick = { onIcon2Click() },
                 modifier = Modifier
-                    .size(24.dp)
+                    .size(48.dp)
+                    .padding(start = 4.dp)
                     .constrainAs(icon2) {
                         top.linkTo(header.bottom, margin = 16.dp)
                         end.linkTo(parent.end)

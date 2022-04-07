@@ -40,7 +40,6 @@ import com.c3ai.sourcingoptimization.common.components.PButton
 import com.c3ai.sourcingoptimization.domain.model.Alert
 import com.c3ai.sourcingoptimization.modifiers.interceptKey
 import com.c3ai.sourcingoptimization.presentation.alerts.AlertCardSimple
-import com.c3ai.sourcingoptimization.presentation.item_details.ItemDetailsActivity
 import com.c3ai.sourcingoptimization.presentation.navigateToItemDetails
 import com.c3ai.sourcingoptimization.presentation.navigateToSupplierDetails
 import com.c3ai.sourcingoptimization.presentation.rememberContentPaddingForScreen
@@ -68,15 +67,6 @@ fun SearchScreen(
         Icon(
             painter = painterResource(id = R.drawable.ic_app_logo),
             contentDescription = null
-        )
-        PButton(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 16.dp),
-            text = "ItemDetails",
-            onClick = {
-                context.startActivity(Intent(context, ItemDetailsActivity::class.java))
-            }
         )
         PButton(
             modifier = Modifier

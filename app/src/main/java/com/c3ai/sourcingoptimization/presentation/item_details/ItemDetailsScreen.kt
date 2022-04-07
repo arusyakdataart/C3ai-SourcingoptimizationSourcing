@@ -99,21 +99,21 @@ fun ItemDetailsScreen(
                 loading = uiState.isLoading,
                 onRefresh = onRefreshDetails,
                 content = {
-                    when (uiState) {
-                        is ItemDetailsUiState.HasItem -> {
-                            Column {
-                                Tabs(
-                                    selectedTab = uiState.tabIndex,
-                                    TabItem(stringResource(R.string.overview)) {
-                                        onTabItemClick(0)
-                                    },
-                                    TabItem(stringResource(R.string.po_lines)) {
-                                        onTabItemClick(1)
-                                    },
-                                    TabItem(stringResource(R.string.suppliers)) {
-                                        onTabItemClick(2)
-                                    }
-                                )
+                    Column {
+                        Tabs(
+                            selectedTab = uiState.tabIndex,
+                            TabItem(stringResource(R.string.overview)) {
+                                onTabItemClick(0)
+                            },
+                            TabItem(stringResource(R.string.po_lines)) {
+                                onTabItemClick(1)
+                            },
+                            TabItem(stringResource(R.string.suppliers)) {
+                                onTabItemClick(2)
+                            }
+                        )
+                        when (uiState) {
+                            is ItemDetailsUiState.HasItem -> {
                                 when (uiState.tabIndex) {
                                     0 -> {
                                         OverviewComponent(
@@ -151,8 +151,7 @@ fun ItemDetailsScreen(
                                     }
                                 }
                             }
-                        }
-                        is ItemDetailsUiState.NoItem -> {
+                            is ItemDetailsUiState.NoItem -> {
 //                            if (uiState.errorMessages.isEmpty()) {
 //                                // if there are no posts, and no error, let the user refresh manually
 //                                PButton(
@@ -164,6 +163,7 @@ fun ItemDetailsScreen(
 //                                // there's currently an error showing, don't show any content
 //                                Box(contentModifier.fillMaxSize()) { /* empty screen */ }
 //                            }
+                            }
                         }
                     }
                 }

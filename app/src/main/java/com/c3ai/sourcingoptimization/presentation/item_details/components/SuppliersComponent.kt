@@ -111,6 +111,7 @@ fun SuppliersComponent(
                         LabeledValue(
                             label = stringResource(R.string.closed_pol_value),
                             value = item.closedPOValue,
+                            labelModifier = Modifier.height(32.dp),
                             modifier = Modifier
                                 .constrainAs(closedPOLValue) {
                                     top.linkTo(divider.bottom)
@@ -122,6 +123,7 @@ fun SuppliersComponent(
                         LabeledValue(
                             label = stringResource(R.string.open_pol_value),
                             value = item.openPOValue,
+                            labelModifier = Modifier.height(32.dp),
                             modifier = Modifier
                                 .constrainAs(openPOLValue) {
                                     top.linkTo(divider.bottom)
@@ -131,8 +133,9 @@ fun SuppliersComponent(
                                 },
                         )
                         LabeledValue(
-                            label = stringResource(R.string.avg_unit_price) + "\n",
+                            label = stringResource(R.string.avg_unit_price),
                             value = item.avgPOValue,
+                            labelModifier = Modifier.height(32.dp),
                             modifier = Modifier
                                 .constrainAs(avgUnitPrice) {
                                     top.linkTo(divider.bottom)
