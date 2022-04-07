@@ -33,11 +33,23 @@ fun ViewModelState.convert(vendor: C3Vendor): UiVendor = UiVendor(
     name = vendor.name,
     allPOValue = vendor.allPOValue?.format() ?: "",
     openPOValue = vendor.openPOValue?.format() ?: "",
+    closedPOValue = vendor.allPOValue?.let {
+        C3UnitValue(
+            it.unit,
+            it.value - (vendor.openPOValue?.value ?: 0.0)
+        ).format()
+    } ?: "",
+    avgPOValue = vendor.allPOValue?.let {
+        C3UnitValue(
+            it.unit,
+            it.value / 2
+        ).format()
+    } ?: "",
     active = vendor.active ?: false,
     diversity = vendor.diversity ?: false,
     hasActiveContracts = vendor.hasActiveContracts ?: false,
     hasActiveAlerts = vendor.hasActiveAlerts ?: false,
-    numberOfActiveAlerts = vendor.numberOfActiveAlerts ?: 0,
+    numberOfActiveAlerts = vendor.numberOfActiveAlerts?.numberOfActiveAlertsString() ?: "",
     location = vendor.location,
     email = vendor.email,
     phone = vendor.phone,
@@ -82,6 +94,35 @@ fun ViewModelState.convert(line: PurchaseOrder.Line): UiPurchaseOrder.Line =
         actualLeadTime = Date().daysBefore(line.promisedDeliveryDate),
         order = line.order?.let { convert(it) },
     )
+
+fun ViewModelState.convert(
+    savingsOppItem: SavingsOpportunityItem,
+    itemId: String
+): UiSavingsOpportunityItem = UiSavingsOpportunityItem(
+    savingOppText = savingsOppItem.let { item ->
+        val savingOppText = item.result[itemId]?.SavingsOpportunityCompound?.missing?.let { list ->
+            val filteredList = list.filter { it < 100 }
+            if (filteredList.isEmpty()) "0" else filteredList.sum().div(filteredList.size)
+        }
+        String.format("%s%s", "$", savingOppText)
+    } ?: "",
+    data = savingsOppItem.result[itemId]?.SavingsOpportunityCompound?.data
+        ?: emptyList()
+)
+
+fun ViewModelState.convert(
+    ocPOLineQtyItem: OpenClosedPOLineQtyItem?,
+    itemId: String
+): UiOpenClosedPOLineQtyItem = UiOpenClosedPOLineQtyItem(
+    closedValueText = String.format(
+        "%s%s", "$",
+        (ocPOLineQtyItem?.result?.get(itemId)?.ClosedPOLineQuantity?.data?.get(0) ?: "").toString()
+    ),
+    openValueText = String.format(
+        "%s%s", "$",
+        (ocPOLineQtyItem?.result?.get(itemId)?.OpenPOLineQuantity?.data?.get(0) ?: "").toString()
+    ),
+)
 
 fun ViewModelState.convert(alerts: Set<Alert>, feedBacks: Set<AlertFeedback>): List<UiAlert> {
     val uiAlerts = alerts.map {

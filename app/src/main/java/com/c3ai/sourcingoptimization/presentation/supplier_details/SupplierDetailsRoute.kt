@@ -1,6 +1,5 @@
 package com.c3ai.sourcingoptimization.presentation.supplier_details
 
-import android.content.Intent
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -8,7 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.c3ai.sourcingoptimization.presentation.item_details.ItemDetailsActivity
+import com.c3ai.sourcingoptimization.presentation.navigateToItemDetails
 import com.c3ai.sourcingoptimization.presentation.navigateToAlerts
 import com.c3ai.sourcingoptimization.presentation.navigateToPoDetails
 
@@ -40,6 +39,7 @@ fun SupplierDetailsRoute(
         onTabItemClick = { viewModel.onEvent(SupplierDetailsEvent.OnTabItemClick(it)) },
         onExpandableItemClick = { viewModel.onEvent(SupplierDetailsEvent.OnExpandableItemClick(it)) },
         onPOItemClick = { navController.navigateToPoDetails(it) },
+        onC3ItemClick = { navController.navigateToItemDetails(it) },
         onAlertsClick = {
 //            navController.navigateToEditSuppliers(
 //                it,
@@ -56,11 +56,6 @@ fun SupplierDetailsRoute(
 
 //            navController.navigateToEditIndex("mpi0")
             navController.navigateToAlerts()
-        },
-        onC3ItemClick = {
-            val intent = Intent(context, ItemDetailsActivity::class.java)
-            intent.putExtra("id", it)
-            context.startActivity(intent)
         },
         onSortChanged = { viewModel.onEvent(SupplierDetailsEvent.OnSortChanged(it)) },
         onBackButtonClick = { navController.navigateUp() },

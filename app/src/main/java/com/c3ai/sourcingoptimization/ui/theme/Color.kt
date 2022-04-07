@@ -26,3 +26,4 @@ val Accent = Color(0xFF4F8DFF)
 val Orange = Color(0xFFD47C00)
 
 val Blue = Color(0xFF37A2FF)
+val CardBackgroundSecondary = Color(0x1AFFFFFF)
