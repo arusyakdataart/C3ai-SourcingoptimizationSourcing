@@ -142,6 +142,11 @@ fun AlertsScreen(
                                     }
 
                                     items(categoryList.getValue(it)) {
+                                        if (it.readStatus != "Read") {
+                                            it.readStatus = "Read"
+                                            changeReadStatus(it.id, viewModel)
+                                        }
+
                                         CollapsableLayout(
                                             expanded = !uiState.collapsedListItemIds.contains(
                                                 it.id
@@ -293,9 +298,12 @@ private fun changeFeedbackHelpful(alert: UiAlert, viewModel: AlertsViewModel, he
 }
 
 private fun changeFlaggedStatus(alert: UiAlert, viewModel: AlertsViewModel, flagged: Boolean) {
-
     viewModel.updateAlerts(listOf(alert.id), "flagged", flagged)
     viewModel.onEvent(AlertsEvent.OnFlaggedChanged(alert.id, flagged))
+}
+
+private fun changeReadStatus(alertIds: String, viewModel: AlertsViewModel) {
+    viewModel.updateAlerts(listOf(alertIds), "read", null)
 }
 
 @SuppressLint("UnusedTransitionTargetStateParameter")

@@ -131,7 +131,7 @@ class C3MockRepositoryImpl : C3Repository {
         alertIds: List<String>,
         userId: String,
         statusType: String,
-        statusValue: Boolean
+        statusValue: Boolean?
     ) {
         TODO("Not yet implemented")
     }

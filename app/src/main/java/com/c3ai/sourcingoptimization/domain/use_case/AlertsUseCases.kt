@@ -24,7 +24,7 @@ class UpdateAlerts(private val repository: C3Repository) {
     suspend operator fun invoke(
         alertIds: List<String>,
         statusType: String,
-        statusValue: Boolean
+        statusValue: Boolean?
     ) {
         return repository.updateAlert(alertIds, "BA", statusType, statusValue)
     }

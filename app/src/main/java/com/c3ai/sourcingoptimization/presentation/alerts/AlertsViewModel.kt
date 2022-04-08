@@ -170,7 +170,7 @@ class AlertsViewModel @Inject constructor(
         }
     }
 
-    fun updateAlerts(alertIds: List<String>, statusType: String, statusValue: Boolean) {
+    fun updateAlerts(alertIds: List<String>, statusType: String, statusValue: Boolean?) {
         viewModelScope.launch {
             useCases.updateAlerts(alertIds, statusType, statusValue)
         }

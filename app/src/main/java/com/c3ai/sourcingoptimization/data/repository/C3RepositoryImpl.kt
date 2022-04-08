@@ -179,6 +179,6 @@ class C3RepositoryImpl @Inject constructor(private val api: C3ApiService) : C3Re
         alertIds: List<String>,
         userId: String,
         statusType: String,
-        statusValue: Boolean
+        statusValue: Boolean?
     ) = api.updateAlert(UpdateAlertParameters(alertIds, userId, statusType, statusValue))
 }

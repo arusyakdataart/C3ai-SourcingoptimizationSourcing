@@ -9,7 +9,7 @@ data class UiAlert(
     val category: C3Category?,
     val description: String,
     val currentState: C3Category?,
-    val readStatus: String?,
+    var readStatus: String?,
     val flagged: Boolean?,
     val timestamp: String?,
     val redirectUrl: String?,
