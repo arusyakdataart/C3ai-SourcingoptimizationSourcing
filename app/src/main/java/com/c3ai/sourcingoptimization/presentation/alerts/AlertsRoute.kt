@@ -10,7 +10,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.c3ai.sourcingoptimization.presentation.navigateToAlertSettings
+import com.c3ai.sourcingoptimization.presentation.*
 import com.google.gson.Gson
 
 /**
@@ -42,6 +42,9 @@ fun AlertsRoute(
         onSortChanged = { viewModel.onEvent(AlertsEvent.OnSortChanged(it)) },
         onChangeFilter = { navController.navigateToAlertSettings(it) },
         onBackButtonClick = { navController.navigateUp() },
-        onCollapsableItemClick = { viewModel.onEvent(AlertsEvent.OnCollapsableItemClick(it)) }
+        onCollapsableItemClick = { viewModel.onEvent(AlertsEvent.OnCollapsableItemClick(it)) },
+        onSupplierClick = { navController.navigateToSupplierDetails(it) },
+        onItemClick = { navController.navigateToItemDetails(it) },
+        onPOClick = { navController.navigateToPoDetails(it) }
     )
 }

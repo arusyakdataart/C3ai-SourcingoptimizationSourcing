@@ -1,8 +1,6 @@
 package com.c3ai.sourcingoptimization.presentation.alerts
 
 import android.annotation.SuppressLint
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.tween
@@ -17,7 +15,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.outlined.Flag
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -27,13 +24,8 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.unit.dp
-import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.constraintlayout.compose.Dimension
-import androidx.navigation.NavController
 import com.c3ai.sourcingoptimization.R
-import com.c3ai.sourcingoptimization.common.AlertTypes
 import com.c3ai.sourcingoptimization.common.SortType
 import com.c3ai.sourcingoptimization.common.components.*
 import com.c3ai.sourcingoptimization.presentation.views.UiAlert
@@ -61,7 +53,10 @@ fun AlertsScreen(
     onSortChanged: (String) -> Unit,
     onChangeFilter: (String) -> Unit,
     onBackButtonClick: () -> Unit,
-    onCollapsableItemClick: (String) -> Unit
+    onCollapsableItemClick: (String) -> Unit,
+    onSupplierClick: (String) -> Unit,
+    onItemClick: (String) -> Unit,
+    onPOClick: (String) -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
     val bottomState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
@@ -144,7 +139,7 @@ fun AlertsScreen(
                                     items(categoryList.getValue(it)) {
                                         if (it.readStatus != "Read") {
                                             it.readStatus = "Read"
-                                            changeReadStatus(it.id, viewModel)
+                                            updateReadStatus(it.id, viewModel)
                                         }
 
                                         CollapsableLayout(
@@ -154,9 +149,26 @@ fun AlertsScreen(
                                         ) {
                                             RapidRatingsRiskAlert(
                                                 it,
-                                                { changeFlaggedStatus(it, viewModel, !(it.flagged ?: false)) },
-                                                { changeFeedbackHelpful(it, viewModel, true) },
-                                                { changeFeedbackHelpful(it, viewModel, false) }
+                                                {
+                                                    updateFlaggedStatus(
+                                                        it,
+                                                        viewModel,
+                                                        !(it.flagged ?: false)
+                                                    )
+                                                },
+                                                { updateFeedbackHelpful(it, viewModel, true) },
+                                                { updateFeedbackHelpful(it, viewModel, false) },
+                                                {
+                                                    updateDetailReadStatus(it.id, viewModel)
+                                                    val id = it.redirectUrl?.substring(
+                                                        it.redirectUrl.lastIndexOf("/") + 1
+                                                    ) ?: ""
+                                                    when (it.alertType) {
+                                                        "Supplier" -> onSupplierClick(id)
+                                                        "Item" -> onItemClick(id)
+                                                        else -> onPOClick(id)
+                                                    }
+                                                }
                                             )
                                         }
 //                                        when (it.category?.name) {
@@ -289,7 +301,7 @@ fun AlertsScreen(
     }
 }
 
-private fun changeFeedbackHelpful(alert: UiAlert, viewModel: AlertsViewModel, helpful: Boolean) {
+private fun updateFeedbackHelpful(alert: UiAlert, viewModel: AlertsViewModel, helpful: Boolean) {
     if (alert.feedback?.helpful == helpful) {
         return
     }
@@ -297,13 +309,17 @@ private fun changeFeedbackHelpful(alert: UiAlert, viewModel: AlertsViewModel, he
     viewModel.onEvent(AlertsEvent.OnFeedbackChanged(alert.id, helpful))
 }
 
-private fun changeFlaggedStatus(alert: UiAlert, viewModel: AlertsViewModel, flagged: Boolean) {
+private fun updateFlaggedStatus(alert: UiAlert, viewModel: AlertsViewModel, flagged: Boolean) {
     viewModel.updateAlerts(listOf(alert.id), "flagged", flagged)
     viewModel.onEvent(AlertsEvent.OnFlaggedChanged(alert.id, flagged))
 }
 
-private fun changeReadStatus(alertIds: String, viewModel: AlertsViewModel) {
-    viewModel.updateAlerts(listOf(alertIds), "read", null)
+private fun updateReadStatus(alertId: String, viewModel: AlertsViewModel) {
+    viewModel.updateAlerts(listOf(alertId), "read", null)
+}
+
+private fun updateDetailReadStatus(alertId: String, viewModel: AlertsViewModel) {
+    viewModel.updateAlerts(listOf(alertId), "detailRead", null)
 }
 
 @SuppressLint("UnusedTransitionTargetStateParameter")

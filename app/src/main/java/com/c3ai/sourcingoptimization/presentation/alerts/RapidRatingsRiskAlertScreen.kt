@@ -1,5 +1,6 @@
 package com.c3ai.sourcingoptimization.presentation.alerts
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -32,12 +33,14 @@ fun RapidRatingsRiskAlert(
     alert: UiAlert,
     onChangeFlaggedStatus: () -> Unit,
     onChangeFeedbackHelpful: () -> Unit,
-    onChangeFeedbackUnhelpful: () -> Unit
+    onChangeFeedbackUnhelpful: () -> Unit,
+    onCardClick: () -> Unit
 ) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = 16.dp, top = 8.dp, end = 16.dp, bottom = 16.dp)
+            .clickable { onCardClick() }
     ) {
         C3SimpleCard {
             ConstraintLayout(
