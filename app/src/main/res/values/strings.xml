@@ -18,6 +18,7 @@
     <string name="edit_suppliers">"Edit Suppliers"</string>
     <string name="edit_index">"Edit Market Price Index"</string>
     <string name="cd_search_clear">CLear search</string>
+    <string name="overview">Overview</string>
     <string name="po_lines">PO Lines</string>
     <string name="po_lines_">"PO Lines (%s)"</string>
     <string name="items_supplied">Items Supplied</string>
@@ -60,7 +61,25 @@
     <string name="open_po_item_value">Open PO Item Value</string>
     <string name="moq">MOQ</string>
     <string name="_share">% Share</string>
-    <string name="avg_unit_price">% Avg. Unit Price</string>
+    <string name="avg_unit_price">Avg. Unit Price</string>
+    <string name="_avg_unit_price">% Avg. Unit Price</string>
+    <string name="saving_opportunity">Saving Opportunity</string>
+    <string name="suppliers_with_contract">Suppliers with Contract</string>
+    <string name="suppliers">"Suppliers"</string>
+    <string name="last_30_days">Last 30 days</string>
+    <string name="inventory">Inventory</string>
+    <string name="open_pol_value">Open POL Value</string>
+    <string name="closed_pol_value">Closed POL Value</string>
+    <string name="cases">Cases</string>
+    <string name="last_12_mo">Last 12 mo</string>
+    <string name="avg_price">Avg Price</string>
+    <string name="lowest_price">Lowest Price</string>
+    <string name="last_price">Last Price</string>
+    <string name="sourcing_analysis">Sourcing Analysis</string>
+    <string name="supplier">Supplier</string>
+    <string name="index">Index</string>
+    <string name="supplier_avg_price_symbol">Supplier Avg. Price (%s)</string>
+    <string name="index_symbol">Index (%s)</string>
     <string name="select_suppliers">Select up to 5 suppliers</string>
     <string name="select_index">Select up to 1 index</string>
     <string name="max_number_reached">Maximum number reached</string>
@@ -84,7 +103,6 @@
     <string name="index_price_change">Index Price\nChange</string>
     <string name="supplier__">Supplier\n\n</string>
     <string name="last_item_price">Last Item Price</string>
-    <string name="index">Index</string>
     <string name="price_change">Price\nChange</string>
     <string name="source">Source</string>
     <string name="ser">SER</string>
@@ -104,5 +122,15 @@
         <item>Promised Delivery Date</item>
         <item>Actual Lead Time</item>
         <item>Planned Lead Time</item>
+    </array>
+    <array name="dateRange">
+        <item>3M</item>
+        <item>6M</item>
+        <item>1Y</item>
+        <item>All</item>
+    </array>
+    <array name="sourcingAnalysisStatsType">
+        <item>Total Spent ($)</item>
+        <item>Share (%)</item>
     </array>
 </resources>

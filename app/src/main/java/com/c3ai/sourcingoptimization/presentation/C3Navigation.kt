@@ -8,6 +8,7 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
  */
 object C3Destinations {
     const val SEARCH_ROUTE = "search"
+    const val ITEM_DETAILS_ROUTE = "item_details/{itemId}"
     const val SUPPLIER_DETAILS_ROUTE = "supplier_details/{supplierId}"
     const val PO_DETAILS_ROUTE = "po_details/{orderId}"
     const val EDIT_SUPPLIERS_ROUTE = "edit_suppliers?itemId={itemId}&supplierIds={supplierIds}"
@@ -15,6 +16,15 @@ object C3Destinations {
     const val ALERTS_ROUTE = "alerts"
     const val ALERT_SETTINGS_ROUTE = "alert_settings?categories={categories}"
 }
+
+/**
+ * Navigate to the item details[ItemDetailsRoute]
+ *
+ * @param itemId the item's id
+ */
+fun NavController.navigateToItemDetails(
+    itemId: String,
+) = navigate("item_details/$itemId")
 
 /**
  * Navigate to the supplier details[SupplierDetailsRoute]

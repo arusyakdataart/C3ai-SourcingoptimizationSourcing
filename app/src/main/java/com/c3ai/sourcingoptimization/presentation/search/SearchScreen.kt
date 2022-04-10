@@ -1,6 +1,5 @@
 package com.c3ai.sourcingoptimization.presentation.search
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.widget.Toast
@@ -41,7 +40,7 @@ import com.c3ai.sourcingoptimization.common.components.PButton
 import com.c3ai.sourcingoptimization.domain.model.Alert
 import com.c3ai.sourcingoptimization.modifiers.interceptKey
 import com.c3ai.sourcingoptimization.presentation.alerts.AlertCardSimple
-import com.c3ai.sourcingoptimization.presentation.item_details.ItemDetailsActivity
+import com.c3ai.sourcingoptimization.presentation.navigateToItemDetails
 import com.c3ai.sourcingoptimization.presentation.navigateToSupplierDetails
 import com.c3ai.sourcingoptimization.presentation.rememberContentPaddingForScreen
 import com.google.accompanist.insets.imePadding
@@ -73,18 +72,18 @@ fun SearchScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 16.dp),
-            text = "ItemDetails",
+            text = "SupplierDetails",
             onClick = {
-                context.startActivity(Intent(context, ItemDetailsActivity::class.java))
+                navController.navigateToSupplierDetails("supplier0")
             }
         )
         PButton(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 16.dp),
-            text = "SupplierDetails",
+            text = "ItemDetails Compose",
             onClick = {
-                navController.navigateToSupplierDetails("supplier0")
+                navController.navigateToItemDetails("item0")
             }
         )
     }
