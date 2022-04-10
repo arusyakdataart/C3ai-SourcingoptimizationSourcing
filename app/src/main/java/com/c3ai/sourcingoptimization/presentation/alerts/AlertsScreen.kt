@@ -137,6 +137,8 @@ fun AlertsScreen(
                                     }
 
                                     items(categoryList.getValue(it)) {
+                                        phoneNumber = it.supplierContract?.phone ?: ""
+                                        emailAddress = it.supplierContract?.email ?: ""
                                         if (it.readStatus != "Read") {
                                             it.readStatus = "Read"
                                             updateReadStatus(it.id, viewModel)
@@ -167,6 +169,13 @@ fun AlertsScreen(
                                                         "Supplier" -> onSupplierClick(id)
                                                         "Item" -> onItemClick(id)
                                                         else -> onPOClick(id)
+                                                    }
+                                                },
+                                                {
+                                                    coroutineScope.launch {
+                                                        if (!bottomState.isVisible) {
+                                                            bottomState.show()
+                                                        }
                                                     }
                                                 }
                                             )

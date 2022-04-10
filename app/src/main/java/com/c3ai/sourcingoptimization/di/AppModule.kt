@@ -103,7 +103,8 @@ object AppModule {
         return AlertsUseCases(
             getAlerts = GetAlertsForUser(repository),
             getAlertsFeedbacks = GetAlertsFeedbacks(repository),
-            updateAlerts = UpdateAlerts(repository)
+            updateAlerts = UpdateAlerts(repository),
+            getSupplierContacts = GetSupplierContacts(repository)
         )
     }
 }

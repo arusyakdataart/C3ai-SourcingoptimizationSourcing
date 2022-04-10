@@ -2,6 +2,7 @@ package com.c3ai.sourcingoptimization.presentation.views
 
 import com.c3ai.sourcingoptimization.domain.model.AlertFeedback
 import com.c3ai.sourcingoptimization.domain.model.C3Category
+import com.c3ai.sourcingoptimization.domain.model.C3VendorContact
 
 data class UiAlert(
     val id: String,
@@ -13,5 +14,6 @@ data class UiAlert(
     val flagged: Boolean?,
     val timestamp: String?,
     val redirectUrl: String?,
-    val feedback: AlertFeedback?
+    val feedback: AlertFeedback?,
+    val supplierContract: C3VendorContact?
 )

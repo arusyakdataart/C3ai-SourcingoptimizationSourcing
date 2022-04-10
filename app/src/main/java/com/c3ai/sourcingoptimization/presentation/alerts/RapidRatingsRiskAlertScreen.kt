@@ -34,7 +34,8 @@ fun RapidRatingsRiskAlert(
     onChangeFlaggedStatus: () -> Unit,
     onChangeFeedbackHelpful: () -> Unit,
     onChangeFeedbackUnhelpful: () -> Unit,
-    onCardClick: () -> Unit
+    onCardClick: () -> Unit,
+    onContactClick: () -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -81,42 +82,42 @@ fun RapidRatingsRiskAlert(
                     SpanStyle(Orange) to (alert.currentState?.name ?: ""),
                     null to (alert.timestamp ?: ""),
                 )
-                SplitText(
-                    modifier = Modifier.constrainAs(poValue) {
-                        top.linkTo(status.bottom, margin = 0.dp)
-                    },
-                    // TODO!!! not clear which is savings opp from api data.
-                    SpanStyle(Lila40) to stringResource(id = R.string.open_po_val),
-                    null to "-",
-                )
-                ListDivider(Modifier.constrainAs(divider1) { top.linkTo(poValue.bottom) })
-                LabeledValue(
-                    label = stringResource(R.string.source),
-                    value = "-",
-                    modifier = Modifier
-                        .constrainAs(source) {
-                            top.linkTo(divider1.bottom)
-                            start.linkTo(parent.start)
-                            end.linkTo(fhr.start)
-                            width = Dimension.fillToConstraints
-                        },
-                )
-                LabeledValue(
-                    label = stringResource(R.string.fhr),
-                    value = "-", // TODO!!! not clear which is savings opp from api data.
-                    modifier = Modifier
-                        .constrainAs(fhr) {
-                            top.linkTo(divider1.bottom)
-                            start.linkTo(source.end, margin = 8.dp)
-                            end.linkTo(parent.end)
-                            width = Dimension.fillToConstraints
-                        },
-                )
-                ListDivider(Modifier.constrainAs(divider2) { top.linkTo(source.bottom) })
+//                SplitText(
+//                    modifier = Modifier.constrainAs(poValue) {
+//                        top.linkTo(status.bottom, margin = 0.dp)
+//                    },
+//                    // TODO!!! not clear which is savings opp from api data.
+//                    SpanStyle(Lila40) to stringResource(id = R.string.open_po_val),
+//                    null to "-",
+//                )
+                ListDivider(Modifier.constrainAs(divider1) { top.linkTo(status.bottom) })
+//                LabeledValue(
+//                    label = stringResource(R.string.source),
+//                    value = "-",
+//                    modifier = Modifier
+//                        .constrainAs(source) {
+//                            top.linkTo(divider1.bottom)
+//                            start.linkTo(parent.start)
+//                            end.linkTo(fhr.start)
+//                            width = Dimension.fillToConstraints
+//                        },
+//                )
+//                LabeledValue(
+//                    label = stringResource(R.string.fhr),
+//                    value = "-", // TODO!!! not clear which is savings opp from api data.
+//                    modifier = Modifier
+//                        .constrainAs(fhr) {
+//                            top.linkTo(divider1.bottom)
+//                            start.linkTo(source.end, margin = 8.dp)
+//                            end.linkTo(parent.end)
+//                            width = Dimension.fillToConstraints
+//                        },
+//                )
+//                ListDivider(Modifier.constrainAs(divider2) { top.linkTo(source.bottom) })
                 Row(
                     modifier = Modifier
                         .constrainAs(helpful) {
-                            top.linkTo(divider2.bottom, margin = 8.dp)
+                            top.linkTo(divider1.bottom, margin = 8.dp)
                             start.linkTo(parent.start)
                         },
                     verticalAlignment = Alignment.CenterVertically,
@@ -145,7 +146,7 @@ fun RapidRatingsRiskAlert(
                 Row(
                     modifier = Modifier
                         .constrainAs(notHelpful) {
-                            top.linkTo(divider2.bottom, margin = 8.dp)
+                            top.linkTo(divider1.bottom, margin = 8.dp)
                             start.linkTo(helpful.end)
                         }
                         .padding(start = 16.dp),
@@ -172,18 +173,20 @@ fun RapidRatingsRiskAlert(
                         )
                     )
                 }
-                C3IconButton(
-                    onClick = { },
-                    modifier = Modifier
-                        .constrainAs(contact) {
-                            top.linkTo(divider2.bottom)
-                            end.linkTo(parent.end)
-                        }) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.person_card),
-                        tint = MaterialTheme.colors.onBackground,
-                        contentDescription = "contact"
-                    )
+                if (alert.alertType == "Supplier") {
+                    C3IconButton(
+                        onClick = { onContactClick() },
+                        modifier = Modifier
+                            .constrainAs(contact) {
+                                top.linkTo(divider1.bottom)
+                                end.linkTo(parent.end)
+                            }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.person_card),
+                            tint = MaterialTheme.colors.onBackground,
+                            contentDescription = "contact"
+                        )
+                    }
                 }
             }
         }

@@ -33,5 +33,6 @@ class UpdateAlerts(private val repository: C3Repository) {
 data class AlertsUseCases(
     val getAlerts: GetAlertsForUser,
     val getAlertsFeedbacks: GetAlertsFeedbacks,
-    val updateAlerts: UpdateAlerts
+    val updateAlerts: UpdateAlerts,
+    val getSupplierContacts: GetSupplierContacts
 )
