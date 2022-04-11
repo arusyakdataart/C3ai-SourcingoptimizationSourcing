@@ -15,7 +15,11 @@ interface C3Repository {
 
     suspend fun getSupplierDetails(supplierId: String): C3Result<C3Vendor>
 
-    suspend fun getSuppliers(itemId: String, order: String): C3Result<List<C3Vendor>>
+    suspend fun getSuppliers(
+        itemId: String,
+        order: String,
+        limit: Int = PAGINATED_RESPONSE_LIMIT
+    ): C3Result<List<C3Vendor>>
 
     suspend fun getPODetails(orderId: String): C3Result<PurchaseOrder.Order>
 
@@ -79,7 +83,15 @@ interface C3Repository {
 
     suspend fun getAlertsForUser(order: String): C3Result<List<Alert>>
 
-    suspend fun getAlertsFeedbacks(alertIds: List<String>, userId: String): C3Result<List<AlertFeedback>>
+    suspend fun getAlertsFeedbacks(
+        alertIds: List<String>,
+        userId: String
+    ): C3Result<List<AlertFeedback>>
 
-    suspend fun updateAlert(alertIds: List<String>, userId: String, statusType: String, statusValue: Boolean?)
+    suspend fun updateAlert(
+        alertIds: List<String>,
+        userId: String,
+        statusType: String,
+        statusValue: Boolean?
+    )
 }

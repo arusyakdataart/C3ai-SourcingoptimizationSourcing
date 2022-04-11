@@ -25,10 +25,11 @@ class C3RepositoryImpl @Inject constructor(private val api: C3ApiService) : C3Re
 
     override suspend fun getSuppliers(
         itemId: String,
-        order: String
+        order: String,
+        limit: Int
     ): C3Result<List<C3Vendor>> =
         C3Result.on {
-            api.getSuppliers(SuppliersParameters(itemId, order)).objs
+            api.getSuppliers(SuppliersParameters(itemId, order, limit = limit)).objs
         }
 
     override suspend fun getPODetails(orderId: String): C3Result<PurchaseOrder.Order> =
@@ -96,7 +97,10 @@ class C3RepositoryImpl @Inject constructor(private val api: C3ApiService) : C3Re
         )
     }
 
-    override suspend fun getItemDetailsSuppliers(itemId: String, limit: Int): C3Result<List<C3Vendor>> =
+    override suspend fun getItemDetailsSuppliers(
+        itemId: String,
+        limit: Int
+    ): C3Result<List<C3Vendor>> =
         C3Result.on {
             api.getSuppliers(
                 SuppliersParameters(
@@ -179,7 +183,7 @@ class C3RepositoryImpl @Inject constructor(private val api: C3ApiService) : C3Re
     override suspend fun getAlertsFeedbacks(
         alertIds: List<String>,
         userId: String
-    ): C3Result<List<AlertFeedback>>  = C3Result.on {
+    ): C3Result<List<AlertFeedback>> = C3Result.on {
         api.getAlertsFeedbacks(AlertFeedbackParameters(alertIds, userId)).objs
     }
 
