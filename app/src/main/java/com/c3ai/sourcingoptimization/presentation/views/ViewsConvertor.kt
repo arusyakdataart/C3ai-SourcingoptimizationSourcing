@@ -91,7 +91,7 @@ fun ViewModelState.convert(line: PurchaseOrder.Line): UiPurchaseOrder.Line =
         requestedDeliveryDate = settings.format(line.requestedDeliveryDate),
         promisedDeliveryDate = settings.format(line.promisedDeliveryDate),
         requestedLeadTime = line.requestedLeadTime,
-        actualLeadTime = Date().daysBefore(line.promisedDeliveryDate),
+        actualLeadTime = Date().daysBefore(line?.promisedDeliveryDate),
         order = line.order?.let { convert(it) },
     )
 
@@ -141,7 +141,7 @@ fun ViewModelState.convert(
             timestamp = settings.format(it.timestamp),
             redirectUrl = it.redirectUrl,
             feedback = feedBacks.findLast { it1 -> it.id == it1.parent?.id },
-            supplierContract = supplierContracts.find {it1 -> it.id == it1.id }
+            supplierContract = supplierContracts.find { it1 -> it.id == it1.id }
         )
     }
     return uiAlerts
@@ -212,7 +212,10 @@ fun Int.numberOfActiveAlertsString(): String {
     return if (this > 0) this.toString() else ""
 }
 
-fun Date.daysBefore(date: Date): Int {
-    val days = TimeUnit.DAYS.convert(date.time - time, TimeUnit.MILLISECONDS).toInt()
+fun Date.daysBefore(date: Date?): Int {
+    val days = TimeUnit.DAYS.convert(
+        date?.time ?: Calendar.getInstance().timeInMillis - time,
+        TimeUnit.MILLISECONDS
+    ).toInt()
     return if (days > 0) days else 0
 }

@@ -10,6 +10,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.c3ai.sourcingoptimization.presentation.navigateToAlerts
 import com.c3ai.sourcingoptimization.presentation.navigateToSupplierDetails
 
 /**
@@ -45,7 +46,7 @@ fun ItemDetailsRoute(
         onIndexClick = {},
         onChartViewMoveOver = { viewModel.onEvent(ItemDetailsEvent.UpdateSourcingAnalysis(it)) },
         onSortChanged = { viewModel.onEvent(ItemDetailsEvent.OnSortChanged(it)) },
-        onAlertsClick = {},
+        onAlertsClick = { navController.navigateToAlerts() },
         onContactClick = { viewModel.onEvent(ItemDetailsEvent.OnSupplierContactSelected(it))},
     )
 }
