@@ -124,12 +124,13 @@ private data class ItemDetailsViewModelState(
                     dataLabelsFormat = if (statsTypeSelected == 0) "{point.y:,.2f}M" else "{point.y:,.0f} %",
                     suppliers = vendorRelationMetrics?.let { metrics ->
                         val textsMap = mutableMapOf<String, String>()
+                        val supplierNames = getSupplierNameAbbr(itemDetailsSuppliers.map { it.name })
                         if (selectedChartsCrosshairIndex != -1) {
-                            itemDetailsSuppliers.forEach {
-                                textsMap[it.name] = String.format(
+                            itemDetailsSuppliers.forEachIndexed { index, c3Vendor ->
+                                textsMap[supplierNames[index]] = String.format(
                                     "%s%s", "$",
                                     String.format(
-                                        "%.2f", metrics[it.id]?.get(selectedChartsCrosshairIndex)
+                                        "%.2f", metrics[c3Vendor.id]?.get(selectedChartsCrosshairIndex)
                                     )
                                 )
                             }
@@ -190,6 +191,46 @@ private data class ItemDetailsViewModelState(
                 statsTypeSelected = statsTypeSelected
             )
         }
+    }
+
+    private fun getSupplierNameAbbr(names: List<String>): List<String> {
+        val abbr = mutableListOf<String>()
+        val occurrences = mutableMapOf<String, Int>()
+
+        names.forEach {
+            if (it.length <= 3) {
+                abbr.add(it)
+            } else {
+                if (!it.contains(" ")) {
+                    val short = it.substring(0, 3).uppercase()
+                    if (abbr.contains(short)) {
+                        var number = occurrences.get(short) ?: 0
+                        occurrences.put(short, ++number)
+                        abbr.add(short.substring(0,2) + number)
+                    } else {
+                        occurrences.put(short, 0)
+                        abbr.add(short)
+                    }
+                } else {
+                    var short = it.split(" ").joinToString("") { it[0].toString() }.uppercase()
+                    if (short.length > 3) {
+                        short = short.substring(0, 3)
+                    }
+                    var number = occurrences.get(short) ?: -1
+                    occurrences.put(short, ++number)
+                    if (number == 0) {
+                        abbr.add(short)
+                    } else {
+                        if (short.length == 3) {
+                            abbr.add(short.substring(0, 2) + number)
+                        } else {
+                            abbr.add(short + number)
+                        }
+                    }
+                }
+            }
+        }
+        return abbr
     }
 
     fun formatSuppliersChartData(): List<Double> {
@@ -352,7 +393,7 @@ class ItemDetailsViewModel @Inject constructor(
     }
 
     private suspend fun updateSourcingAnalysis(startDate: String, endDate: String) {
-        val suppliersResult = useCases.getItemDetailsSuppliers(itemId)
+        val suppliersResult = useCases.getItemDetailsSuppliers(itemId, limit = 5)
         viewModelState.update { state ->
             when (suppliersResult) {
                 is Success -> {

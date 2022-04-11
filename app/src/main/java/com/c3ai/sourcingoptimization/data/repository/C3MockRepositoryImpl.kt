@@ -21,8 +21,11 @@ class C3MockRepositoryImpl : C3Repository {
         C3Vendor.fake()
     }
 
-    override suspend fun getSuppliers(itemId: String, order: String): C3Result<List<C3Vendor>>
-    = C3Result.on { (1..20).map { C3Vendor.fake() } }
+    override suspend fun getSuppliers(
+        itemId: String,
+        order: String,
+        limit: Int
+    ): C3Result<List<C3Vendor>> = C3Result.on { (1..limit).map { C3Vendor.fake() } }
 
     override suspend fun getPODetails(orderId: String): C3Result<PurchaseOrder.Order> =
         C3Result.on { PurchaseOrder.Order.fake() }
@@ -134,7 +137,7 @@ class C3MockRepositoryImpl : C3Repository {
         alertIds: List<String>,
         userId: String,
         statusType: String,
-        statusValue: Boolean
+        statusValue: Boolean?
     ) {
         TODO("Not yet implemented")
     }

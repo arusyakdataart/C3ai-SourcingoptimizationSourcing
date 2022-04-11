@@ -48,8 +48,8 @@ sealed interface PurchaseOrder {
         val totalQuantity: C3UnitValue,
         val unitPrice: C3UnitValue,
         val unitPriceLocal: C3UnitValue,
-        val requestedDeliveryDate: Date,
-        val promisedDeliveryDate: Date,
+        val requestedDeliveryDate: Date?,
+        val promisedDeliveryDate: Date?,
         val requestedLeadTime: Int,
         val order: Order?,
     ) : PurchaseOrder {

@@ -8,7 +8,7 @@ data class UpdateAlertParameters(
     @Transient val ids: List<String>,
     @Transient val user: String,
     @Transient val type: String,
-    @Transient val value: Boolean,
+    @Transient val value: Boolean?,
 ) : StatusParameters {
     override val alertIds = ids
     override val userId = user

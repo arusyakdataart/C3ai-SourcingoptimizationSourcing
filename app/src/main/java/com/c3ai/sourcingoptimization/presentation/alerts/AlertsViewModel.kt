@@ -7,6 +7,7 @@ import com.c3ai.sourcingoptimization.data.C3Result
 import com.c3ai.sourcingoptimization.domain.model.Alert
 import com.c3ai.sourcingoptimization.domain.model.AlertFeedback
 import com.c3ai.sourcingoptimization.domain.model.C3Number
+import com.c3ai.sourcingoptimization.domain.model.C3VendorContact
 import com.c3ai.sourcingoptimization.domain.settings.C3AppSettingsProvider
 import com.c3ai.sourcingoptimization.domain.use_case.AlertsUseCases
 import com.c3ai.sourcingoptimization.presentation.ViewModelState
@@ -66,6 +67,7 @@ private data class AlertsViewModelState(
     override val settings: C3AppSettingsProvider,
     val alerts: Set<Alert>? = null,
     val alertsFeedBacks: Set<AlertFeedback>? = null,
+    val supplierContacts: List<C3VendorContact>? = null,
     val isLoading: Boolean = false,
     val errorMessages: List<ErrorMessage> = emptyList(),
     val searchInput: String = "",
@@ -78,8 +80,8 @@ private data class AlertsViewModelState(
      * a more strongly typed [AlertsUiState] for driving the ui.
      */
     fun toUiState(): AlertsUiState =
-        if (alerts != null && alertsFeedBacks != null) {
-            val uiAlert = convert(alerts, alertsFeedBacks)
+        if (alerts != null && alertsFeedBacks != null && supplierContacts != null) {
+            val uiAlert = convert(alerts, alertsFeedBacks, supplierContacts)
             AlertsUiState.HasData(
                 alerts = uiAlert,
                 collapsedListItemIds = collapsedListItemIds,
@@ -135,6 +137,7 @@ class AlertsViewModel @Inject constructor(
             viewModelState.update {
                 when (result) {
                     is C3Result.Success -> {
+                        getSupplierContacts(result.data)
                         getFeedbacks(result.data.map { it.id })
                         it.copy(alerts = result.data.toSet())
                     }
@@ -170,7 +173,42 @@ class AlertsViewModel @Inject constructor(
         }
     }
 
-    fun updateAlerts(alertIds: List<String>, statusType: String, statusValue: Boolean) {
+    private fun getSupplierContacts(alerts: List<Alert>) {
+        val supplierAlertIds = alerts.mapNotNull {
+            if (it.alertType == "Supplier") it.redirectUrl?.substring(
+                it.redirectUrl.lastIndexOf("/") + 1
+            ) else null
+        }
+        val contracts = mutableListOf<C3VendorContact>()
+        supplierAlertIds.forEach {
+            viewModelScope.launch {
+                val result = useCases.getSupplierContacts(it)
+                viewModelState.update {
+                    when (result) {
+                        is C3Result.Success -> {
+                            contracts.add(result.data)
+                            if (contracts.size == supplierAlertIds.size) {
+                                it.copy(
+                                    supplierContacts = contracts, isLoading = false)
+                            } else {
+                                it.copy()
+                            }
+                        }
+                        is C3Result.Error -> {
+                            val errorMessages = it.errorMessages + ErrorMessage(
+                                id = UUID.randomUUID().mostSignificantBits,
+                                messageId = R.string.load_error
+                            )
+                            it.copy(errorMessages = errorMessages, isLoading = false)
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+
+    fun updateAlerts(alertIds: List<String>, statusType: String, statusValue: Boolean?) {
         viewModelScope.launch {
             useCases.updateAlerts(alertIds, statusType, statusValue)
         }

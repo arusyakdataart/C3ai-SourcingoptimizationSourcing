@@ -48,5 +48,5 @@ interface StatusParameters {
     val alertIds: List<String>
     val userId: String
     val statusType: String
-    val statusValue: Boolean
+    val statusValue: Boolean?
 }
