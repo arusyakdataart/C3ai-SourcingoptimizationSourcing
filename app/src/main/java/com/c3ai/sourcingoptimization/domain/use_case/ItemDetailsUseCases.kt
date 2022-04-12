@@ -3,6 +3,7 @@ package com.c3ai.sourcingoptimization.domain.use_case
 import com.c3ai.sourcingoptimization.data.C3Result
 import com.c3ai.sourcingoptimization.data.repository.C3Repository
 import com.c3ai.sourcingoptimization.domain.model.*
+import com.c3ai.sourcingoptimization.utilities.PAGINATED_RESPONSE_LIMIT
 
 class GetItemDetails(private val repository: C3Repository) {
 
@@ -54,8 +55,8 @@ class GetEvalMetricsForSavingsOpportunity(private val repository: C3Repository) 
 
 class GetItemDetailsSuppliers(private val repository: C3Repository) {
 
-    suspend operator fun invoke(itemId: String): C3Result<List<C3Vendor>> {
-        return repository.getItemDetailsSuppliers(itemId = itemId)
+    suspend operator fun invoke(itemId: String, limit: Int = PAGINATED_RESPONSE_LIMIT): C3Result<List<C3Vendor>> {
+        return repository.getItemDetailsSuppliers(itemId = itemId, limit = limit)
     }
 
 }
@@ -177,7 +178,6 @@ class GetSuppliers(private val repository: C3Repository) {
     ): C3Result<List<C3Vendor>> {
         return repository.getSuppliers(itemId, order, limit, offset)
     }
-
 }
 
 data class ItemDetailsUseCases(

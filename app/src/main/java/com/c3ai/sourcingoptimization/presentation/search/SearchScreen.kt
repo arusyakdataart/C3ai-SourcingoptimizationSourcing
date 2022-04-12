@@ -83,7 +83,7 @@ fun SearchScreen(
                 .padding(top = 16.dp),
             text = "ItemDetails Compose",
             onClick = {
-                navController.navigateToItemDetails("item0")
+                navController.navigateToItemDetails("item1")
             }
         )
     }

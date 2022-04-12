@@ -110,8 +110,9 @@ fun EditSuppliersScreen(
                                         )
                                 ) {
                                     val (header, image, titleText, subtitleText, checkBox, divider) = createRefs()
-                                    val nameShort = it.name.split(" ")
-                                        .joinToString("") { it[0].toString() }.uppercase()
+                                    val nameShort = it.name?.split(" ")
+                                        ?.joinToString("") { it[0].toString() }
+                                        ?.uppercase() ?: ""
                                     Text(
                                         text = stringResource(
                                             R.string.supplier_,
@@ -145,7 +146,7 @@ fun EditSuppliersScreen(
                                     }
 
                                     Text(
-                                        it.name,
+                                        it.name ?: "",
                                         style = MaterialTheme.typography.h3,
                                         color = MaterialTheme.colors.primary,
                                         maxLines = 1,

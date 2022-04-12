@@ -30,7 +30,7 @@ fun ViewModelState.convert(item: C3Item): UiItem = UiItem(
 
 fun ViewModelState.convert(vendor: C3Vendor): UiVendor = UiVendor(
     id = vendor.id,
-    name = vendor.name,
+    name = vendor.name ?: "",
     allPOValue = vendor.allPOValue?.format() ?: "",
     openPOValue = vendor.openPOValue?.format() ?: "",
     closedPOValue = vendor.allPOValue?.let {
@@ -91,7 +91,7 @@ fun ViewModelState.convert(line: PurchaseOrder.Line): UiPurchaseOrder.Line =
         requestedDeliveryDate = settings.format(line.requestedDeliveryDate),
         promisedDeliveryDate = settings.format(line.promisedDeliveryDate),
         requestedLeadTime = line.requestedLeadTime,
-        actualLeadTime = Date().daysBefore(line.promisedDeliveryDate),
+        actualLeadTime = Date().daysBefore(line?.promisedDeliveryDate),
         order = line.order?.let { convert(it) },
     )
 
@@ -124,7 +124,11 @@ fun ViewModelState.convert(
     ),
 )
 
-fun ViewModelState.convert(alerts: Set<Alert>, feedBacks: Set<AlertFeedback>): List<UiAlert> {
+fun ViewModelState.convert(
+    alerts: Set<Alert>,
+    feedBacks: Set<AlertFeedback>,
+    supplierContracts: List<C3VendorContact>
+): List<UiAlert> {
     val uiAlerts = alerts.map {
         UiAlert(
             id = it.id,
@@ -136,7 +140,8 @@ fun ViewModelState.convert(alerts: Set<Alert>, feedBacks: Set<AlertFeedback>): L
             flagged = it.flagged,
             timestamp = settings.format(it.timestamp),
             redirectUrl = it.redirectUrl,
-            feedback = feedBacks.findLast { it1 -> it.id == it1.parent?.id }
+            feedback = feedBacks.findLast { it1 -> it.id == it1.parent?.id },
+            supplierContract = supplierContracts.find { it1 -> it.id == it1.id }
         )
     }
     return uiAlerts
@@ -144,7 +149,7 @@ fun ViewModelState.convert(alerts: Set<Alert>, feedBacks: Set<AlertFeedback>): L
 
 fun filterByCategory(alerts: List<UiAlert>, categories: Set<String>): List<UiAlert> {
     if (categories.isEmpty()) {
-       return alerts
+        return alerts
     }
     val filteredAlerts = mutableListOf<UiAlert>()
     alerts.forEach {
@@ -207,7 +212,10 @@ fun Int.numberOfActiveAlertsString(): String {
     return if (this > 0) this.toString() else ""
 }
 
-fun Date.daysBefore(date: Date): Int {
-    val days = TimeUnit.DAYS.convert(date.time - time, TimeUnit.MILLISECONDS).toInt()
+fun Date.daysBefore(date: Date?): Int {
+    val days = TimeUnit.DAYS.convert(
+        date?.time ?: Calendar.getInstance().timeInMillis - time,
+        TimeUnit.MILLISECONDS
+    ).toInt()
     return if (days > 0) days else 0
 }
