@@ -3,12 +3,12 @@ package com.c3ai.sourcingoptimization.presentation.item_details.components
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.c3ai.sourcingoptimization.common.components.PoLinesListExpanded
 import com.c3ai.sourcingoptimization.presentation.item_details.ItemDetailsUiState
 
@@ -23,22 +23,26 @@ fun POLinesComponent(
     loadData: () -> Unit,
     onAlertsClick: (String) -> Unit,
 ) {
-
     LaunchedEffect(uiState.itemId) {
         loadData()
     }
 
+    val lazyItems = uiState.poLines?.collectAsLazyPagingItems()
     val listState = rememberLazyListState()
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        listState,
-        contentPadding = PaddingValues(horizontal = 16.dp),
-    ) {
-        items(items = uiState.poLineItems) { poLine ->
-            PoLinesListExpanded(
-                poLine,
-                onPOAlertsClick = onAlertsClick
-            )
+
+    lazyItems?.let { items ->
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            listState,
+            contentPadding = PaddingValues(horizontal = 16.dp),
+        ) {
+            items(items.itemCount) { index ->
+                val item = items[index]!!
+                PoLinesListExpanded(
+                    item,
+                    onPOAlertsClick = onAlertsClick
+                )
+            }
         }
     }
 }

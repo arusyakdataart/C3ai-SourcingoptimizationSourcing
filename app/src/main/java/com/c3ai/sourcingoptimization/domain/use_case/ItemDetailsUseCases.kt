@@ -157,16 +157,26 @@ class GetMarketPriceIndexRelationMetrics(private val repository: C3Repository) {
 
 class GetPOLinesByItem(private val repository: C3Repository) {
 
-    suspend operator fun invoke(itemId: String, order: String): C3Result<List<PurchaseOrder.Line>> {
-        return repository.getPOLines(itemId = itemId, orderId = null, order = order)
+    suspend operator fun invoke(
+        itemId: String,
+        order: String,
+        limit: Int,
+        offset: Int,
+    ): C3Result<List<PurchaseOrder.Line>> {
+        return repository.getPOLines(itemId, orderId = null, order = order, limit, offset)
     }
 
 }
 
 class GetSuppliers(private val repository: C3Repository) {
 
-    suspend operator fun invoke(itemId: String, order: String): C3Result<List<C3Vendor>> {
-        return repository.getSuppliers(itemId = itemId, order = order)
+    suspend operator fun invoke(
+        itemId: String,
+        order: String,
+        limit: Int,
+        offset: Int,
+    ): C3Result<List<C3Vendor>> {
+        return repository.getSuppliers(itemId, order, limit, offset)
     }
 }
 

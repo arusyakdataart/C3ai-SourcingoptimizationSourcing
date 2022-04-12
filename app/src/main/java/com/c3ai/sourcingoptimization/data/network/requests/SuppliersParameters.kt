@@ -9,8 +9,9 @@ data class SuppliersParameters(
     @Transient val offset: Int = 0,
 ) : RequestParameters {
     override val spec: C3Spec = C3Spec(
-        limit = limit,
         order = order,
-        filter = "items.id == '$itemId'"
+        filter = "items.id == '$itemId'",
+        limit = limit,
+        offset = offset,
     )
 }

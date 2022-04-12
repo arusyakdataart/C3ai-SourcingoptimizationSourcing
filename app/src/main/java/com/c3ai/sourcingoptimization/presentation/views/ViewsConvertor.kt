@@ -25,12 +25,12 @@ fun ViewModelState.convert(item: C3Item): UiItem = UiItem(
     minPoLinesUnitPrice = item.lastUnitPricePaid?.format() ?: "",
     weightedAveragePoLineUnitPrice = item.lastUnitPricePaid?.format() ?: "",
     hasActiveAlerts = item.hasActiveAlerts,
-    numberOfActiveAlerts = item.numberOfActiveAlerts.numberOfActiveAlertsString(),
+    numberOfActiveAlerts = item.numberOfActiveAlerts?.numberOfActiveAlertsString() ?: "",
 )
 
 fun ViewModelState.convert(vendor: C3Vendor): UiVendor = UiVendor(
     id = vendor.id,
-    name = vendor.name,
+    name = vendor.name ?: "",
     allPOValue = vendor.allPOValue?.format() ?: "",
     openPOValue = vendor.openPOValue?.format() ?: "",
     closedPOValue = vendor.allPOValue?.let {
@@ -66,7 +66,7 @@ fun ViewModelState.convert(order: PurchaseOrder.Order): UiPurchaseOrder.Order =
         totalCost = settings.formatTotalCost(order),
         orderCreationDate = settings.format(order.orderCreationDate),
         closedDate = settings.format(order.closedDate),
-        numberOfActiveAlerts = order.numberOfActiveAlerts.numberOfActiveAlertsString(),
+        numberOfActiveAlerts = order.numberOfActiveAlerts?.numberOfActiveAlertsString() ?: "",
         buyer = order.buyer,
         buyerContact = order.buyerContact,
         to = order.to,

@@ -2,6 +2,10 @@ package com.c3ai.sourcingoptimization.presentation.item_details
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.map
 import com.c3ai.sourcingoptimization.common.*
 import com.c3ai.sourcingoptimization.data.C3Result.Error
 import com.c3ai.sourcingoptimization.data.C3Result.Success
@@ -10,6 +14,7 @@ import com.c3ai.sourcingoptimization.domain.settings.C3AppSettingsProvider
 import com.c3ai.sourcingoptimization.domain.settings.FakeC3AppSettingsProvider
 import com.c3ai.sourcingoptimization.domain.use_case.ItemDetailsUseCases
 import com.c3ai.sourcingoptimization.presentation.ViewModelState
+import com.c3ai.sourcingoptimization.presentation.common.C3PagingSource
 import com.c3ai.sourcingoptimization.presentation.views.*
 import com.c3ai.sourcingoptimization.presentation.views.itemdetails.IndexPriceCharts
 import com.c3ai.sourcingoptimization.presentation.views.itemdetails.SuppliersCharts
@@ -35,6 +40,8 @@ sealed interface ItemDetailsUiState {
     val dateRangeSelected: Int
     val statsTypeSelected: Int
     val selectedSupplierContact: C3VendorContact?
+    val polineSortOption: String
+    val suppliersSortOption: String
 
     /**
      * There are no item to render.
@@ -49,6 +56,8 @@ sealed interface ItemDetailsUiState {
         override val dateRangeSelected: Int,
         override val statsTypeSelected: Int,
         override val selectedSupplierContact: C3VendorContact? = null,
+        override val polineSortOption: String = "",
+        override val suppliersSortOption: String = "",
     ) : ItemDetailsUiState
 
     /**
@@ -63,14 +72,16 @@ sealed interface ItemDetailsUiState {
         val indexPriceChart: IndexPriceCharts?,
         val vendorRelationMetrics: Map<String, List<Double>>? = null,
         val chartsHashCode: Int,
-        val poLineItems: List<UiPurchaseOrder.Line>,
-        val suppliers: List<UiVendor>,
+        val poLines: Flow<PagingData<UiPurchaseOrder.Line>>? = null,
+        val suppliers: Flow<PagingData<UiVendor>>? = null,
         override val isLoading: Boolean,
         override val itemId: String,
         override val tabIndex: Int,
         override val dateRangeSelected: Int,
         override val statsTypeSelected: Int,
         override val selectedSupplierContact: C3VendorContact? = null,
+        override val polineSortOption: String = "",
+        override val suppliersSortOption: String = "",
     ) : ItemDetailsUiState
 }
 
@@ -88,8 +99,8 @@ private data class ItemDetailsViewModelState(
     val vendorRelationMetrics: Map<String, List<Double>>? = null,
     val saStartDate: String = formatDate(date = getMonthBackDate(3)),
     val saEndDate: String = formatDate(date = getCurrentDate()),
-    val poLineItems: List<PurchaseOrder.Line> = emptyList(),
-    val suppliers: List<C3Vendor> = emptyList(),
+    val poLinesFlow: Flow<PagingData<UiPurchaseOrder.Line>>? = null,
+    val suppliersFlow: Flow<PagingData<UiVendor>>? = null,
     val selectedSupplierContact: C3VendorContact? = null,
     val isLoading: Boolean = false,
     val itemId: String = "",
@@ -118,13 +129,13 @@ private data class ItemDetailsViewModelState(
                 },
                 ocPOLineQty = convert(openClosedPOLineQty, item.id),
                 suppliersChart = SuppliersCharts(
-                    categories = itemDetailsSuppliers.map { it.name },
+                    categories = itemDetailsSuppliers.map { it.name ?: "" },
                     data = formatSuppliersChartData(),
                     maxValue = formatSuppliersChartData().maxOrNull(),
                     dataLabelsFormat = if (statsTypeSelected == 0) "{point.y:,.2f}M" else "{point.y:,.0f} %",
                     suppliers = vendorRelationMetrics?.let { metrics ->
                         val textsMap = mutableMapOf<String, String>()
-                        val supplierNames = getSupplierNameAbbr(itemDetailsSuppliers.map { it.name })
+                        val supplierNames = getSupplierNameAbbr(itemDetailsSuppliers.map { it.name ?: "" })
                         if (selectedChartsCrosshairIndex != -1) {
                             itemDetailsSuppliers.forEachIndexed { index, c3Vendor ->
                                 textsMap[supplierNames[index]] = String.format(
@@ -178,8 +189,8 @@ private data class ItemDetailsViewModelState(
                 dateRangeSelected = dateRangeSelected,
                 statsTypeSelected = statsTypeSelected,
                 chartsHashCode = chartsHashCode,
-                poLineItems = poLineItems.map { convert(it) },
-                suppliers = suppliers.map { convert(it) },
+                poLines = poLinesFlow,
+                suppliers = suppliersFlow,
                 selectedSupplierContact = selectedSupplierContact
             )
         } else {
@@ -235,14 +246,16 @@ private data class ItemDetailsViewModelState(
 
     fun formatSuppliersChartData(): List<Double> {
         if (statsTypeSelected == 0) {
-            return itemDetailsSuppliers.map { it.spend.value.formatNumberLocal() }
+            return itemDetailsSuppliers.map { it.spend?.value?.formatNumberLocal() ?: 0.0}
         }
 
-        val total = itemDetailsSuppliers.sumOf { it.spend.value }
+        val total = itemDetailsSuppliers.sumOf { it.spend?.value ?: 0.0 }
         if (total == 0.0) {
             return emptyList()
         }
-        return itemDetailsSuppliers.map { ((it.spend.value / total) * 100) }
+        return itemDetailsSuppliers.map {
+            it.spend?.let { spend -> ((spend.value / total) * 100) } ?: 0.0
+        }
     }
 }
 
@@ -258,6 +271,13 @@ class ItemDetailsViewModel @Inject constructor(
     private val viewModelState = MutableStateFlow(ItemDetailsViewModelState(settings))
     private var offset = 0
     private var itemId: String = ""
+
+    private val poLinesSource = C3PagingSource { limit, offset ->
+        useCases.getPOLines(itemId, viewModelState.value.polineSortOption, limit, offset)
+    }
+    private val suppliersSource = C3PagingSource { limit, offset ->
+        useCases.getSuppliers(itemId, viewModelState.value.suppliersSortOption, limit, offset)
+    }
 
     // UI state exposed to the UI
     val uiState = viewModelState
@@ -285,8 +305,18 @@ class ItemDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             when (viewModelState.value.tabIndex) {
                 0 -> loadOverview()
-                1 -> loadPOLines()
-                2 -> loadSuppliers()
+                1 -> viewModelState.update {
+                    it.copy(
+                        poLinesFlow = getPOLines(),
+                        isLoading = false
+                    )
+                }
+                2 -> viewModelState.update {
+                    it.copy(
+                        suppliersFlow = getSuppliers(),
+                        isLoading = false
+                    )
+                }
             }
         }
     }
@@ -358,38 +388,14 @@ class ItemDetailsViewModel @Inject constructor(
         )
     }
 
-    private suspend fun loadPOLines() {
-        val result = useCases.getPOLines(itemId, viewModelState.value.polineSortOption)
-        viewModelState.update {
-            when (result) {
-                is Success -> {
-                    it.copy(
-                        poLineItems = result.data,
-                        isLoading = false
-                    )
-                }
-                is Error -> {
-                    it.copy(isLoading = false)
-                }
-            }
-        }
+    private fun getPOLines(): Flow<PagingData<UiPurchaseOrder.Line>> {
+        return Pager(PagingConfig(PAGINATED_RESPONSE_LIMIT)) { poLinesSource }.flow
+            .map { data -> data.map { viewModelState.value.convert(it) } }
     }
 
-    private suspend fun loadSuppliers() {
-        val result = useCases.getSuppliers(itemId, viewModelState.value.suppliersSortOption)
-        viewModelState.update { state ->
-            when (result) {
-                is Success -> {
-                    state.copy(
-                        suppliers = result.data,
-                        isLoading = false
-                    )
-                }
-                is Error -> {
-                    state.copy(isLoading = false)
-                }
-            }
-        }
+    private fun getSuppliers(): Flow<PagingData<UiVendor>> {
+        return Pager(PagingConfig(PAGINATED_RESPONSE_LIMIT)) { suppliersSource }.flow
+            .map { data -> data.map { viewModelState.value.convert(it) } }
     }
 
     private suspend fun updateSourcingAnalysis(startDate: String, endDate: String) {
@@ -545,44 +551,20 @@ class ItemDetailsViewModel @Inject constructor(
                     }
                 }
                 is ItemDetailsEvent.OnSortChanged -> {
-                    viewModelState.update { it.copy(isLoading = true) }
                     when (state.tabIndex) {
                         1 -> {
-                            viewModelScope.launch {
-                                val result = useCases.getPOLines(itemId, event.sortOption)
-                                viewModelState.update { state ->
-                                    when (result) {
-                                        is Success -> state.copy(
-                                            polineSortOption = event.sortOption,
-                                            poLineItems = result.data,
-                                            isLoading = false
-                                        )
-                                        is Error -> {
-                                            state.copy(isLoading = false)
-                                        }
-                                    }
-                                }
-                            }
-                            state
+                            state.copy(
+                                polineSortOption = event.sortOption,
+                                poLinesFlow = getPOLines(),
+                            )
                         }
                         2 -> {
-                            viewModelScope.launch {
-                                val result = useCases.getSuppliers(itemId, event.sortOption)
-                                viewModelState.update { state ->
-                                    when (result) {
-                                        is Success -> state.copy(
-                                            suppliersSortOption = event.sortOption,
-                                            suppliers = result.data,
-                                            isLoading = false
-                                        )
-                                        is Error -> {
-                                            state.copy(isLoading = false)
-                                        }
-                                    }
-                                }
-                            }
-                            state
-                        } else -> {
+                            state.copy(
+                                suppliersSortOption = event.sortOption,
+                                suppliersFlow = getSuppliers(),
+                            )
+                        }
+                        else -> {
                             state
                         }
                     }

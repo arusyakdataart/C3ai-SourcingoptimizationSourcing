@@ -226,89 +226,89 @@ private fun TopAppBar(
         onBackButtonClick = onBackButtonClick,
         actions = {
             if (selectedTabIndex != 0) {
-                IconButton(onClick = { sortMenuExpanded = true }) {
-                    Icon(
-                        imageVector = Icons.Filled.Sort,
-                        contentDescription = stringResource(R.string.cd_sort_menu)
-                    )
-                }
-                DropdownMenu(
-                    modifier = Modifier,
-                    expanded = sortMenuExpanded,
-                    onDismissRequest = { sortMenuExpanded = false }
-                ) {
-                    val resources = if (selectedTabIndex == 0) listOf(
-                        "totalCost.value" to "Total Cost",
-                        "unitPrice.value" to "Unit Price",
-                        "totalQuantity.value" to "Quantity",
-                        "orderCreationDate" to "Opened Date",
-                        "closedDate" to "Closed Date",
-                        "requestedDeliveryDate" to "Requested Delivery Date",
-                        "promisedDeliveryDate" to "Promised Delivery Date",
-                        "actualLeadTime" to "Actual Lead Time",
-                        "plannedLeadTime" to "Planned Lead Time"
-                    ) else listOf(
-                        "id" to "Item ID",
-                        "name" to "Item Name",
-                        "openPOValue.value" to "Open PO Line Value",
-                        "closedPOValue.value" to "Closed PO Line Value",
-                        "averageUnitPricePaid.value" to "Average Unit Price"
-                    )
-
-                    resources.map { it ->
-                        DropdownMenuItem(
-                            onClick = {
-                                sortMenuExpanded = false
-                                var orderType = ""
-                                when (selectedTabIndex) {
-                                    0 -> {
-                                        firstTabSortType = if (firstTabSortApplied == it.first) {
-                                            if (firstTabSortType == SortType.ASCENDING) SortType.DESCENDING else SortType.ASCENDING
-                                        } else {
-                                            SortType.DESCENDING
-                                        }
-                                        orderType =
-                                            if (firstTabSortType == SortType.DESCENDING) "descending" else "ascending"
-                                        firstTabSortApplied = it.first
-                                    }
-                                    1 -> {
-                                        secondTabSortType = if (secondTabSortApplied == it.first) {
-                                            if (secondTabSortType == SortType.ASCENDING) SortType.DESCENDING else SortType.ASCENDING
-                                        } else {
-                                            SortType.DESCENDING
-                                        }
-                                        orderType =
-                                            if (secondTabSortType == SortType.DESCENDING) "descending" else "ascending"
-                                        secondTabSortApplied = it.first
-                                    }
-                                }
-                                onSortChanged(orderType + "(" + it.first + ")")
-                            },
-                        ) {
-                            Row(modifier = Modifier.fillMaxSize()) {
-                                val sortApplied =
-                                    if (selectedTabIndex == 0) firstTabSortApplied else secondTabSortApplied
-                                if (sortApplied == it.first) {
-                                    val sortType =
-                                        if (selectedTabIndex == 0) firstTabSortType else secondTabSortType
-                                    Icon(
-                                        imageVector = if (sortType == SortType.ASCENDING) Icons.Filled.ArrowUpward else Icons.Filled.ArrowDownward,
-                                        contentDescription = "",
-                                        tint = Blue
-                                    )
-                                } else {
-                                    Spacer(modifier = Modifier.width(24.dp))
-                                }
-                                Spacer(modifier = Modifier.width(16.dp))
-                                Text(
-                                    it.second,
-                                    style = MaterialTheme.typography.subtitle1,
-                                    color = if (sortApplied == it.first) Blue else MaterialTheme.colors.secondaryVariant,
-                                )
-                            }
-                        }
-                    }
-                }
+//                IconButton(onClick = { sortMenuExpanded = true }) {
+//                    Icon(
+//                        imageVector = Icons.Filled.Sort,
+//                        contentDescription = stringResource(R.string.cd_sort_menu)
+//                    )
+//                }
+//                DropdownMenu(
+//                    modifier = Modifier,
+//                    expanded = sortMenuExpanded,
+//                    onDismissRequest = { sortMenuExpanded = false }
+//                ) {
+//                    val resources = if (selectedTabIndex == 1) listOf(
+//                        "totalCost.value" to "Total Cost",
+//                        "unitPrice.value" to "Unit Price",
+//                        "totalQuantity.value" to "Quantity",
+//                        "orderCreationDate" to "Opened Date",
+//                        "closedDate" to "Closed Date",
+//                        "requestedDeliveryDate" to "Requested Delivery Date",
+//                        "promisedDeliveryDate" to "Promised Delivery Date",
+//                        "actualLeadTime" to "Actual Lead Time",
+//                        "plannedLeadTime" to "Planned Lead Time"
+//                    ) else listOf(
+//                        "id" to "Item ID",
+//                        "name" to "Item Name",
+//                        "openPOValue.value" to "Open PO Line Value",
+//                        "closedPOValue.value" to "Closed PO Line Value",
+//                        "averageUnitPricePaid.value" to "Average Unit Price"
+//                    )
+//
+//                    resources.map {
+//                        DropdownMenuItem(
+//                            onClick = {
+//                                sortMenuExpanded = false
+//                                var orderType = ""
+//                                when (selectedTabIndex) {
+//                                    1 -> {
+//                                        firstTabSortType = if (firstTabSortApplied == it.first) {
+//                                            if (firstTabSortType == SortType.ASCENDING) SortType.DESCENDING else SortType.ASCENDING
+//                                        } else {
+//                                            SortType.DESCENDING
+//                                        }
+//                                        orderType =
+//                                            if (firstTabSortType == SortType.DESCENDING) "descending" else "ascending"
+//                                        firstTabSortApplied = it.first
+//                                    }
+//                                    2 -> {
+//                                        secondTabSortType = if (secondTabSortApplied == it.first) {
+//                                            if (secondTabSortType == SortType.ASCENDING) SortType.DESCENDING else SortType.ASCENDING
+//                                        } else {
+//                                            SortType.DESCENDING
+//                                        }
+//                                        orderType =
+//                                            if (secondTabSortType == SortType.DESCENDING) "descending" else "ascending"
+//                                        secondTabSortApplied = it.first
+//                                    }
+//                                }
+//                                onSortChanged(orderType + "(" + it.first + ")")
+//                            },
+//                        ) {
+//                            Row(modifier = Modifier.fillMaxSize()) {
+//                                val sortApplied =
+//                                    if (selectedTabIndex == 1) firstTabSortApplied else secondTabSortApplied
+//                                if (sortApplied == it.first) {
+//                                    val sortType =
+//                                        if (selectedTabIndex == 1) firstTabSortType else secondTabSortType
+//                                    Icon(
+//                                        imageVector = if (sortType == SortType.ASCENDING) Icons.Filled.ArrowUpward else Icons.Filled.ArrowDownward,
+//                                        contentDescription = "",
+//                                        tint = Blue
+//                                    )
+//                                } else {
+//                                    Spacer(modifier = Modifier.width(24.dp))
+//                                }
+//                                Spacer(modifier = Modifier.width(16.dp))
+//                                Text(
+//                                    it.second,
+//                                    style = MaterialTheme.typography.subtitle1,
+//                                    color = if (sortApplied == it.first) Blue else MaterialTheme.colors.secondaryVariant,
+//                                )
+//                            }
+//                        }
+//                    }
+//                }
                 IconButton(onClick = { /* TODO: Open search */ }) {
                     Icon(
                         imageVector = Icons.Filled.Search,

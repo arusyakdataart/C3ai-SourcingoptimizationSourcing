@@ -3,6 +3,7 @@ package com.c3ai.sourcingoptimization.data.repository
 import com.c3ai.sourcingoptimization.data.C3Result
 import com.c3ai.sourcingoptimization.data.mock.fake
 import com.c3ai.sourcingoptimization.domain.model.*
+import com.c3ai.sourcingoptimization.utilities.PAGINATED_RESPONSE_LIMIT
 
 /**
  * Fake repository implementation provides all faked data.
@@ -24,8 +25,10 @@ class C3MockRepositoryImpl : C3Repository {
     override suspend fun getSuppliers(
         itemId: String,
         order: String,
-        limit: Int
-    ): C3Result<List<C3Vendor>> = C3Result.on { (1..limit).map { C3Vendor.fake() } }
+        limit: Int,
+        offset: Int
+    ): C3Result<List<C3Vendor>>
+    = C3Result.on { (1..40).map { C3Vendor.fake() } }
 
     override suspend fun getPODetails(orderId: String): C3Result<PurchaseOrder.Order> =
         C3Result.on { PurchaseOrder.Order.fake() }
@@ -33,7 +36,9 @@ class C3MockRepositoryImpl : C3Repository {
     override suspend fun getPOLines(
         itemId: String?,
         orderId: String?,
-        order: String
+        order: String,
+        limit: Int,
+        offset: Int
     ): C3Result<List<PurchaseOrder.Line>> =
         C3Result.on {
             emptyList()
