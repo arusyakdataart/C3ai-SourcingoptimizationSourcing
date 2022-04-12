@@ -16,6 +16,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -40,7 +41,7 @@ fun EditSuppliersScreen(
     scaffoldState: ScaffoldState,
     uiState: EditSuppliersUiState,
     itemId: String,
-    supplierIds: List<String>,
+    suppliers: List<String>,
     onRefreshDetails: () -> Unit,
     onSearchInputChanged: (String) -> Unit,
     onSupplierClick: (String) -> Unit,
@@ -48,6 +49,7 @@ fun EditSuppliersScreen(
     onUncheckSupplier: (String) -> Unit,
     onBackButtonClick: () -> Unit,
 ) {
+    val context = LocalContext.current
     Scaffold(
         scaffoldState = scaffoldState,
         topBar = {
@@ -64,7 +66,7 @@ fun EditSuppliersScreen(
     ) { innerPadding ->
         val contentModifier = Modifier.padding(innerPadding)
         val checkedSuppliers = mutableListOf<String>()
-        checkedSuppliers.addAll(supplierIds)
+        checkedSuppliers.addAll(suppliers)
         val openDialog = remember { mutableStateOf(false) }
 
         LoadingContent(
@@ -96,6 +98,7 @@ fun EditSuppliersScreen(
                                     )
                                 }
                             }
+                            val supplierIds = suppliers.map { it }
                             items(items = uiState.suppliers, itemContent = {
                                 val isChecked = supplierIds.contains(it.id)
                                 val checkedState = remember { mutableStateOf(isChecked) }

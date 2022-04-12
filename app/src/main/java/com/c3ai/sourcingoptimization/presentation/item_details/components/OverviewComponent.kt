@@ -42,6 +42,7 @@ import com.github.aachartmodel.aainfographics.aaoptionsmodel.AAStyle
 import com.github.aachartmodel.aainfographics.aatools.AAColor
 import com.github.aachartmodel.aainfographics.aatools.AAGradientColor
 import com.github.aachartmodel.aainfographics.aatools.AALinearGradientDirection
+import com.google.gson.Gson
 
 private val chartColors: Array<Any> = arrayOf("#82B0FF", "#C799FF", "#F2950A", "#49BFA9", "#A7ADC4")
 
@@ -161,7 +162,10 @@ private fun ItemDetailsInfo(
             AndroidView(
                 factory = { ctx ->
                     AAChartView(ctx).apply {
-                        layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+                        layoutParams = ViewGroup.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.MATCH_PARENT
+                        )
                     }
                 },
                 update = { view ->
@@ -354,7 +358,10 @@ private fun SourcingAnalysis(
             AndroidView(
                 factory = { ctx ->
                     AAChartView(ctx).apply {
-                        layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+                        layoutParams = ViewGroup.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.MATCH_PARENT
+                        )
                     }
                 },
                 update = { view ->
@@ -397,7 +404,9 @@ private fun SourcingAnalysis(
                     }
             )
             C3IconButton(
-                onClick = { onSupplierClick(item.id) },
+                onClick = {
+                    onSupplierClick(Gson().toJson(uiState.suppliersChart?.suppliers?.ids))
+                },
                 modifier = Modifier
                     .constrainAs(supplierRoute) {
                         top.linkTo(divider.bottom)
@@ -428,7 +437,7 @@ private fun SourcingAnalysis(
                     }
                     .horizontalScroll(rememberScrollState())
             ) {
-                uiState.suppliersChart?.suppliers?.forEach { (key, value) ->
+                uiState.suppliersChart?.suppliers?.chartData?.forEach { (key, value) ->
                     NameValue(
                         name = key,
                         value = value,
@@ -501,7 +510,10 @@ private fun SourcingAnalysis(
                     AndroidView(
                         factory = { ctx ->
                             AAChartView(ctx).apply {
-                                layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+                                layoutParams = ViewGroup.LayoutParams(
+                                    ViewGroup.LayoutParams.MATCH_PARENT,
+                                    ViewGroup.LayoutParams.MATCH_PARENT
+                                )
                             }
                         },
                         update = { view ->
@@ -537,7 +549,10 @@ private fun SourcingAnalysis(
                     AndroidView(
                         factory = { ctx ->
                             AAChartView(ctx).apply {
-                                layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+                                layoutParams = ViewGroup.LayoutParams(
+                                    ViewGroup.LayoutParams.MATCH_PARENT,
+                                    ViewGroup.LayoutParams.MATCH_PARENT
+                                )
                             }
                         },
                         update = { view ->

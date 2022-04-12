@@ -11,7 +11,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.c3ai.sourcingoptimization.presentation.navigateToAlerts
-import com.c3ai.sourcingoptimization.presentation.navigateToSupplierDetails
+import com.c3ai.sourcingoptimization.presentation.navigateToEditSuppliers
 
 /**
  * Displays the Home route.
@@ -42,7 +42,7 @@ fun ItemDetailsRoute(
         loadData = { itemId?.let { viewModel.loadData(it) } },
         onDateRangeSelected = { viewModel.onEvent(ItemDetailsEvent.OnDateRangeSelected(it)) },
         onStatsTypeSelected = { viewModel.onEvent(ItemDetailsEvent.OnStatsTypeSelected(it)) },
-        onSupplierClick = { navController.navigateToSupplierDetails(it) },
+        onSupplierClick = { navController.navigateToEditSuppliers(itemId ?: "", it) },
         onIndexClick = {},
         onChartViewMoveOver = { viewModel.onEvent(ItemDetailsEvent.UpdateSourcingAnalysis(it)) },
         onSortChanged = { viewModel.onEvent(ItemDetailsEvent.OnSortChanged(it)) },
