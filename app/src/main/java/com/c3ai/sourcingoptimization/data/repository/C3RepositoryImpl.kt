@@ -4,6 +4,7 @@ import com.c3ai.sourcingoptimization.data.C3Result
 import com.c3ai.sourcingoptimization.data.network.C3ApiService
 import com.c3ai.sourcingoptimization.data.network.requests.*
 import com.c3ai.sourcingoptimization.domain.model.*
+import com.c3ai.sourcingoptimization.utilities.PAGINATED_RESPONSE_LIMIT
 import javax.inject.Inject
 
 /**
@@ -16,33 +17,37 @@ class C3RepositoryImpl @Inject constructor(private val api: C3ApiService) : C3Re
     }
 
     override suspend fun getItemDetails(itemId: String): C3Result<C3Item> = C3Result.on {
-        api.getItemDetails(ItemDetailsParameters(itemId = itemId)).objs[0]
+        api.getItemDetails(ItemDetailsParameters(itemId = itemId)).objs?.get(0) ?: C3Item("")
     }
 
     override suspend fun getSupplierDetails(supplierId: String): C3Result<C3Vendor> = C3Result.on {
-        api.getSupplierDetails(SupplierDetailsParameters(supplierId)).objs[0]
+        api.getSupplierDetails(SupplierDetailsParameters(supplierId)).objs?.get(0) ?: C3Vendor("")
     }
 
     override suspend fun getSuppliers(
         itemId: String,
-        order: String
+        order: String,
+        limit: Int,
+        offset: Int
     ): C3Result<List<C3Vendor>> =
         C3Result.on {
-            api.getSuppliers(SuppliersParameters(itemId, order)).objs
+            api.getSuppliers(SuppliersParameters(itemId, order, limit, offset)).objs ?: emptyList()
         }
 
     override suspend fun getPODetails(orderId: String): C3Result<PurchaseOrder.Order> =
         C3Result.on {
-            api.getDetailedPO(DetailedPOParameters(orderId)).objs[0]
+            api.getDetailedPO(DetailedPOParameters(orderId)).objs?.get(0) ?: PurchaseOrder.Order("")
         }
 
     override suspend fun getPOLines(
         itemId: String?,
         orderId: String?,
-        order: String
+        order: String,
+        limit: Int,
+        offset: Int
     ): C3Result<List<PurchaseOrder.Line>> =
         C3Result.on {
-            api.getPOLines(POLinesDetailsParameters(itemId, orderId, order)).objs
+            api.getPOLines(POLinesDetailsParameters(itemId, orderId, order, limit, offset)).objs ?: emptyList()
         }
 
     override suspend fun getPOsForVendor(
@@ -50,20 +55,20 @@ class C3RepositoryImpl @Inject constructor(private val api: C3ApiService) : C3Re
         order: String
     ): C3Result<List<PurchaseOrder.Order>> =
         C3Result.on {
-            api.getPOsForVendor(VendorPOParameters(vendorId, order)).objs
+            api.getPOsForVendor(VendorPOParameters(vendorId, order)).objs ?: emptyList()
         }
 
     override suspend fun getSupplierContacts(id: String): C3Result<C3VendorContact> = C3Result.on {
-        api.getSupplierContacts(SupplierContactsParameters(id)).objs[0]
+        api.getSupplierContacts(SupplierContactsParameters(id)).objs?.get(0) ?: C3VendorContact("")
     }
 
     override suspend fun getBuyerContacts(id: String): C3Result<C3BuyerContact> = C3Result.on {
-        api.getBuyerContacts(BuyerContactsParameters(id)).objs[0]
+        api.getBuyerContacts(BuyerContactsParameters(id)).objs?.get(0) ?: C3BuyerContact("")
     }
 
     override suspend fun getSuppliedItems(vendorId: String, order: String): C3Result<List<C3Item>> =
         C3Result.on {
-            api.getSuppliedItems(SuppliedItemParameters(vendorId, order)).objs
+            api.getSuppliedItems(SuppliedItemParameters(vendorId, order)).objs ?: emptyList()
         }
 
     override suspend fun getEvalMetricsForPOLineQty(
@@ -104,7 +109,7 @@ class C3RepositoryImpl @Inject constructor(private val api: C3ApiService) : C3Re
                     limit = limit,
                     order = "descending(spend.value)"
                 )
-            ).objs
+            ).objs ?: emptyList()
         }
 
     override suspend fun getItemVendorRelation(
@@ -117,7 +122,7 @@ class C3RepositoryImpl @Inject constructor(private val api: C3ApiService) : C3Re
                     itemId = itemId,
                     supplierIds = supplierIds
                 )
-            ).objs
+            ).objs ?: emptyList()
         }
 
     override suspend fun getItemVendorRelationMetrics(
@@ -139,7 +144,7 @@ class C3RepositoryImpl @Inject constructor(private val api: C3ApiService) : C3Re
     }
 
     override suspend fun getMarketPriceIndexes(): C3Result<List<MarketPriceIndex>> = C3Result.on {
-        api.getMarketPriceIndexes().objs
+        api.getMarketPriceIndexes().objs ?: emptyList()
     }
 
     override suspend fun getItemMarketPriceIndexRelation(
@@ -151,7 +156,7 @@ class C3RepositoryImpl @Inject constructor(private val api: C3ApiService) : C3Re
                 itemId = itemId,
                 indexId = indexId
             )
-        ).objs
+        ).objs ?: emptyList()
     }
 
     override suspend fun getItemMarketPriceIndexRelationMetrics(
@@ -173,14 +178,14 @@ class C3RepositoryImpl @Inject constructor(private val api: C3ApiService) : C3Re
     }
 
     override suspend fun getAlertsForUser(order: String): C3Result<List<Alert>> = C3Result.on {
-        api.getAlertsForUser(AlertsParameters(order)).objs
+        api.getAlertsForUser(AlertsParameters(order)).objs ?: emptyList()
     }
 
     override suspend fun getAlertsFeedbacks(
         alertIds: List<String>,
         userId: String
     ): C3Result<List<AlertFeedback>>  = C3Result.on {
-        api.getAlertsFeedbacks(AlertFeedbackParameters(alertIds, userId)).objs
+        api.getAlertsFeedbacks(AlertFeedbackParameters(alertIds, userId)).objs ?: emptyList()
     }
 
     override suspend fun updateAlert(

@@ -15,14 +15,21 @@ interface C3Repository {
 
     suspend fun getSupplierDetails(supplierId: String): C3Result<C3Vendor>
 
-    suspend fun getSuppliers(itemId: String, order: String): C3Result<List<C3Vendor>>
+    suspend fun getSuppliers(
+        itemId: String,
+        order: String,
+        limit: Int = PAGINATED_RESPONSE_LIMIT,
+        offset: Int = 0
+    ): C3Result<List<C3Vendor>>
 
     suspend fun getPODetails(orderId: String): C3Result<PurchaseOrder.Order>
 
     suspend fun getPOLines(
         itemId: String?,
-        orderId: String?,
-        order: String
+        orderId: String? = null,
+        order: String,
+        limit: Int = PAGINATED_RESPONSE_LIMIT,
+        offset: Int = 0
     ): C3Result<List<PurchaseOrder.Line>>
 
     suspend fun getPOsForVendor(

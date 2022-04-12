@@ -11,25 +11,25 @@ sealed interface PurchaseOrder {
     val totalCostLocal: C3UnitValue?
     val orderCreationDate: Date?
     val closedDate: Date?
-    val numberOfActiveAlerts: Int
+    val numberOfActiveAlerts: Int?
 
     data class Order(
         override val id: String,
-        override val name: String?,
-        override val fulfilled: Boolean?,
-        override val fulfilledStr: String?,
-        override val totalCost: C3UnitValue?,
-        override val totalCostLocal: C3UnitValue?,
-        override val orderCreationDate: Date?,
-        override val closedDate: Date?,
-        override val numberOfActiveAlerts: Int,
-        val buyer: C3Buyer?,
-        var buyerContact: C3BuyerContact?,
-        val to: C3Facility?,
-        val from: C3Facility?,
-        val vendor: C3Vendor?,
-        var vendorContract: C3VendorContact?,
-        val orderLines: List<Line>?,
+        override val name: String? = "",
+        override val fulfilled: Boolean? = false,
+        override val fulfilledStr: String? = "",
+        override val totalCost: C3UnitValue? = null,
+        override val totalCostLocal: C3UnitValue? = null,
+        override val orderCreationDate: Date? = null,
+        override val closedDate: Date? = null,
+        override val numberOfActiveAlerts: Int? = null,
+        val buyer: C3Buyer? = null,
+        var buyerContact: C3BuyerContact? = null,
+        val to: C3Facility? = null,
+        val from: C3Facility? = null,
+        val vendor: C3Vendor? = null,
+        var vendorContract: C3VendorContact? = null,
+        val orderLines: List<Line>? = emptyList(),
     ) : PurchaseOrder {
 
         companion object
