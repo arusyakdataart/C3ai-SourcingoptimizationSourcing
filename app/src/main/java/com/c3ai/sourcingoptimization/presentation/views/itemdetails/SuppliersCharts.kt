@@ -5,5 +5,10 @@ data class SuppliersCharts(
     val data: List<Double>,
     val maxValue: Double?,
     val dataLabelsFormat: String,
-    val suppliers: Map<String, String>?
+    val suppliers: ChartSuppliers?
+)
+
+data class ChartSuppliers(
+    val ids: List<String>?,
+    val chartData: Map<String, String>?
 )

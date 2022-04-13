@@ -40,7 +40,7 @@ fun EditSuppliersScreen(
     scaffoldState: ScaffoldState,
     uiState: EditSuppliersUiState,
     itemId: String,
-    supplierIds: List<String>,
+    suppliers: List<String>,
     onRefreshDetails: () -> Unit,
     onSearchInputChanged: (String) -> Unit,
     onSupplierClick: (String) -> Unit,
@@ -64,7 +64,7 @@ fun EditSuppliersScreen(
     ) { innerPadding ->
         val contentModifier = Modifier.padding(innerPadding)
         val checkedSuppliers = mutableListOf<String>()
-        checkedSuppliers.addAll(supplierIds)
+        checkedSuppliers.addAll(suppliers)
         val openDialog = remember { mutableStateOf(false) }
 
         LoadingContent(
@@ -96,6 +96,7 @@ fun EditSuppliersScreen(
                                     )
                                 }
                             }
+                            val supplierIds = suppliers.map { it }
                             items(items = uiState.suppliers, itemContent = {
                                 val isChecked = supplierIds.contains(it.id)
                                 val checkedState = remember { mutableStateOf(isChecked) }

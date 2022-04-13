@@ -16,6 +16,7 @@ import com.c3ai.sourcingoptimization.domain.use_case.ItemDetailsUseCases
 import com.c3ai.sourcingoptimization.presentation.ViewModelState
 import com.c3ai.sourcingoptimization.presentation.common.C3PagingSource
 import com.c3ai.sourcingoptimization.presentation.views.*
+import com.c3ai.sourcingoptimization.presentation.views.itemdetails.ChartSuppliers
 import com.c3ai.sourcingoptimization.presentation.views.itemdetails.IndexPriceCharts
 import com.c3ai.sourcingoptimization.presentation.views.itemdetails.SuppliersCharts
 import com.c3ai.sourcingoptimization.utilities.PAGINATED_RESPONSE_LIMIT
@@ -135,6 +136,7 @@ private data class ItemDetailsViewModelState(
                     dataLabelsFormat = if (statsTypeSelected == 0) "{point.y:,.2f}M" else "{point.y:,.0f} %",
                     suppliers = vendorRelationMetrics?.let { metrics ->
                         val textsMap = mutableMapOf<String, String>()
+                        val ids = mutableListOf<String>()
                         val supplierNames = getSupplierNameAbbr(itemDetailsSuppliers.map { it.name ?: "" })
                         if (selectedChartsCrosshairIndex != -1) {
                             itemDetailsSuppliers.forEachIndexed { index, c3Vendor ->
@@ -144,9 +146,10 @@ private data class ItemDetailsViewModelState(
                                         "%.2f", metrics[c3Vendor.id]?.get(selectedChartsCrosshairIndex)
                                     )
                                 )
+                                ids.add(c3Vendor.id)
                             }
                         }
-                        textsMap
+                        ChartSuppliers(ids, textsMap)
                     }
                 ),
                 indexPriceChart = IndexPriceCharts(

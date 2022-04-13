@@ -67,14 +67,14 @@ fun C3NavGraph(
             C3Destinations.EDIT_SUPPLIERS_ROUTE,
             arguments = listOf(
                 navArgument("itemId") { type = NavType.StringType },
-                navArgument("supplierIds") { type = NavType.StringType }
+                navArgument("suppliers") { type = NavType.StringType }
             )
         ) { entry ->
             EditSuppliersRoute(
                 navController = navController,
                 itemId = entry.arguments?.getString("itemId"),
-                supplierIds = Gson().fromJson(
-                    entry.arguments?.getString("supplierIds"),
+                suppliers = Gson().fromJson(
+                    entry.arguments?.getString("suppliers"),
                     Array<String>::class.java
                 ).asList()
             )
