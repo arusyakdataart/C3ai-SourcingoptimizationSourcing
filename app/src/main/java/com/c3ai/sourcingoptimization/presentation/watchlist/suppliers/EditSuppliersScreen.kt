@@ -82,9 +82,11 @@ fun EditSuppliersScreen(
                 when (uiState) {
                     is EditSuppliersUiState.HasData -> {
                         val listState = rememberLazyListState()
-                        uiState.suppliers.forEach {
-                            if (suppliers.contains(it.id)) {
-                                checkedSuppliers.add(it)
+                        if (checkedSuppliers.isEmpty()) {
+                            uiState.suppliers.forEach {
+                                if (suppliers.contains(it.id)) {
+                                    checkedSuppliers.add(it)
+                                }
                             }
                         }
                         LazyColumn(modifier = Modifier.fillMaxSize(), listState) {

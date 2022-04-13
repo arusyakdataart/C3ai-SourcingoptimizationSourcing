@@ -162,7 +162,10 @@ private fun ItemDetailsInfo(
             AndroidView(
                 factory = { ctx ->
                     AAChartView(ctx).apply {
-                        layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+                        layoutParams = ViewGroup.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.MATCH_PARENT
+                        )
                     }
                 },
                 update = { view ->
@@ -355,7 +358,10 @@ private fun SourcingAnalysis(
             AndroidView(
                 factory = { ctx ->
                     AAChartView(ctx).apply {
-                        layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+                        layoutParams = ViewGroup.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.MATCH_PARENT
+                        )
                     }
                 },
                 update = { view ->
@@ -453,7 +459,9 @@ private fun SourcingAnalysis(
                     }
             )
             C3IconButton(
-                onClick = { onIndexClick(item.id) },
+                onClick = {
+                    onIndexClick(uiState.indexPriceChart?.indexId ?: "")
+                },
                 modifier = Modifier
                     .constrainAs(indexRoute) {
                         top.linkTo(divider2.bottom)
@@ -504,7 +512,10 @@ private fun SourcingAnalysis(
                     AndroidView(
                         factory = { ctx ->
                             AAChartView(ctx).apply {
-                                layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+                                layoutParams = ViewGroup.LayoutParams(
+                                    ViewGroup.LayoutParams.MATCH_PARENT,
+                                    ViewGroup.LayoutParams.MATCH_PARENT
+                                )
                             }
                         },
                         update = { view ->
@@ -540,7 +551,10 @@ private fun SourcingAnalysis(
                     AndroidView(
                         factory = { ctx ->
                             AAChartView(ctx).apply {
-                                layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+                                layoutParams = ViewGroup.LayoutParams(
+                                    ViewGroup.LayoutParams.MATCH_PARENT,
+                                    ViewGroup.LayoutParams.MATCH_PARENT
+                                )
                             }
                         },
                         update = { view ->

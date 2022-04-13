@@ -11,7 +11,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.c3ai.sourcingoptimization.domain.model.C3Vendor
+import com.c3ai.sourcingoptimization.domain.model.MarketPriceIndex
 import com.c3ai.sourcingoptimization.presentation.navigateToAlerts
+import com.c3ai.sourcingoptimization.presentation.navigateToEditIndex
 import com.c3ai.sourcingoptimization.presentation.navigateToEditSuppliers
 import com.google.gson.Gson
 
@@ -29,6 +31,7 @@ fun ItemDetailsRoute(
     navController: NavController,
     itemId: String?,
     suppliers: String?,
+    index: String?,
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     viewModel: ItemDetailsViewModel = hiltViewModel(),
 ) {
@@ -47,14 +50,15 @@ fun ItemDetailsRoute(
             itemId?.let {
                 viewModel.loadData(
                     it,
-                    suppliers = Gson().fromJson(suppliers, Array<C3Vendor>::class.java)?.asList()
+                    suppliers = Gson().fromJson(suppliers, Array<C3Vendor>::class.java)?.asList(),
+                    index = Gson().fromJson(index, MarketPriceIndex::class.java)
                 )
             }
         },
         onDateRangeSelected = { viewModel.onEvent(ItemDetailsEvent.OnDateRangeSelected(it)) },
         onStatsTypeSelected = { viewModel.onEvent(ItemDetailsEvent.OnStatsTypeSelected(it)) },
         onSupplierClick = { navController.navigateToEditSuppliers(itemId ?: "", it) },
-        onIndexClick = {},
+        onIndexClick = { navController.navigateToEditIndex(it) },
         onChartViewMoveOver = { viewModel.onEvent(ItemDetailsEvent.UpdateSourcingAnalysis(it)) },
         onSortChanged = { viewModel.onEvent(ItemDetailsEvent.OnSortChanged(it)) },
         onAlertsClick = { navController.navigateToAlerts() },

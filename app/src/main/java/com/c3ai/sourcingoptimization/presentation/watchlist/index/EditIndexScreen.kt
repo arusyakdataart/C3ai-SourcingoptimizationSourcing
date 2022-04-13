@@ -18,10 +18,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.navigation.NavController
 import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.common.components.*
 import com.c3ai.sourcingoptimization.ui.theme.BackgroundColor
 import com.c3ai.sourcingoptimization.ui.theme.Blue
+import com.google.gson.Gson
 
 /**
  * A display and edit of the indexes list for item.
@@ -33,6 +35,7 @@ import com.c3ai.sourcingoptimization.ui.theme.Blue
 @ExperimentalFoundationApi
 @Composable
 fun EditIndexScreen(
+    navController: NavController,
     scaffoldState: ScaffoldState,
     uiState: EditIndexUiState,
     indexId: String,
@@ -113,7 +116,12 @@ fun EditIndexScreen(
 
                                     RadioButton(
                                         selected = selectedState.value == it.id,
-                                        onClick = { selectedState.value = it.id },
+                                        onClick = {
+                                            selectedState.value = it.id
+                                            navController.previousBackStackEntry
+                                                ?.savedStateHandle
+                                                ?.set("index", Gson().toJson(it))
+                                        },
                                         modifier = Modifier
                                             .padding(start = 16.dp)
                                             .size(24.dp)

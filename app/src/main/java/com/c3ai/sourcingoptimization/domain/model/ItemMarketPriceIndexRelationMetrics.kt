@@ -19,5 +19,7 @@ data class IndexPrice(
     val timeZone: String,
     val interval: String,
     val start: String,
-    val end: String
+    val end: String,
+    var indexId: String?,
+    var indexName: String?
 )

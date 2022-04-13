@@ -40,11 +40,13 @@ fun C3NavGraph(
             C3Destinations.ITEM_DETAILS_ROUTE,
             arguments = listOf(navArgument("itemId") { type = NavType.StringType })
         ) { entry ->
-            val data = entry.savedStateHandle.get<String>("suppliers")
+            val suppliers = entry.savedStateHandle.get<String>("suppliers")
+            val index = entry.savedStateHandle.get<String>("index")
             ItemDetailsRoute(
                 navController = navController,
                 itemId = entry.arguments?.getString("itemId"),
-                suppliers = data
+                suppliers = suppliers,
+                index = index
             )
         }
         composable(
