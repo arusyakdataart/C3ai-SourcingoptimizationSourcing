@@ -16,11 +16,13 @@ import com.c3ai.sourcingoptimization.common.SortType
 import com.c3ai.sourcingoptimization.common.components.*
 import com.c3ai.sourcingoptimization.data.C3Result
 import com.c3ai.sourcingoptimization.data.repository.C3MockRepositoryImpl
+import com.c3ai.sourcingoptimization.domain.model.C3Vendor
 import com.c3ai.sourcingoptimization.presentation.item_details.components.OverviewComponent
 import com.c3ai.sourcingoptimization.presentation.item_details.components.POLinesComponent
 import com.c3ai.sourcingoptimization.presentation.item_details.components.SuppliersComponent
 import com.c3ai.sourcingoptimization.ui.theme.*
 import com.github.aachartmodel.aainfographics.aachartcreator.*
+import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -44,6 +46,7 @@ import kotlinx.coroutines.runBlocking
 fun ItemDetailsScreen(
     scaffoldState: ScaffoldState,
     itemId: String,
+    suppliers: String?,
     uiState: ItemDetailsUiState,
     onRefreshDetails: () -> Unit,
     onTabItemClick: (Int) -> Unit,
@@ -60,6 +63,7 @@ fun ItemDetailsScreen(
 ) {
     val coroutineScope = rememberCoroutineScope()
     val bottomState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+    val checkedSuppliers = Gson().fromJson(suppliers, Array<C3Vendor>::class.java)?.asList()
 
     LaunchedEffect(itemId) {
         loadData()
@@ -331,6 +335,7 @@ fun ItemDetailsPreview() {
         ItemDetailsScreen(
             scaffoldState = rememberScaffoldState(),
             itemId = item.id,
+            suppliers = "",
             uiState = PreviewItemDetailsUiState(item),
             onRefreshDetails = {},
             onTabItemClick = {},
@@ -359,6 +364,7 @@ fun ItemDetailsPOLinesTabPreview() {
         ItemDetailsScreen(
             scaffoldState = rememberScaffoldState(),
             itemId = item.id,
+            suppliers = "",
             uiState = PreviewItemDetailsUiState(item, 1),
             onRefreshDetails = {},
             onTabItemClick = {},

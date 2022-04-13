@@ -137,13 +137,15 @@ private data class ItemDetailsViewModelState(
                     suppliers = vendorRelationMetrics?.let { metrics ->
                         val textsMap = mutableMapOf<String, String>()
                         val ids = mutableListOf<String>()
-                        val supplierNames = getSupplierNameAbbr(itemDetailsSuppliers.map { it.name ?: "" })
+                        val supplierNames =
+                            getSupplierNameAbbr(itemDetailsSuppliers.map { it.name ?: "" })
                         if (selectedChartsCrosshairIndex != -1) {
                             itemDetailsSuppliers.forEachIndexed { index, c3Vendor ->
                                 textsMap[supplierNames[index]] = String.format(
                                     "%s%s", "$",
                                     String.format(
-                                        "%.2f", metrics[c3Vendor.id]?.get(selectedChartsCrosshairIndex)
+                                        "%.2f",
+                                        metrics[c3Vendor.id]?.get(selectedChartsCrosshairIndex)
                                     )
                                 )
                                 ids.add(c3Vendor.id)
@@ -220,7 +222,7 @@ private data class ItemDetailsViewModelState(
                     if (abbr.contains(short)) {
                         var number = occurrences.get(short) ?: 0
                         occurrences.put(short, ++number)
-                        abbr.add(short.substring(0,2) + number)
+                        abbr.add(short.substring(0, 2) + number)
                     } else {
                         occurrences.put(short, 0)
                         abbr.add(short)
@@ -249,7 +251,7 @@ private data class ItemDetailsViewModelState(
 
     fun formatSuppliersChartData(): List<Double> {
         if (statsTypeSelected == 0) {
-            return itemDetailsSuppliers.map { it.spend?.value?.formatNumberLocal() ?: 0.0}
+            return itemDetailsSuppliers.map { it.spend?.value?.formatNumberLocal() ?: 0.0 }
         }
 
         val total = itemDetailsSuppliers.sumOf { it.spend?.value ?: 0.0 }
@@ -291,9 +293,9 @@ class ItemDetailsViewModel @Inject constructor(
             viewModelState.value.toUiState()
         )
 
-    fun loadData(itemId: String) {
+    fun loadData(itemId: String, suppliers: List<C3Vendor>?) {
         this.itemId = itemId
-        load()
+        load(suppliers)
     }
 
     /**
@@ -304,10 +306,12 @@ class ItemDetailsViewModel @Inject constructor(
         load()
     }
 
-    private fun load() {
+    private fun load(selectedSuppliers: List<C3Vendor>? = null) {
         viewModelScope.launch {
             when (viewModelState.value.tabIndex) {
-                0 -> loadOverview()
+                0 -> if (selectedSuppliers == null) loadOverview() else updateSourcingAnalysisForSuppliers(
+                    selectedSuppliers
+                )
                 1 -> viewModelState.update {
                     it.copy(
                         poLinesFlow = getPOLines(),
@@ -389,6 +393,31 @@ class ItemDetailsViewModel @Inject constructor(
             viewModelState.value.saStartDate,
             viewModelState.value.saEndDate
         )
+    }
+
+    private suspend fun updateSourcingAnalysisForSuppliers(suppliers: List<C3Vendor>) {
+        val result = useCases.getVendorRelationMetrics(
+            itemId,
+            suppliers.map { it.id },
+            listOf("OrderLineValue"),
+            viewModelState.value.saStartDate,
+            viewModelState.value.saEndDate,
+            "MONTH"
+        )
+        viewModelState.update { state ->
+            when (result) {
+                is Success -> {
+                    state.copy(
+                        itemDetailsSuppliers = suppliers,
+                        vendorRelationMetrics = result.data,
+                        chartsHashCode = result.data.hashCode()
+                    )
+                }
+                is Error -> {
+                    state.copy()
+                }
+            }
+        }
     }
 
     private fun getPOLines(): Flow<PagingData<UiPurchaseOrder.Line>> {

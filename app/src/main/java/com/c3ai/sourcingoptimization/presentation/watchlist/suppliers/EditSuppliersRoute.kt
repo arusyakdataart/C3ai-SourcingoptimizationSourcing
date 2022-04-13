@@ -33,6 +33,7 @@ fun EditSuppliersRoute(
     val uiState by viewModel.uiState.collectAsState()
 
     EditSuppliersScreen(
+        navController = navController,
         scaffoldState = scaffoldState,
         uiState = uiState,
         itemId = itemId ?: "",

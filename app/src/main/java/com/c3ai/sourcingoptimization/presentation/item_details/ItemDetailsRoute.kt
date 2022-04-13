@@ -10,8 +10,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.c3ai.sourcingoptimization.domain.model.C3Vendor
 import com.c3ai.sourcingoptimization.presentation.navigateToAlerts
 import com.c3ai.sourcingoptimization.presentation.navigateToEditSuppliers
+import com.google.gson.Gson
 
 /**
  * Displays the Home route.
@@ -26,6 +28,7 @@ import com.c3ai.sourcingoptimization.presentation.navigateToEditSuppliers
 fun ItemDetailsRoute(
     navController: NavController,
     itemId: String?,
+    suppliers: String?,
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     viewModel: ItemDetailsViewModel = hiltViewModel(),
 ) {
@@ -37,9 +40,17 @@ fun ItemDetailsRoute(
         uiState = uiState,
         onRefreshDetails = { viewModel.refresh() },
         itemId = itemId ?: "",
+        suppliers = suppliers,
         onTabItemClick = { viewModel.onEvent(ItemDetailsEvent.OnTabItemClick(it)) },
         onBackButtonClick = { navController.navigateUp() },
-        loadData = { itemId?.let { viewModel.loadData(it) } },
+        loadData = {
+            itemId?.let {
+                viewModel.loadData(
+                    it,
+                    suppliers = Gson().fromJson(suppliers, Array<C3Vendor>::class.java)?.asList()
+                )
+            }
+        },
         onDateRangeSelected = { viewModel.onEvent(ItemDetailsEvent.OnDateRangeSelected(it)) },
         onStatsTypeSelected = { viewModel.onEvent(ItemDetailsEvent.OnStatsTypeSelected(it)) },
         onSupplierClick = { navController.navigateToEditSuppliers(itemId ?: "", it) },

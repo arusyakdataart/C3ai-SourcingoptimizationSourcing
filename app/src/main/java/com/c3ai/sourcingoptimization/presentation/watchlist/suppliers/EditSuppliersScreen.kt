@@ -21,11 +21,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.navigation.NavController
 import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.common.components.*
+import com.c3ai.sourcingoptimization.domain.model.C3Vendor
 import com.c3ai.sourcingoptimization.ui.theme.BackgroundColor
 import com.c3ai.sourcingoptimization.ui.theme.Blue
 import com.c3ai.sourcingoptimization.ui.theme.Gray70
+import com.google.gson.Gson
 
 /**
  * A display and edit of the suppliers list for item.
@@ -37,6 +40,7 @@ import com.c3ai.sourcingoptimization.ui.theme.Gray70
 @ExperimentalFoundationApi
 @Composable
 fun EditSuppliersScreen(
+    navController: NavController,
     scaffoldState: ScaffoldState,
     uiState: EditSuppliersUiState,
     itemId: String,
@@ -63,8 +67,7 @@ fun EditSuppliersScreen(
         snackbarHost = { C3SnackbarHost(hostState = it) },
     ) { innerPadding ->
         val contentModifier = Modifier.padding(innerPadding)
-        val checkedSuppliers = mutableListOf<String>()
-        checkedSuppliers.addAll(suppliers)
+        val checkedSuppliers = mutableListOf<C3Vendor>()
         val openDialog = remember { mutableStateOf(false) }
 
         LoadingContent(
@@ -79,6 +82,11 @@ fun EditSuppliersScreen(
                 when (uiState) {
                     is EditSuppliersUiState.HasData -> {
                         val listState = rememberLazyListState()
+                        uiState.suppliers.forEach {
+                            if (suppliers.contains(it.id)) {
+                                checkedSuppliers.add(it)
+                            }
+                        }
                         LazyColumn(modifier = Modifier.fillMaxSize(), listState) {
                             stickyHeader {
                                 Box(
@@ -177,13 +185,16 @@ fun EditSuppliersScreen(
                                         onCheckedChange = { isChecked ->
                                             if (isChecked && checkedSuppliers.size < 5) {
                                                 checkedState.value = isChecked
-                                                checkedSuppliers.add(it.id)
+                                                checkedSuppliers.add(it)
                                             } else if (!isChecked && checkedSuppliers.size > 1) {
                                                 checkedState.value = isChecked
-                                                checkedSuppliers.remove(it.id)
+                                                checkedSuppliers.remove(it)
                                             } else {
                                                 openDialog.value = true
                                             }
+                                            navController.previousBackStackEntry
+                                                ?.savedStateHandle
+                                                ?.set("suppliers", Gson().toJson(checkedSuppliers))
                                         },
                                         modifier = Modifier
                                             .padding(start = 16.dp)
