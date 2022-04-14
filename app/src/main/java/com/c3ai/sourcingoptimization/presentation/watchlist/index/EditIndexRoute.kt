@@ -33,6 +33,7 @@ fun EditIndexRoute(
     val uiState by viewModel.uiState.collectAsState()
 
     EditIndexScreen(
+        navController = navController,
         scaffoldState = scaffoldState,
         uiState = uiState,
         indexId = indexId ?: "",

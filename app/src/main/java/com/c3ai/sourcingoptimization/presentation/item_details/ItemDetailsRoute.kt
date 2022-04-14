@@ -10,8 +10,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.c3ai.sourcingoptimization.domain.model.C3Vendor
+import com.c3ai.sourcingoptimization.domain.model.MarketPriceIndex
 import com.c3ai.sourcingoptimization.presentation.navigateToAlerts
+import com.c3ai.sourcingoptimization.presentation.navigateToEditIndex
+import com.c3ai.sourcingoptimization.presentation.navigateToEditSuppliers
 import com.c3ai.sourcingoptimization.presentation.navigateToSupplierDetails
+import com.google.gson.Gson
 
 /**
  * Displays the Home route.
@@ -26,6 +31,8 @@ import com.c3ai.sourcingoptimization.presentation.navigateToSupplierDetails
 fun ItemDetailsRoute(
     navController: NavController,
     itemId: String?,
+    suppliers: String?,
+    index: String?,
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     viewModel: ItemDetailsViewModel = hiltViewModel(),
 ) {
@@ -37,16 +44,26 @@ fun ItemDetailsRoute(
         uiState = uiState,
         onRefreshDetails = { viewModel.refresh() },
         itemId = itemId ?: "",
+        suppliers = suppliers,
         onTabItemClick = { viewModel.onEvent(ItemDetailsEvent.OnTabItemClick(it)) },
         onBackButtonClick = { navController.navigateUp() },
-        loadData = { itemId?.let { viewModel.loadData(it) } },
+        loadData = {
+            itemId?.let {
+                viewModel.loadData(
+                    it,
+                    suppliers = Gson().fromJson(suppliers, Array<C3Vendor>::class.java)?.asList(),
+                    index = Gson().fromJson(index, MarketPriceIndex::class.java)
+                )
+            }
+        },
         onDateRangeSelected = { viewModel.onEvent(ItemDetailsEvent.OnDateRangeSelected(it)) },
         onStatsTypeSelected = { viewModel.onEvent(ItemDetailsEvent.OnStatsTypeSelected(it)) },
         onSupplierClick = { navController.navigateToSupplierDetails(it) },
-        onIndexClick = {},
+        onEditSuppliersClick = { navController.navigateToEditSuppliers(itemId ?: "", it) },
+        onEditIndexClick = { navController.navigateToEditIndex(it) },
         onChartViewMoveOver = { viewModel.onEvent(ItemDetailsEvent.UpdateSourcingAnalysis(it)) },
         onSortChanged = { viewModel.onEvent(ItemDetailsEvent.OnSortChanged(it)) },
         onAlertsClick = { navController.navigateToAlerts() },
-        onContactClick = { viewModel.onEvent(ItemDetailsEvent.OnSupplierContactSelected(it))},
+        onContactClick = { viewModel.onEvent(ItemDetailsEvent.OnSupplierContactSelected(it)) },
     )
 }

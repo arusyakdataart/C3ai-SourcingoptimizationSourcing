@@ -25,7 +25,7 @@ import androidx.navigation.NavController
 fun EditSuppliersRoute(
     navController: NavController,
     itemId: String?,
-    supplierIds: List<String>?,
+    suppliers: List<String>?,
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     viewModel: EditSuppliersViewModel = hiltViewModel(),
 ) {
@@ -33,10 +33,11 @@ fun EditSuppliersRoute(
     val uiState by viewModel.uiState.collectAsState()
 
     EditSuppliersScreen(
+        navController = navController,
         scaffoldState = scaffoldState,
         uiState = uiState,
         itemId = itemId ?: "",
-        supplierIds = supplierIds ?: listOf(),
+        suppliers = suppliers ?: listOf(),
         onRefreshDetails = { viewModel.refreshDetails() },
         onSearchInputChanged = { viewModel.onEvent(EditSuppliersEvent.OnSearchInputChanged(it)) },
         onSupplierClick = {},

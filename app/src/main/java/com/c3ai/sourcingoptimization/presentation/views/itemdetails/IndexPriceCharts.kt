@@ -8,4 +8,5 @@ data class IndexPriceCharts(
     val dateText: String,
     val nameText: String,
     val priceText: String,
+    val indexId: String?
 )

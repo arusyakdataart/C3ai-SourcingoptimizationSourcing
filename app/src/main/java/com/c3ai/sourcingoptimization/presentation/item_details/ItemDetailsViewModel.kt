@@ -16,6 +16,7 @@ import com.c3ai.sourcingoptimization.domain.use_case.ItemDetailsUseCases
 import com.c3ai.sourcingoptimization.presentation.ViewModelState
 import com.c3ai.sourcingoptimization.presentation.common.C3PagingSource
 import com.c3ai.sourcingoptimization.presentation.views.*
+import com.c3ai.sourcingoptimization.presentation.views.itemdetails.ChartSuppliers
 import com.c3ai.sourcingoptimization.presentation.views.itemdetails.IndexPriceCharts
 import com.c3ai.sourcingoptimization.presentation.views.itemdetails.SuppliersCharts
 import com.c3ai.sourcingoptimization.utilities.PAGINATED_RESPONSE_LIMIT
@@ -135,18 +136,22 @@ private data class ItemDetailsViewModelState(
                     dataLabelsFormat = if (statsTypeSelected == 0) "{point.y:,.2f}M" else "{point.y:,.0f} %",
                     suppliers = vendorRelationMetrics?.let { metrics ->
                         val textsMap = mutableMapOf<String, String>()
-                        val supplierNames = getSupplierNameAbbr(itemDetailsSuppliers.map { it.name ?: "" })
+                        val ids = mutableListOf<String>()
+                        val supplierNames =
+                            getSupplierNameAbbr(itemDetailsSuppliers.map { it.name ?: "" })
                         if (selectedChartsCrosshairIndex != -1) {
                             itemDetailsSuppliers.forEachIndexed { index, c3Vendor ->
                                 textsMap[supplierNames[index]] = String.format(
                                     "%s%s", "$",
                                     String.format(
-                                        "%.2f", metrics[c3Vendor.id]?.get(selectedChartsCrosshairIndex)
+                                        "%.2f",
+                                        metrics[c3Vendor.id]?.get(selectedChartsCrosshairIndex)
                                     )
                                 )
+                                ids.add(c3Vendor.id)
                             }
                         }
-                        textsMap
+                        ChartSuppliers(ids, textsMap)
                     }
                 ),
                 indexPriceChart = IndexPriceCharts(
@@ -170,7 +175,7 @@ private data class ItemDetailsViewModelState(
                             ""
                         }
                     } ?: "",
-                    nameText = item.name ?: "",
+                    nameText = indexPrice?.indexName ?: "",
                     priceText = indexPrice?.data?.let {
                         if (selectedChartsCrosshairIndex != -1) {
                             String.format(
@@ -181,6 +186,7 @@ private data class ItemDetailsViewModelState(
                             ""
                         }
                     } ?: "",
+                    indexId = indexPrice?.indexId
                 ),
                 vendorRelationMetrics = vendorRelationMetrics,
                 isLoading = isLoading,
@@ -217,7 +223,7 @@ private data class ItemDetailsViewModelState(
                     if (abbr.contains(short)) {
                         var number = occurrences.get(short) ?: 0
                         occurrences.put(short, ++number)
-                        abbr.add(short.substring(0,2) + number)
+                        abbr.add(short.substring(0, 2) + number)
                     } else {
                         occurrences.put(short, 0)
                         abbr.add(short)
@@ -246,7 +252,7 @@ private data class ItemDetailsViewModelState(
 
     fun formatSuppliersChartData(): List<Double> {
         if (statsTypeSelected == 0) {
-            return itemDetailsSuppliers.map { it.spend?.value?.formatNumberLocal() ?: 0.0}
+            return itemDetailsSuppliers.map { it.spend?.value?.formatNumberLocal() ?: 0.0 }
         }
 
         val total = itemDetailsSuppliers.sumOf { it.spend?.value ?: 0.0 }
@@ -288,9 +294,9 @@ class ItemDetailsViewModel @Inject constructor(
             viewModelState.value.toUiState()
         )
 
-    fun loadData(itemId: String) {
+    fun loadData(itemId: String, suppliers: List<C3Vendor>?, index: MarketPriceIndex?) {
         this.itemId = itemId
-        load()
+        load(suppliers, index)
     }
 
     /**
@@ -301,10 +307,16 @@ class ItemDetailsViewModel @Inject constructor(
         load()
     }
 
-    private fun load() {
+    private fun load(selectedSuppliers: List<C3Vendor>? = null, indexId: MarketPriceIndex? = null) {
         viewModelScope.launch {
             when (viewModelState.value.tabIndex) {
-                0 -> loadOverview()
+                0 -> {
+                    if (selectedSuppliers != null) updateSourcingAnalysisForSuppliers(
+                        selectedSuppliers
+                    )
+                    if (indexId != null) updateSourcingAnalysisForIndex(indexId)
+                    else loadOverview()
+                }
                 1 -> viewModelState.update {
                     it.copy(
                         poLinesFlow = getPOLines(),
@@ -388,6 +400,62 @@ class ItemDetailsViewModel @Inject constructor(
         )
     }
 
+    private suspend fun updateSourcingAnalysisForSuppliers(suppliers: List<C3Vendor>) {
+        val result = useCases.getVendorRelationMetrics(
+            itemId,
+            suppliers.map { it.id },
+            listOf("OrderLineValue"),
+            viewModelState.value.saStartDate,
+            viewModelState.value.saEndDate,
+            "MONTH"
+        )
+        viewModelState.update { state ->
+            when (result) {
+                is Success -> {
+                    state.copy(
+                        itemDetailsSuppliers = suppliers,
+                        vendorRelationMetrics = result.data,
+                        chartsHashCode = result.data.hashCode()
+                    )
+                }
+                is Error -> {
+                    state.copy()
+                }
+            }
+        }
+    }
+
+    private suspend fun updateSourcingAnalysisForIndex(index: MarketPriceIndex) {
+        val indexPriceRM = useCases.getMarketPriceIndexRelationMetrics(
+            itemId,
+            index.id,
+            listOf(index.id),
+            expressions = listOf("IndexPrice"),
+            viewModelState.value.saStartDate,
+            viewModelState.value.saEndDate,
+            interval = "MONTH"
+        )
+        viewModelState.update { state ->
+            when (indexPriceRM) {
+                is Success -> {
+                    val indexPrice = indexPriceRM.data.result[index.id]?.indexPrice
+                    indexPrice?.indexId = index.id
+                    indexPrice?.indexName = index.name
+                    state.copy(
+                        marketPriceIndex = listOf(index),
+                        indexPrice = indexPrice,
+                        chartsHashCode = indexPrice.hashCode()
+                    )
+                }
+                is Error -> {
+                    state.copy()
+                }
+            }
+        }
+
+
+    }
+
     private fun getPOLines(): Flow<PagingData<UiPurchaseOrder.Line>> {
         return Pager(PagingConfig(PAGINATED_RESPONSE_LIMIT)) { poLinesSource }.flow
             .map { data -> data.map { viewModelState.value.convert(it) } }
@@ -428,9 +496,11 @@ class ItemDetailsViewModel @Inject constructor(
             when (marketPriceIndex) {
                 is Success -> {
                     val indexId = marketPriceIndex.data[0].id
+                    val indexName = marketPriceIndex.data[0].name
                     val indexPrice = getMarketPriceIndexRelationMetrics(
                         itemId,
                         indexId,
+                        indexName,
                         listOf(indexId),
                         expressions = listOf("IndexPrice"),
                         startDate = startDate,
@@ -481,12 +551,14 @@ class ItemDetailsViewModel @Inject constructor(
     private suspend fun getMarketPriceIndexRelationMetrics(
         itemId: String,
         indexId: String,
+        indexName: String,
         ids: List<String>,
         expressions: List<String>,
         startDate: String,
         endDate: String,
         interval: String
     ): IndexPrice? {
+        var indexPrice: IndexPrice? = null
         val result = useCases.getMarketPriceIndexRelationMetrics(
             itemId,
             indexId,
@@ -498,11 +570,13 @@ class ItemDetailsViewModel @Inject constructor(
         )
         when (result) {
             is Success -> {
-                result.data.result[indexId]?.indexPrice
+                indexPrice = result.data.result[indexId]?.indexPrice
+                indexPrice?.indexId = indexId
+                indexPrice?.indexName = indexName
             }
             is Error -> {}
         }
-        return null
+        return indexPrice
     }
 
     /**
