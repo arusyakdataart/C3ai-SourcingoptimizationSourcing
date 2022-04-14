@@ -315,7 +315,7 @@ class ItemDetailsViewModel @Inject constructor(
                         selectedSuppliers
                     )
                     if (indexId != null) updateSourcingAnalysisForIndex(indexId)
-                    else loadOverview()
+                    else if (selectedSuppliers == null) loadOverview()
                 }
                 1 -> viewModelState.update {
                     it.copy(
