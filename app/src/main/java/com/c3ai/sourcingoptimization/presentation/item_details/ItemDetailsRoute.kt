@@ -44,7 +44,6 @@ fun ItemDetailsRoute(
         uiState = uiState,
         onRefreshDetails = { viewModel.refresh() },
         itemId = itemId ?: "",
-        suppliers = suppliers,
         onTabItemClick = { viewModel.onEvent(ItemDetailsEvent.OnTabItemClick(it)) },
         onBackButtonClick = { navController.navigateUp() },
         loadData = {

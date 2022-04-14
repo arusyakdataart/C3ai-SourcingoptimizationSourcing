@@ -46,7 +46,6 @@ import kotlinx.coroutines.runBlocking
 fun ItemDetailsScreen(
     scaffoldState: ScaffoldState,
     itemId: String,
-    suppliers: String?,
     uiState: ItemDetailsUiState,
     onRefreshDetails: () -> Unit,
     onTabItemClick: (Int) -> Unit,
@@ -64,7 +63,6 @@ fun ItemDetailsScreen(
 ) {
     val coroutineScope = rememberCoroutineScope()
     val bottomState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
-    val checkedSuppliers = Gson().fromJson(suppliers, Array<C3Vendor>::class.java)?.asList()
 
     LaunchedEffect(itemId) {
         loadData()
@@ -336,7 +334,6 @@ fun ItemDetailsPreview() {
         ItemDetailsScreen(
             scaffoldState = rememberScaffoldState(),
             itemId = item.id,
-            suppliers = "",
             uiState = PreviewItemDetailsUiState(item),
             onRefreshDetails = {},
             onTabItemClick = {},
@@ -366,7 +363,6 @@ fun ItemDetailsPOLinesTabPreview() {
         ItemDetailsScreen(
             scaffoldState = rememberScaffoldState(),
             itemId = item.id,
-            suppliers = "",
             uiState = PreviewItemDetailsUiState(item, 1),
             onRefreshDetails = {},
             onTabItemClick = {},
