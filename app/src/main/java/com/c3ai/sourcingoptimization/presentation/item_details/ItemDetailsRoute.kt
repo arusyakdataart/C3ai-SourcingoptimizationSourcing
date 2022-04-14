@@ -15,6 +15,7 @@ import com.c3ai.sourcingoptimization.domain.model.MarketPriceIndex
 import com.c3ai.sourcingoptimization.presentation.navigateToAlerts
 import com.c3ai.sourcingoptimization.presentation.navigateToEditIndex
 import com.c3ai.sourcingoptimization.presentation.navigateToEditSuppliers
+import com.c3ai.sourcingoptimization.presentation.navigateToSupplierDetails
 import com.google.gson.Gson
 
 /**
@@ -57,8 +58,9 @@ fun ItemDetailsRoute(
         },
         onDateRangeSelected = { viewModel.onEvent(ItemDetailsEvent.OnDateRangeSelected(it)) },
         onStatsTypeSelected = { viewModel.onEvent(ItemDetailsEvent.OnStatsTypeSelected(it)) },
-        onSupplierClick = { navController.navigateToEditSuppliers(itemId ?: "", it) },
-        onIndexClick = { navController.navigateToEditIndex(it) },
+        onSupplierClick = { navController.navigateToSupplierDetails(it) },
+        onEditSuppliersClick = { navController.navigateToEditSuppliers(itemId ?: "", it) },
+        onEditIndexClick = { navController.navigateToEditIndex(it) },
         onChartViewMoveOver = { viewModel.onEvent(ItemDetailsEvent.UpdateSourcingAnalysis(it)) },
         onSortChanged = { viewModel.onEvent(ItemDetailsEvent.OnSortChanged(it)) },
         onAlertsClick = { navController.navigateToAlerts() },
