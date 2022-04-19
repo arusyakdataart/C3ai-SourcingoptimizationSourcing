@@ -45,6 +45,7 @@ fun AlertsRoute(
         onCollapsableItemClick = { viewModel.onEvent(AlertsEvent.OnCollapsableItemClick(it)) },
         onSupplierClick = { navController.navigateToSupplierDetails(it) },
         onItemClick = { navController.navigateToItemDetails(it) },
-        onPOClick = { navController.navigateToPoDetails(it) }
+        onPOClick = { navController.navigateToPoDetails(it) },
+        onContactClick = { viewModel.onEvent(AlertsEvent.OnSupplierContactSelected(it)) },
     )
 }

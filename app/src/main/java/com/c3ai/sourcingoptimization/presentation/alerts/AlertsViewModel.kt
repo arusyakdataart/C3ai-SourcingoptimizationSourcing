@@ -35,6 +35,7 @@ sealed interface AlertsUiState {
     val isLoading: Boolean
     val errorMessages: List<ErrorMessage>
     val searchInput: String
+    val selectedSupplierContact: C3VendorContact?
 
     /**
      * There is no data to render.
@@ -45,7 +46,8 @@ sealed interface AlertsUiState {
     data class NoData(
         override val isLoading: Boolean,
         override val errorMessages: List<ErrorMessage>,
-        override val searchInput: String
+        override val searchInput: String,
+        override val selectedSupplierContact: C3VendorContact? = null,
     ) : AlertsUiState
 
     /**
@@ -59,7 +61,8 @@ sealed interface AlertsUiState {
         val selectedCategoriesList: Set<String> = emptySet(),
         override val isLoading: Boolean,
         override val errorMessages: List<ErrorMessage>,
-        override val searchInput: String
+        override val searchInput: String,
+        override val selectedSupplierContact: C3VendorContact? = null,
     ) : AlertsUiState
 }
 
@@ -70,7 +73,7 @@ private data class AlertsViewModelState(
     override val settings: C3AppSettingsProvider,
     var alerts: Set<Alert>? = null,
     var alertsFeedBacks: Set<AlertFeedback>? = null,
-    val supplierContacts: List<C3VendorContact>? = null,
+    val selectedSupplierContact: C3VendorContact? = null,
     val isLoading: Boolean = false,
     val errorMessages: List<ErrorMessage> = emptyList(),
     val searchInput: String = "",
@@ -84,12 +87,13 @@ private data class AlertsViewModelState(
      */
     fun toUiState(): AlertsUiState =
         if (alerts != null &&  alertsFeedBacks != null) {
-            val uiAlert = convert(alerts!!, alertsFeedBacks!!, supplierContacts)
+            val uiAlert = convert(alerts!!, alertsFeedBacks!!)
             AlertsUiState.HasData(
                 alerts = uiAlert,
                 collapsedListItemIds = collapsedListItemIds,
                 selectedCategoriesList = selectedCategoriesList,
                 filteredAlerts = filterByCategory(uiAlert, selectedCategoriesList),
+                selectedSupplierContact = selectedSupplierContact,
                 isLoading = isLoading,
                 errorMessages = errorMessages,
                 searchInput = searchInput
@@ -219,41 +223,6 @@ class AlertsViewModel @Inject constructor(
         }
     }
 
-    private fun getSupplierContacts(alerts: List<Alert>) {
-        val supplierAlertIds = alerts.mapNotNull {
-            if (it.alertType == "Supplier") it.redirectUrl?.substring(
-                it.redirectUrl.lastIndexOf("/") + 1
-            ) else null
-        }
-        val contracts = mutableListOf<C3VendorContact>()
-        supplierAlertIds.forEach {
-            viewModelScope.launch {
-                val result = useCases.getSupplierContacts(it)
-                viewModelState.update {
-                    when (result) {
-                        is C3Result.Success -> {
-                            contracts.add(result.data)
-                            if (contracts.size == supplierAlertIds.size) {
-                                it.copy(
-                                    supplierContacts = contracts, isLoading = false)
-                            } else {
-                                it.copy()
-                            }
-                        }
-                        is C3Result.Error -> {
-                            val errorMessages = it.errorMessages + ErrorMessage(
-                                id = UUID.randomUUID().mostSignificantBits,
-                                messageId = R.string.load_error
-                            )
-                            it.copy(errorMessages = errorMessages, isLoading = false)
-                        }
-                    }
-                }
-            }
-        }
-
-    }
-
     fun updateAlerts(alertIds: List<String>, statusType: String, statusValue: Boolean?) {
         viewModelScope.launch {
             useCases.updateAlerts(alertIds, statusType, statusValue)
@@ -318,6 +287,22 @@ class AlertsViewModel @Inject constructor(
                         }
                     )
 
+                }
+                is AlertsEvent.OnSupplierContactSelected -> {
+                    viewModelScope.launch {
+                        val result = useCases.getSupplierContacts(event.supplierId)
+                        viewModelState.update { state ->
+                            when (result) {
+                                is C3Result.Success -> state.copy(
+                                    selectedSupplierContact = result.data
+                                )
+                                is C3Result.Error -> {
+                                    state.copy(isLoading = false)
+                                }
+                            }
+                        }
+                    }
+                    state
                 }
                 else -> {
                     state.copy()

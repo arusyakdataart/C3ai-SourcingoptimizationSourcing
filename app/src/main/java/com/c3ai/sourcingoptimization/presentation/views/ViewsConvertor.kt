@@ -126,8 +126,7 @@ fun ViewModelState.convert(
 
 fun ViewModelState.convert(
     alerts: Set<Alert>,
-    feedBacks: Set<AlertFeedback>,
-    supplierContracts: List<C3VendorContact>?
+    feedBacks: Set<AlertFeedback>
 ): List<UiAlert> {
     val uiAlerts = alerts.map {
         UiAlert(
@@ -140,8 +139,7 @@ fun ViewModelState.convert(
             flagged = it.flagged,
             timestamp = settings.format(it.timestamp),
             redirectUrl = it.redirectUrl,
-            feedback = feedBacks.findLast { it1 -> it.id == it1.parent?.id },
-            supplierContract = supplierContracts?.find { it1 -> it.id == it1.id }
+            feedback = feedBacks.findLast { it1 -> it.id == it1.parent?.id }
         )
     }
     return uiAlerts

@@ -57,18 +57,11 @@ fun AlertsScreen(
     onCollapsableItemClick: (String) -> Unit,
     onSupplierClick: (String) -> Unit,
     onItemClick: (String) -> Unit,
-    onPOClick: (String) -> Unit
+    onPOClick: (String) -> Unit,
+    onContactClick: (String) -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
     val bottomState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
-
-    var phoneNumber: String by remember {
-        mutableStateOf("")
-    }
-
-    var emailAddress: String by remember {
-        mutableStateOf("")
-    }
 
     if (selectedCategories != null) {
         viewModel.onEvent(AlertsEvent.OnFilterChanged(selectedCategories))
@@ -77,7 +70,10 @@ fun AlertsScreen(
     ModalBottomSheetLayout(
         sheetState = bottomState,
         sheetContent = {
-            ContactSupplierBottomSheetContent(phoneNumber, emailAddress)
+            ContactSupplierBottomSheetContent(
+                uiState.selectedSupplierContact?.phone ?: "",
+                uiState.selectedSupplierContact?.email ?: "",
+            )
         }
     ) {
         val page = viewModel.page.value
@@ -142,11 +138,9 @@ fun AlertsScreen(
                                     itemsIndexed(items = categoryList.getValue(it)) { index, it ->
 
                                         viewModel.onChangeListScrollPosition(index)
-                                        if((index + 1) >= (page * PAGINATED_RESPONSE_LIMIT)){
+                                        if ((index + 1) >= (page * PAGINATED_RESPONSE_LIMIT)){
                                             viewModel.nextPage()
                                         }
-                                        phoneNumber = it.supplierContract?.phone ?: ""
-                                        emailAddress = it.supplierContract?.email ?: ""
                                         if (it.readStatus != "Read") {
                                             it.readStatus = "Read"
                                             updateReadStatus(it.id, viewModel)
@@ -180,6 +174,12 @@ fun AlertsScreen(
                                                     }
                                                 },
                                                 {
+                                                    val supplierId = it.redirectUrl?.substring(
+                                                        it.redirectUrl.lastIndexOf("/") + 1
+                                                    )
+                                                    if (supplierId != null) {
+                                                        onContactClick(supplierId)
+                                                    }
                                                     coroutineScope.launch {
                                                         if (!bottomState.isVisible) {
                                                             bottomState.show()
