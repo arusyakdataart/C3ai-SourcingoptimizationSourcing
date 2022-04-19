@@ -10,7 +10,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -30,6 +30,7 @@ import com.c3ai.sourcingoptimization.common.SortType
 import com.c3ai.sourcingoptimization.common.components.*
 import com.c3ai.sourcingoptimization.presentation.views.UiAlert
 import com.c3ai.sourcingoptimization.ui.theme.*
+import com.c3ai.sourcingoptimization.utilities.PAGINATED_RESPONSE_LIMIT
 import com.google.gson.Gson
 import kotlinx.coroutines.launch
 
@@ -79,6 +80,8 @@ fun AlertsScreen(
             ContactSupplierBottomSheetContent(phoneNumber, emailAddress)
         }
     ) {
+        val page = viewModel.page.value
+
         Scaffold(
             scaffoldState = scaffoldState,
             topBar = {
@@ -136,7 +139,12 @@ fun AlertsScreen(
                                         )
                                     }
 
-                                    items(categoryList.getValue(it)) {
+                                    itemsIndexed(items = categoryList.getValue(it)) { index, it ->
+
+                                        viewModel.onChangeListScrollPosition(index)
+                                        if((index + 1) >= (page * PAGINATED_RESPONSE_LIMIT)){
+                                            viewModel.nextPage()
+                                        }
                                         phoneNumber = it.supplierContract?.phone ?: ""
                                         emailAddress = it.supplierContract?.email ?: ""
                                         if (it.readStatus != "Read") {

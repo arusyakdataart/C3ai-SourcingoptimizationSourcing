@@ -7,8 +7,8 @@ import com.c3ai.sourcingoptimization.domain.model.AlertFeedback
 
 class GetAlertsForUser(private val repository: C3Repository) {
 
-    suspend operator fun invoke(order: String): C3Result<List<Alert>> {
-        return repository.getAlertsForUser(order)
+    suspend operator fun invoke(order: String, page: Int): C3Result<List<Alert>> {
+        return repository.getAlertsForUser(order, page)
     }
 }
 
