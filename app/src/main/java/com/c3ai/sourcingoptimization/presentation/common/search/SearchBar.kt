@@ -100,7 +100,6 @@ fun SearchBar(
             FiltersGridLayout(
                 filters = stringArrayResource(R.array.searchFilters).toList(),
                 modifier = Modifier
-                    .fillMaxWidth()
                     .padding(horizontal = 30.dp)
                     .horizontalScroll(rememberScrollState())
             ) {
@@ -196,7 +195,7 @@ fun FiltersGridLayout(
     filters: List<String>,
     onFilterClick: (Int) -> Unit
 ) {
-    Box(modifier = modifier) {
+    StaggeredGrid(modifier = modifier) {
         filters.forEachIndexed { index, filter ->
             OutlinedChip(
                 modifier = Modifier.padding(4.dp),

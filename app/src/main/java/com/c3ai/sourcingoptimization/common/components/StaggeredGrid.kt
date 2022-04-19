@@ -39,8 +39,6 @@ fun StaggeredGrid(
         var maxPlaceableHeight = 0
         var lastRowHeight = 0
 
-//        println("😈 MyStaggeredGrid() constraintMaxWidth: $constraintMaxWidth, constraintMaxHeight: $constraintMaxHeight")
-
         val placeables: List<Placeable> = measurables.mapIndexed { index, measurable ->
             // Measure each child
             val placeable = measurable.measure(constraints)
