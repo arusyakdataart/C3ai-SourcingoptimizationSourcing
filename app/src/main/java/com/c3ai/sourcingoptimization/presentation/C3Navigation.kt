@@ -8,6 +8,7 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
  */
 object C3Destinations {
     const val SEARCH_ROUTE = "search"
+    const val SETTINGS_ROUTE = "settings"
     const val ITEM_DETAILS_ROUTE = "item_details/{itemId}"
     const val SUPPLIER_DETAILS_ROUTE = "supplier_details/{supplierId}"
     const val PO_DETAILS_ROUTE = "po_details/{orderId}"

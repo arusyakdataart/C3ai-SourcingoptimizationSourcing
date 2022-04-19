@@ -1,13 +1,12 @@
 package com.c3ai.sourcingoptimization.common.components
 
-import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -20,22 +19,33 @@ import com.c3ai.sourcingoptimization.R
 @Composable
 fun C3TopAppBar(
     title: String,
-    onBackButtonClick: () -> Unit,
+    showLogo: Boolean = false,
+    onBackButtonClick: () -> Unit = {},
     navigationIcon: @Composable (() -> Unit)? = null,
     actions: @Composable RowScope.() -> Unit = {},
 ) {
     TopAppBar(
         title = {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.caption,
-                color = MaterialTheme.colors.primary,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(bottom = 4.dp, top = 10.dp)
-            )
+            Row(modifier = Modifier.fillMaxWidth()) {
+                if (showLogo) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_app_logo),
+                        contentDescription = stringResource(R.string.home),
+                        tint = MaterialTheme.colors.onBackground,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.caption,
+                    color = MaterialTheme.colors.primary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(bottom = 4.dp, top = 10.dp)
+                )
+            }
         },
         navigationIcon = if (navigationIcon == null) {
             {

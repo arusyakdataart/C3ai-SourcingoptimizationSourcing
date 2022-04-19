@@ -9,6 +9,7 @@
     <string name="search">Search</string>
     <string name="logout">Logout</string>
     <string name="Search" />
+    <string name="settings">Settings</string>
     <string name="cd_search">Search</string>
     <string name="cd_more_actions">Clear</string>
     <string name="retry">Retry</string>
@@ -112,6 +113,8 @@
     <string name="helpful">Helpful</string>
     <string name="not_helpful">Not helpful</string>
     <string name="alert_types_settings">Alert Types Settings</string>
+    <string name="home">Home</string>
+    <string name="search_">Search…</string>
     <array name="sort_po">
         <item>Total Cost</item>
         <item>Unit Price</item>
@@ -132,5 +135,12 @@
     <array name="sourcingAnalysisStatsType">
         <item>Total Spent ($)</item>
         <item>Share (%)</item>
+    </array>
+    <array name="searchFilters">
+        <item>Supplier</item>
+        <item>Item</item>
+        <item>PO</item>
+        <item>POL</item>
+        <item>Alert</item>
     </array>
 </resources>

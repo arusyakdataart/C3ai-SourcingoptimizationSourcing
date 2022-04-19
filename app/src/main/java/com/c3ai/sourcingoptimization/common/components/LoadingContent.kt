@@ -36,8 +36,8 @@ fun FullScreenLoading() {
  */
 @Composable
 fun LoadingContent(
-    empty: Boolean,
-    emptyContent: @Composable () -> Unit,
+    empty: Boolean = false,
+    emptyContent: @Composable () -> Unit = {},
     loading: Boolean,
     onRefresh: () -> Unit,
     content: @Composable () -> Unit

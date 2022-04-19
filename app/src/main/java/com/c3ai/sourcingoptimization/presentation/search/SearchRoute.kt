@@ -9,6 +9,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.c3ai.sourcingoptimization.presentation.C3Destinations.SETTINGS_ROUTE
+import com.c3ai.sourcingoptimization.presentation.search.SearchScreenType.*
 
 /**
  * Displays the Home route.
@@ -16,7 +18,6 @@ import androidx.navigation.NavController
  * Note: AAC ViewModels don't work with Compose Previews currently.
  *
  * @param viewModel ViewModel that handles the business logic of this screen
- * @param isExpandedScreen (state) whether the screen is expanded
  * @param scaffoldState (state) state for the [Scaffold] component on this screen
  */
 @OptIn(ExperimentalMaterialApi::class)
@@ -27,17 +28,24 @@ fun SearchRoute(
     scaffoldState: ScaffoldState = rememberScaffoldState()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val isExpandedScreen = false
 
-    when (getSearchScreenType(isExpandedScreen, uiState)) {
-        SearchScreenType.Search -> {
-            SearchScreen(navController, uiState)
+    when (getSearchScreenType(uiState)) {
+        SearchHome -> {
+            SearchScreen(
+                navController = navController,
+                scaffoldState = scaffoldState,
+                uiState = uiState,
+                onRefresh = {},
+                onSettingsClick = { navController.navigate(SETTINGS_ROUTE) }
+            )
         }
-        SearchScreenType.SearchWithAlerts -> {
-            SearchScreen(navController, uiState)
-        }
-        SearchScreenType.SearchWithResults -> {
-            SearchScreen(navController, uiState)
+        SearchWithAlerts -> {
+            SearchWithAlertsScreen(
+                navController = navController,
+                scaffoldState = scaffoldState,
+                uiState = uiState,
+                onRefresh = {}
+            )
         }
     }
 }
@@ -46,14 +54,12 @@ fun SearchRoute(
  * A precise enumeration of which type of screen to display at the home route.
  *
  * There are 3 options:
- * - [Search], which displays just search.
+ * - [SearchHome], which displays home screen.
  * - [SearchWithAlerts], which displays both a list of alerts and a search.
- * - [SearchWithResults], which displays both a list of alerts and a search.
  */
 private enum class SearchScreenType {
-    Search,
+    SearchHome,
     SearchWithAlerts,
-    SearchWithResults,
 }
 
 /**
@@ -62,14 +68,8 @@ private enum class SearchScreenType {
  */
 @Composable
 private fun getSearchScreenType(
-    isExpandedScreen: Boolean,
     uiState: SearchUiState
-): SearchScreenType = when (isExpandedScreen) {
-    false -> {
-        when (uiState) {
-            is SearchUiState.HasAlerts -> SearchScreenType.SearchWithAlerts
-            is SearchUiState.NoAlerts -> SearchScreenType.Search
-        }
-    }
-    true -> SearchScreenType.SearchWithResults
+): SearchScreenType = when (uiState) {
+    is SearchUiState.SearchResults -> SearchHome
+    else -> SearchWithAlerts
 }

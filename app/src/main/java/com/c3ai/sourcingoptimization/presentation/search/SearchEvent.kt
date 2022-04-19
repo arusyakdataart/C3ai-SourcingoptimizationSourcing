@@ -1,4 +1,6 @@
 package com.c3ai.sourcingoptimization.presentation.search
 
-class SearchEvent {
+
+sealed class SearchEvent {
+    data class OnFilterClick(val index: Int) : SearchEvent()
 }

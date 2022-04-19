@@ -1,8 +1,10 @@
 package com.c3ai.sourcingoptimization.presentation.search
 
 import android.content.Context
-import android.content.Intent
 import android.widget.Toast
+import androidx.compose.animation.*
+import androidx.compose.animation.core.keyframes
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
@@ -15,14 +17,12 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
 import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.pointer.PointerEventPass
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -30,62 +30,77 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.c3ai.sourcingoptimization.R
-import com.c3ai.sourcingoptimization.common.components.C3SnackbarHost
-import com.c3ai.sourcingoptimization.common.components.PButton
+import com.c3ai.sourcingoptimization.common.components.*
 import com.c3ai.sourcingoptimization.domain.model.Alert
 import com.c3ai.sourcingoptimization.modifiers.interceptKey
 import com.c3ai.sourcingoptimization.presentation.alerts.AlertCardSimple
-import com.c3ai.sourcingoptimization.presentation.navigateToItemDetails
-import com.c3ai.sourcingoptimization.presentation.navigateToSupplierDetails
-import com.c3ai.sourcingoptimization.presentation.rememberContentPaddingForScreen
-import com.google.accompanist.insets.imePadding
-import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
-import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.isActive
+import com.c3ai.sourcingoptimization.presentation.common.search.SearchBar
+import com.c3ai.sourcingoptimization.presentation.common.search.rememberSearchState
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalAnimationApi::class)
 @Composable
 fun SearchScreen(
     navController: NavController,
+    scaffoldState: ScaffoldState,
     uiState: SearchUiState,
+    onRefresh: () -> Unit,
+    onSettingsClick: () -> Unit,
 ) {
     val context = LocalContext.current
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Icon(
-            painter = painterResource(id = R.drawable.ic_app_logo),
-            contentDescription = null
-        )
-        PButton(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 16.dp),
-            text = "SupplierDetails",
-            onClick = {
-                navController.navigateToSupplierDetails("supplier0")
+    val state = rememberSearchState(
+        initialResults = emptyList<Any>(),
+        suggestions = emptyList<Any>(),
+        timeoutMillis = 600,
+    ) { query: TextFieldValue ->
+        emptyList<Any>()
+    }
+
+    Scaffold(
+        scaffoldState = scaffoldState,
+        topBar = {
+            AnimatedVisibility(
+                visible = !state.focused,
+                enter = fadeIn() + expandVertically(),
+                exit = fadeOut() + shrinkVertically(),
+            ) {
+                TopAppBar(
+                    onSettingsClick = onSettingsClick
+                )
             }
-        )
-        PButton(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 16.dp),
-            text = "ItemDetails Compose",
-            onClick = {
-                navController.navigateToItemDetails("item1")
+        },
+        snackbarHost = { C3SnackbarHost(hostState = it) },
+    ) { _ ->
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            AnimatedVisibility(visible = !state.focused) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_home_logo),
+                    contentDescription = "",
+                    tint = MaterialTheme.colors.primary,
+                    modifier = Modifier.padding(vertical = 80.dp)
+                )
             }
-        )
+            SearchBar(
+                query = state.query,
+                onQueryChange = { state.query = it },
+                onSearchFocusChange = { state.focused = it },
+                onClearQuery = { state.query = TextFieldValue("") },
+                onBack = { state.query = TextFieldValue("") },
+                searching = state.searching,
+                focused = state.focused,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
     }
 }
 
@@ -95,230 +110,12 @@ fun SearchScreen(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SearchWithAlertsScreen(
-    uiState: SearchUiState,
-    viewModel: SearchViewModel,
-    showTopAppBar: Boolean,
-    onRefresh: () -> Unit,
-    onErrorDismiss: (Long) -> Unit,
-    openDrawer: () -> Unit,
-    homeListLazyListState: LazyListState,
-    alertDetailLazyListStates: Map<String, LazyListState>,
+    navController: NavController,
     scaffoldState: ScaffoldState,
-    modifier: Modifier = Modifier,
-    onSearchInputChanged: (String) -> Unit,
-) {
-    HomeScreenWithList(
-        uiState = uiState,
-        viewModel = viewModel,
-        showTopAppBar = showTopAppBar,
-        onRefresh = onRefresh,
-        onErrorDismiss = onErrorDismiss,
-        openDrawer = openDrawer,
-        homeListLazyListState = homeListLazyListState,
-        scaffoldState = scaffoldState,
-        modifier = modifier,
-    ) { hasPostsUiState, contentModifier ->
-        val contentPadding = rememberContentPaddingForScreen(additionalTop = 8.dp)
-        Row(contentModifier) {
-            AlertList(
-                alerts = emptyList(),
-                showExpandedSearch = !showTopAppBar,
-                onAlertTapped = {},
-                onToggleAlert = {},
-                contentPadding = contentPadding,
-                modifier = Modifier
-                    .width(334.dp)
-                    .notifyInput({})
-                    .imePadding(), // add padding for the on-screen keyboard
-                state = homeListLazyListState,
-                searchInput = hasPostsUiState.searchInput,
-                onSearchInputChanged = onSearchInputChanged,
-            )
-            // Crossfade between different detail posts
-//            Crossfade(targetState = hasPostsUiState.selectedAlert) { detailAlert ->
-//                // Get the lazy list state for this detail view
-//                val detailLazyListState by derivedStateOf {
-//                    alertDetailLazyListStates.getValue(detailAlert?.id)
-//                }
-//
-//                // Key against the post id to avoid sharing any state between different posts
-//                key(detailPost.id) {
-//                    LazyColumn(
-//                        state = detailLazyListState,
-//                        contentPadding = contentPadding,
-//                        modifier = Modifier
-//                            .padding(horizontal = 16.dp)
-//                            .fillMaxSize()
-//                            .notifyInput {
-//                                onInteractWithDetail(detailPost.id)
-//                            }
-//                            .imePadding() // add padding for the on-screen keyboard
-//                    ) {
-//                        stickyHeader {
-//                            val context = LocalContext.current
-//                            PostTopBar(
-//                                isFavorite = hasPostsUiState.favorites.contains(detailPost.id),
-//                                onToggleFavorite = { onToggleFavorite(detailPost.id) },
-//                                onSharePost = { sharePost(detailPost, context) },
-//                                modifier = Modifier
-//                                    .fillMaxWidth()
-//                                    .wrapContentWidth(Alignment.End)
-//                            )
-//                        }
-//                        postContentItems(detailPost)
-//                    }
-//                }
-//            }
-        }
-    }
-}
-
-/**
- * A [Modifier] that tracks all input, and calls [block] every time input is received.
- */
-private fun Modifier.notifyInput(block: () -> Unit): Modifier =
-    composed {
-        val blockState = rememberUpdatedState(block)
-        pointerInput(Unit) {
-            while (currentCoroutineContext().isActive) {
-                awaitPointerEventScope {
-                    awaitPointerEvent(PointerEventPass.Initial)
-                    blockState.value()
-                }
-            }
-        }
-    }
-
-/**
- * A display of the home screen that has the list.
- *
- * This sets up the scaffold with the top app bar, and surrounds the [hasPostsContent] with refresh,
- * loading and error handling.
- *
- * This helper functions exists because [HomeScreenWithList] and [HomeFeedScreen] are
- * extremely similar, except for the rendered content when there are posts to display.
- */
-@Composable
-private fun HomeScreenWithList(
     uiState: SearchUiState,
-    viewModel: SearchViewModel,
-    showTopAppBar: Boolean,
     onRefresh: () -> Unit,
-    onErrorDismiss: (Long) -> Unit,
-    openDrawer: () -> Unit,
-    homeListLazyListState: LazyListState,
-    scaffoldState: ScaffoldState,
-    modifier: Modifier = Modifier,
-    hasPostsContent: @Composable (
-        uiState: SearchUiState.HasAlerts,
-        modifier: Modifier
-    ) -> Unit
 ) {
-    Scaffold(
-        scaffoldState = scaffoldState,
-        snackbarHost = { C3SnackbarHost(hostState = it) },
-        topBar = {
-//            if (showTopAppBar) {
-//                SearchTopAppBar(
-//                    openDrawer = openDrawer,
-//                    elevation = if (!homeListLazyListState.isScrolled) 0.dp else 4.dp
-//                )
-//            }
-        },
-        modifier = modifier
-    ) { innerPadding ->
-        val contentModifier = Modifier.padding(innerPadding)
 
-//        LoadingContent(
-//            empty = when (uiState) {
-//                is HomeUiState.HasPosts -> false
-//                is HomeUiState.NoPosts -> uiState.isLoading
-//            },
-//            emptyContent = { FullScreenLoading() },
-//            loading = uiState.isLoading,
-//            onRefresh = onRefreshPosts,
-//            content = {
-//                when (uiState) {
-//                    is HomeUiState.HasPosts -> hasPostsContent(uiState, contentModifier)
-//                    is HomeUiState.NoPosts -> {
-//                        if (uiState.errorMessages.isEmpty()) {
-//                            // if there are no posts, and no error, let the user refresh manually
-//                            TextButton(
-//                                onClick = onRefreshPosts,
-//                                modifier.fillMaxSize()
-//                            ) {
-//                                Text(
-//                                    stringResource(id = R.string.home_tap_to_load_content),
-//                                    textAlign = TextAlign.Center
-//                                )
-//                            }
-//                        } else {
-//                            // there's currently an error showing, don't show any content
-//                            Box(contentModifier.fillMaxSize()) { /* empty screen */ }
-//                        }
-//                    }
-//                }
-//            }
-//        )
-    }
-
-    // Process one error message at a time and show them as Snackbars in the UI
-    if (uiState.errorMessages.isNotEmpty()) {
-        // Remember the errorMessage to display on the screen
-        val errorMessage = remember(uiState) { uiState.errorMessages[0] }
-
-        // Get the text to show on the message from resources
-        val errorMessageText: String = stringResource(errorMessage.messageId)
-        val retryMessageText = stringResource(R.string.retry)
-
-        // If onRefreshPosts or onErrorDismiss change while the LaunchedEffect is running,
-        // don't restart the effect and use the latest lambda values.
-        val onRefreshPostsState by rememberUpdatedState(onRefresh)
-        val onErrorDismissState by rememberUpdatedState(onErrorDismiss)
-
-        // Effect running in a coroutine that displays the Snackbar on the screen
-        // If there's a change to errorMessageText, retryMessageText or scaffoldState,
-        // the previous effect will be cancelled and a new one will start with the new values
-        LaunchedEffect(errorMessageText, retryMessageText, scaffoldState) {
-            val snackbarResult = scaffoldState.snackbarHostState.showSnackbar(
-                message = errorMessageText,
-                actionLabel = retryMessageText
-            )
-            if (snackbarResult == SnackbarResult.ActionPerformed) {
-                onRefreshPostsState()
-            }
-            // Once the message is displayed and dismissed, notify the ViewModel
-            onErrorDismissState(errorMessage.id)
-        }
-    }
-}
-
-/**
- * Display an initial empty state or swipe to refresh content.
- *
- * @param empty (state) when true, display [emptyContent]
- * @param emptyContent (slot) the content to display for the empty state
- * @param loading (state) when true, display a loading spinner over [content]
- * @param onRefresh (event) event to request refresh
- * @param content (slot) the main content to show
- */
-@Composable
-private fun LoadingContent(
-    empty: Boolean,
-    emptyContent: @Composable () -> Unit,
-    loading: Boolean,
-    onRefresh: () -> Unit,
-    content: @Composable () -> Unit
-) {
-    if (empty) {
-        emptyContent()
-    } else {
-        SwipeRefresh(
-            state = rememberSwipeRefreshState(loading),
-            onRefresh = onRefresh,
-            content = content,
-        )
-    }
 }
 
 /**
@@ -367,20 +164,6 @@ private fun AlertList(
 }
 
 /**
- * Full screen circular progress indicator
- */
-@Composable
-private fun FullScreenLoading() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .wrapContentSize(Alignment.Center)
-    ) {
-        CircularProgressIndicator()
-    }
-}
-
-/**
  * Full-width list items for [AlertList]
  *
  * @param alerts (state) to display
@@ -403,37 +186,6 @@ private fun AlertsListSimpleSection(
         }
     }
 }
-
-/**
- * Horizontal scrolling cards for [PostList]
- *
- * @param posts (state) to display
- * @param navigateToArticle (event) request navigation to Article screen
- */
-//@Composable
-//private fun PostListPopularSection(
-//    posts: List<Post>,
-//    navigateToArticle: (String) -> Unit
-//) {
-//    Column {
-//        Text(
-//            modifier = Modifier.padding(16.dp),
-//            text = stringResource(id = R.string.home_popular_section_title),
-//            style = MaterialTheme.typography.subtitle1
-//        )
-//
-//        LazyRow(modifier = Modifier.padding(end = 16.dp)) {
-//            items(posts) { post ->
-//                PostCardPopular(
-//                    post,
-//                    navigateToArticle,
-//                    Modifier.padding(start = 16.dp, bottom = 16.dp)
-//                )
-//            }
-//        }
-//        PostListDivider()
-//    }
-//}
 
 /**
  * Full-width list items that display "based on your history" for [PostList]
@@ -558,39 +310,38 @@ private fun submitSearch(
  * TopAppBar for the Home screen
  */
 @Composable
-private fun SearchTopAppBar(
-    elevation: Dp,
+private fun TopAppBar(
+    showSearchButtons: Boolean = false,
+    onSettingsClick: () -> Unit,
 ) {
-    val title = stringResource(id = R.string.app_name)
-    TopAppBar(
-        title = {
-            Icon(
-                painter = painterResource(R.drawable.ic_app_logo),
-                contentDescription = title,
-                tint = MaterialTheme.colors.onBackground,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(bottom = 4.dp, top = 10.dp)
-            )
-        },
+    C3TopAppBar(
+        title = "",
+        showLogo = showSearchButtons,
         navigationIcon = {
-            IconButton(onClick = {}) {
+            IconButton(onClick = onSettingsClick) {
                 Icon(
-                    imageVector = Icons.Filled.Settings,
+                    imageVector = Icons.Outlined.Settings,
                     contentDescription = stringResource(R.string.cd_settings),
                     tint = MaterialTheme.colors.primary
                 )
             }
         },
         actions = {
-            IconButton(onClick = { /* TODO: Open search */ }) {
-                Icon(
-                    imageVector = Icons.Filled.Search,
-                    contentDescription = stringResource(R.string.cd_search)
-                )
+            if (showSearchButtons) {
+                IconButton(onClick = { /* TODO: Open search */ }) {
+                    Icon(
+                        imageVector = Icons.Filled.Search,
+                        contentDescription = stringResource(R.string.cd_search)
+                    )
+                }
+            } else {
+                IconButton(onClick = { /* TODO: Open search */ }) {
+                    Icon(
+                        imageVector = Icons.Filled.WarningAmber,
+                        contentDescription = stringResource(R.string.cd_search)
+                    )
+                }
             }
         },
-        backgroundColor = MaterialTheme.colors.surface,
-        elevation = elevation
     )
 }
