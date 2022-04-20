@@ -10,7 +10,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -30,6 +30,7 @@ import com.c3ai.sourcingoptimization.common.SortType
 import com.c3ai.sourcingoptimization.common.components.*
 import com.c3ai.sourcingoptimization.presentation.views.UiAlert
 import com.c3ai.sourcingoptimization.ui.theme.*
+import com.c3ai.sourcingoptimization.utilities.PAGINATED_RESPONSE_LIMIT
 import com.google.gson.Gson
 import kotlinx.coroutines.launch
 
@@ -56,18 +57,11 @@ fun AlertsScreen(
     onCollapsableItemClick: (String) -> Unit,
     onSupplierClick: (String) -> Unit,
     onItemClick: (String) -> Unit,
-    onPOClick: (String) -> Unit
+    onPOClick: (String) -> Unit,
+    onContactClick: (String) -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
     val bottomState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
-
-    var phoneNumber: String by remember {
-        mutableStateOf("")
-    }
-
-    var emailAddress: String by remember {
-        mutableStateOf("")
-    }
 
     if (selectedCategories != null) {
         viewModel.onEvent(AlertsEvent.OnFilterChanged(selectedCategories))
@@ -76,9 +70,14 @@ fun AlertsScreen(
     ModalBottomSheetLayout(
         sheetState = bottomState,
         sheetContent = {
-            ContactSupplierBottomSheetContent(phoneNumber, emailAddress)
+            ContactSupplierBottomSheetContent(
+                uiState.selectedSupplierContact?.phone ?: "",
+                uiState.selectedSupplierContact?.email ?: "",
+            )
         }
     ) {
+        val page = viewModel.page.value
+
         Scaffold(
             scaffoldState = scaffoldState,
             topBar = {
@@ -136,9 +135,12 @@ fun AlertsScreen(
                                         )
                                     }
 
-                                    items(categoryList.getValue(it)) {
-                                        phoneNumber = it.supplierContract?.phone ?: ""
-                                        emailAddress = it.supplierContract?.email ?: ""
+                                    itemsIndexed(items = categoryList.getValue(it)) { index, it ->
+
+                                        viewModel.onChangeListScrollPosition(index)
+                                        if ((index + 1) >= (page * PAGINATED_RESPONSE_LIMIT)){
+                                            viewModel.nextPage()
+                                        }
                                         if (it.readStatus != "Read") {
                                             it.readStatus = "Read"
                                             updateReadStatus(it.id, viewModel)
@@ -172,6 +174,12 @@ fun AlertsScreen(
                                                     }
                                                 },
                                                 {
+                                                    val supplierId = it.redirectUrl?.substring(
+                                                        it.redirectUrl.lastIndexOf("/") + 1
+                                                    )
+                                                    if (supplierId != null) {
+                                                        onContactClick(supplierId)
+                                                    }
                                                     coroutineScope.launch {
                                                         if (!bottomState.isVisible) {
                                                             bottomState.show()

@@ -84,7 +84,7 @@ interface C3Repository {
         interval: String
     ): C3Result<ItemMarketPriceIndexRelationMetrics>
 
-    suspend fun getAlertsForUser(order: String): C3Result<List<Alert>>
+    suspend fun getAlertsForUser(order: String, page: Int): C3Result<List<Alert>>
 
     suspend fun getAlertsFeedbacks(
         alertIds: List<String>,

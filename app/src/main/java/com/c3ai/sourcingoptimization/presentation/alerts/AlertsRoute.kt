@@ -37,7 +37,7 @@ fun AlertsRoute(
         viewModel = viewModel,
         uiState = uiState,
         selectedCategories = Gson().fromJson(selectedCategories, Array<String>::class.java)?.asList(),
-        onRefreshDetails = { viewModel.refreshDetails() },
+        onRefreshDetails = { viewModel.refreshDetails(page = 0) },
         onSearchInputChanged = { viewModel.onEvent(AlertsEvent.OnSearchInputChanged(it)) },
         onSortChanged = { viewModel.onEvent(AlertsEvent.OnSortChanged(it)) },
         onChangeFilter = { navController.navigateToAlertSettings(it) },
@@ -45,6 +45,7 @@ fun AlertsRoute(
         onCollapsableItemClick = { viewModel.onEvent(AlertsEvent.OnCollapsableItemClick(it)) },
         onSupplierClick = { navController.navigateToSupplierDetails(it) },
         onItemClick = { navController.navigateToItemDetails(it) },
-        onPOClick = { navController.navigateToPoDetails(it) }
+        onPOClick = { navController.navigateToPoDetails(it) },
+        onContactClick = { viewModel.onEvent(AlertsEvent.OnSupplierContactSelected(it)) },
     )
 }

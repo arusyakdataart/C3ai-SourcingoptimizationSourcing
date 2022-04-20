@@ -14,6 +14,5 @@ data class UiAlert(
     val flagged: Boolean?,
     val timestamp: String?,
     val redirectUrl: String?,
-    val feedback: AlertFeedback?,
-    val supplierContract: C3VendorContact?
+    val feedback: AlertFeedback?
 )

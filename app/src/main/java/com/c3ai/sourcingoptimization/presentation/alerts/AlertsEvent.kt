@@ -7,4 +7,5 @@ sealed class AlertsEvent {
     data class OnFilterChanged(val categories: List<String>) : AlertsEvent()
     data class OnFeedbackChanged(val alertId: String, val statusValue: Boolean) : AlertsEvent()
     data class OnFlaggedChanged(val alertId: String, val statusValue: Boolean) : AlertsEvent()
+    data class OnSupplierContactSelected(val supplierId: String) : AlertsEvent()
 }
