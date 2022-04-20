@@ -36,7 +36,10 @@ fun SearchRoute(
                 scaffoldState = scaffoldState,
                 uiState = uiState,
                 onRefresh = {},
-                onSettingsClick = { navController.navigate(SETTINGS_ROUTE) }
+                onSettingsClick = { navController.navigate(SETTINGS_ROUTE) },
+                onSearch = { searchInput, selectedFilters ->
+                    viewModel.search(searchInput, selectedFilters)
+                }
             )
         }
         SearchWithAlerts -> {
@@ -44,7 +47,11 @@ fun SearchRoute(
                 navController = navController,
                 scaffoldState = scaffoldState,
                 uiState = uiState,
-                onRefresh = {}
+                onRefresh = {},
+                onSettingsClick = { navController.navigate(SETTINGS_ROUTE) },
+                onSearch = { searchInput, selectedFilters ->
+                    viewModel.search(searchInput, selectedFilters)
+                }
             )
         }
     }

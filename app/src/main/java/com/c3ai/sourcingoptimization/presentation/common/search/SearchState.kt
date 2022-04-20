@@ -21,13 +21,15 @@ import androidx.compose.ui.text.input.TextFieldValue
 fun <I, R, S> rememberSearchState(
     initialResults: List<I> = emptyList(),
     suggestions: List<S> = emptyList(),
-    searchResults: List<R> = emptyList()
+    searchResults: List<R> = emptyList(),
+    selectedFilters: Set<Int> = emptySet()
 ): SearchState<I, R, S> {
     return remember {
         SearchState(
             initialResults = initialResults,
             suggestions = suggestions,
-            searchResults = searchResults
+            searchResults = searchResults,
+            selectedFilters = selectedFilters
         )
     }
 }
@@ -64,6 +66,7 @@ fun <I, R, S> rememberSearchState(
     initialResults: List<I> = emptyList(),
     suggestions: List<S> = emptyList(),
     searchResults: List<R> = emptyList(),
+    selectedFilters: Set<Int> = emptySet(),
     timeoutMillis: Long = 0,
     onQueryResult: (TextFieldValue) -> List<R>,
 ): SearchState<I, R, S> {
@@ -72,7 +75,8 @@ fun <I, R, S> rememberSearchState(
         SearchState(
             initialResults = initialResults,
             suggestions = suggestions,
-            searchResults = searchResults
+            searchResults = searchResults,
+            selectedFilters = selectedFilters
         )
     }.also { state ->
         LaunchedEffect(key1 = Unit) {
@@ -119,7 +123,8 @@ fun <I, R, S> rememberSearchState(
 class SearchState<I, R, S> internal constructor(
     initialResults: List<I>,
     suggestions: List<S>,
-    searchResults: List<R>
+    searchResults: List<R>,
+    selectedFilters: Set<Int>,
 ) {
     /**
      * Query [TextFieldValue] that contains text and query selection position.
@@ -148,6 +153,11 @@ class SearchState<I, R, S> internal constructor(
      * [SearchDisplay.NoResults] state otherwise in [SearchDisplay.Results] state.
      */
     var searchResults by mutableStateOf(searchResults)
+
+    /**
+     * Set of a selected filters. This list affect selected chips on search.
+     */
+    var selectedFilters by mutableStateOf(selectedFilters)
 
     /**
      * Last query text, it might be used to prevent doing search when current query and previous

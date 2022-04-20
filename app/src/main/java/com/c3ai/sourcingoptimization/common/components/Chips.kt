@@ -153,15 +153,20 @@ fun CancelableChip(
 fun OutlinedChip(
     modifier: Modifier = Modifier,
     text: String,
+    selected: Boolean = false,
     @DrawableRes drawableRes: Int = -1,
     closable: Boolean = false,
     onClick: ((String) -> Unit)? = null,
 ) {
     Surface(
         elevation = 0.dp,
-        border = BorderStroke(1.dp, MaterialTheme.colors.onBackground),
+        border = BorderStroke(
+            1.dp,
+            if (selected) Gray40 else MaterialTheme.colors.onBackground
+        ),
         shape = RoundedCornerShape(16.dp),
         modifier = modifier.clickable { onClick?.invoke(text) },
+        color = if (selected) Gray40 else MaterialTheme.colors.surface
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             if (drawableRes != -1) {
@@ -177,7 +182,7 @@ fun OutlinedChip(
             Text(
                 text,
                 style = MaterialTheme.typography.h4,
-                color = Gray40,
+                color = if (selected) Color.Black else Gray40,
                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
             )
 

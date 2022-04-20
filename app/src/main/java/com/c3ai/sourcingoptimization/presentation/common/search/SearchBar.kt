@@ -26,7 +26,6 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
@@ -41,18 +40,24 @@ import com.c3ai.sourcingoptimization.common.components.StaggeredGrid
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SearchBar(
-    query: TextFieldValue,
-    onQueryChange: (TextFieldValue) -> Unit,
-    onSearchFocusChange: (Boolean) -> Unit,
-    onClearQuery: () -> Unit,
-    onBack: () -> Unit,
-    searching: Boolean,
-    focused: Boolean,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    fglModifier: Modifier = Modifier,
+    filters: List<String>? = null,
+    fixed: Boolean = false,
+    singLine: Boolean = false,
+    onQueryChange: (TextFieldValue) -> Unit = {},
+    onSearchFocusChange: (Boolean) -> Unit = {},
+    onBackClick: () -> Unit = {},
+    onSearch: (String, Set<Int>) -> Unit,
 ) {
 
-    val focusManager = LocalFocusManager.current
-    val keyboardController = LocalSoftwareKeyboardController.current
+    val state = rememberSearchState(
+        initialResults = emptyList<Any>(),
+        suggestions = emptyList<Any>(),
+        timeoutMillis = 600,
+    ) { query: TextFieldValue ->
+        emptyList<Any>()
+    }
 
     Surface(
         color = Color.Transparent,
@@ -64,47 +69,74 @@ fun SearchBar(
                 modifier = modifier
                     .border(1.dp, MaterialTheme.colors.onBackground, MaterialTheme.shapes.small)
                     .background(
-                        color = if (focused) MaterialTheme.colors.surface
+                        color = if (state.focused) MaterialTheme.colors.surface
                         else MaterialTheme.colors.background
                     ),
             ) {
-                AnimatedVisibility(visible = focused) {
-                    IconButton(
-                        onClick = {
-                            focusManager.clearFocus()
-                            keyboardController?.hide()
-                            onBack()
-                        }) {
-                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
-                    }
-                }
-                AnimatedVisibility(visible = !focused) {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .padding(12.dp)
-                            .size(24.dp),
-                    )
+                SearchIconButton(selected = fixed || state.focused) {
+                    state.query = TextFieldValue("")
+                    onBackClick()
                 }
                 SearchTextField(
-                    query,
-                    onQueryChange,
-                    onSearchFocusChange,
-                    onClearQuery,
-                    searching,
-                    focused,
+                    state.query,
+                    {
+                        state.query = it
+                        onQueryChange(it)
+                    },
+                    {
+                        state.focused = it
+                        onSearchFocusChange(it)
+                    },
+                    { state.query = TextFieldValue("") },
+                    state.searching,
+                    state.focused,
                     modifier.weight(1f)
                 )
             }
-            FiltersGridLayout(
-                filters = stringArrayResource(R.array.searchFilters).toList(),
-                modifier = Modifier
-                    .padding(horizontal = 30.dp)
-                    .horizontalScroll(rememberScrollState())
-            ) {
-
+            filters?.let {
+                if (singLine) fglModifier.horizontalScroll(rememberScrollState())
+                FiltersGridLayout(
+                    filters = filters,
+                    selected = state.selectedFilters,
+                    modifier = fglModifier
+                ) {
+                    state.selectedFilters = state.selectedFilters.toMutableSet().apply {
+                        val isRemoved = remove(it)
+                        isRemoved || add(it)
+                    }
+                }
             }
+        }
+    }
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+private fun SearchIconButton(
+    selected: Boolean,
+    onClose: () -> Unit,
+) {
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+    Box {
+        AnimatedVisibility(visible = selected) {
+            IconButton(
+                onClick = {
+                    focusManager.clearFocus()
+                    keyboardController?.hide()
+                    onClose()
+                }) {
+                Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
+            }
+        }
+        AnimatedVisibility(visible = !selected) {
+            Icon(
+                imageVector = Icons.Default.Search,
+                contentDescription = null,
+                modifier = Modifier
+                    .padding(12.dp)
+                    .size(24.dp),
+            )
         }
     }
 }
@@ -193,6 +225,7 @@ private fun SearchHint(modifier: Modifier = Modifier) {
 fun FiltersGridLayout(
     modifier: Modifier = Modifier,
     filters: List<String>,
+    selected: Set<Int>,
     onFilterClick: (Int) -> Unit
 ) {
     StaggeredGrid(modifier = modifier) {
@@ -200,9 +233,8 @@ fun FiltersGridLayout(
             OutlinedChip(
                 modifier = Modifier.padding(4.dp),
                 text = filter,
-                onClick = {
-                    onFilterClick(index)
-                },
+                selected = selected.contains(index),
+                onClick = { onFilterClick(index) },
             )
         }
     }
