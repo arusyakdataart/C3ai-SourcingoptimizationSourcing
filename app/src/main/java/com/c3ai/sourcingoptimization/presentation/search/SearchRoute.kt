@@ -10,7 +10,8 @@ import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.c3ai.sourcingoptimization.presentation.C3Destinations.SETTINGS_ROUTE
-import com.c3ai.sourcingoptimization.presentation.search.SearchScreenType.*
+import com.c3ai.sourcingoptimization.presentation.search.SearchScreenType.SearchHome
+import com.c3ai.sourcingoptimization.presentation.search.SearchScreenType.SearchWithAlerts
 
 /**
  * Displays the Home route.
@@ -32,26 +33,24 @@ fun SearchRoute(
     when (getSearchScreenType(uiState)) {
         SearchHome -> {
             SearchScreen(
-                navController = navController,
                 scaffoldState = scaffoldState,
                 uiState = uiState,
                 onRefresh = {},
                 onSettingsClick = { navController.navigate(SETTINGS_ROUTE) },
-                onSearch = { searchInput, selectedFilters ->
-                    viewModel.search(searchInput, selectedFilters)
-                }
+                onQueryChange = { viewModel.onEvent(SearchEvent.OnQueryChange(it)) },
+                onFilterClick = { viewModel.onEvent(SearchEvent.OnFilterClick(it)) },
+                onSearch = { viewModel.onEvent(SearchEvent.Search) }
             )
         }
         SearchWithAlerts -> {
             SearchWithAlertsScreen(
-                navController = navController,
                 scaffoldState = scaffoldState,
                 uiState = uiState,
                 onRefresh = {},
                 onSettingsClick = { navController.navigate(SETTINGS_ROUTE) },
-                onSearch = { searchInput, selectedFilters ->
-                    viewModel.search(searchInput, selectedFilters)
-                }
+                onQueryChange = { viewModel.onEvent(SearchEvent.OnQueryChange(it)) },
+                onFilterClick = { viewModel.onEvent(SearchEvent.OnFilterClick(it)) },
+                onSearch = { viewModel.onEvent(SearchEvent.Search) }
             )
         }
     }

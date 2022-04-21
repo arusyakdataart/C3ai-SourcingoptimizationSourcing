@@ -1,13 +1,16 @@
 package com.c3ai.sourcingoptimization.presentation.common.search
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -33,31 +36,33 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.c3ai.sourcingoptimization.R
+import com.c3ai.sourcingoptimization.common.components.ListDivider
 import com.c3ai.sourcingoptimization.common.components.OutlinedChip
 import com.c3ai.sourcingoptimization.common.components.StaggeredGrid
+import com.c3ai.sourcingoptimization.presentation.search.RecentSearch
+import com.c3ai.sourcingoptimization.presentation.views.UiRecentSearchItem
 
 @ExperimentalAnimationApi
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SearchBar(
     modifier: Modifier = Modifier,
-    fglModifier: Modifier = Modifier,
-    filters: List<String>? = null,
+    suggestions: List<UiRecentSearchItem> = emptyList(),
     fixed: Boolean = false,
-    singLine: Boolean = false,
+    onBackClick: () -> Unit = {},
     onQueryChange: (TextFieldValue) -> Unit = {},
     onSearchFocusChange: (Boolean) -> Unit = {},
-    onBackClick: () -> Unit = {},
-    onSearch: (String, Set<Int>) -> Unit,
+    onSearch: () -> Unit,
+    subContent: @Composable (() -> Unit)?
 ) {
 
     val state = rememberSearchState(
         initialResults = emptyList<Any>(),
-        suggestions = emptyList<Any>(),
         timeoutMillis = 600,
     ) { query: TextFieldValue ->
         emptyList<Any>()
     }
+    val listState = rememberLazyListState()
 
     Surface(
         color = Color.Transparent,
@@ -78,31 +83,41 @@ fun SearchBar(
                     onBackClick()
                 }
                 SearchTextField(
-                    state.query,
-                    {
+                    query = state.query,
+                    onQueryChange = {
                         state.query = it
                         onQueryChange(it)
                     },
-                    {
+                    onSearchFocusChange = {
                         state.focused = it
                         onSearchFocusChange(it)
                     },
-                    { state.query = TextFieldValue("") },
-                    state.searching,
-                    state.focused,
-                    modifier.weight(1f)
+                    onClearQuery = { state.query = TextFieldValue("") },
+                    searching = state.searching,
+                    focused = state.focused,
+                    modifier = modifier.weight(1f),
+                    onSearch = onSearch,
                 )
             }
-            filters?.let {
-                if (singLine) fglModifier.horizontalScroll(rememberScrollState())
-                FiltersGridLayout(
-                    filters = filters,
-                    selected = state.selectedFilters,
-                    modifier = fglModifier
+            subContent?.invoke()
+            Log.e("suggestions", suggestions.size.toString())
+            if (suggestions.isNotEmpty() && (fixed || state.focused)) {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    listState,
+                    contentPadding = PaddingValues(horizontal = 16.dp),
                 ) {
-                    state.selectedFilters = state.selectedFilters.toMutableSet().apply {
-                        val isRemoved = remove(it)
-                        isRemoved || add(it)
+                    item {
+                        Text(
+                            stringResource(R.string.recent),
+                            style = MaterialTheme.typography.h5,
+                            color = MaterialTheme.colors.secondary,
+                            modifier = Modifier.padding(vertical = 16.dp)
+                        )
+                    }
+                    items(suggestions) { item ->
+                        RecentSearch(item)
+                        ListDivider()
                     }
                 }
             }
@@ -149,13 +164,14 @@ private fun SearchIconButton(
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SearchTextField(
+    modifier: Modifier = Modifier,
     query: TextFieldValue,
     onQueryChange: (TextFieldValue) -> Unit,
     onSearchFocusChange: (Boolean) -> Unit,
     onClearQuery: () -> Unit,
     searching: Boolean,
     focused: Boolean,
-    modifier: Modifier = Modifier
+    onSearch: () -> Unit,
 ) {
     val focusRequester = remember { FocusRequester() }
     CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
@@ -183,6 +199,12 @@ fun SearchTextField(
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(
                         imeAction = ImeAction.Search
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onSearch = {
+                            Log.e("onSearch", "call")
+                            onSearch()
+                        }
                     )
                 )
 

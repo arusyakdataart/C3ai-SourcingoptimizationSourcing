@@ -1,17 +1,30 @@
 package com.c3ai.sourcingoptimization.common.components
 
+import androidx.compose.animation.*
+import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.c3ai.sourcingoptimization.R
+import com.c3ai.sourcingoptimization.presentation.common.search.FiltersGridLayout
+import com.c3ai.sourcingoptimization.presentation.common.search.SearchBar
+import com.c3ai.sourcingoptimization.presentation.search.SearchUiState
 
 
 /**
@@ -67,4 +80,57 @@ fun C3TopAppBar(
         backgroundColor = MaterialTheme.colors.background,
         elevation = 0.dp
     )
+}
+
+/**
+ * TopAppBar for the Home+Alerts screen
+ */
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+fun C3SearchAppBar(
+    title: String,
+    showLogo: Boolean = false,
+    navigationIcon: @Composable (() -> Unit)? = null,
+    actions: @Composable RowScope.() -> Unit = {},
+    onQueryChange: (String) -> Unit = {},
+    onSearch: () -> Unit,
+    subContent: @Composable (() -> Unit)?
+) {
+    val transitionState = remember { MutableTransitionState(initialState = false) }
+    Box {
+        C3TopAppBar(
+            title = title,
+            showLogo = showLogo,
+            navigationIcon = navigationIcon,
+            actions = {
+                actions()
+                AnimatedVisibility(
+                    visible = !transitionState.currentState,
+                    enter = scaleIn(),
+                    exit = scaleOut(),
+                ) {
+                    IconButton(onClick = { transitionState.targetState = true }) {
+                        Icon(
+                            imageVector = Icons.Filled.Search,
+                            contentDescription = stringResource(R.string.cd_search)
+                        )
+                    }
+                }
+            },
+        )
+        AnimatedVisibility(
+            visibleState = transitionState,
+            enter = slideInHorizontally(initialOffsetX = { it }),
+            exit = slideOutHorizontally(targetOffsetX = { it }),
+        ) {
+            SearchBar(
+                fixed = true,
+                onQueryChange = { onQueryChange(it.text) },
+                onBackClick = { transitionState.targetState = false },
+                onSearch = onSearch,
+                subContent = subContent,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+    }
 }

@@ -115,6 +115,8 @@
     <string name="alert_types_settings">Alert Types Settings</string>
     <string name="home">Home</string>
     <string name="search_">Search…</string>
+    <string name="recent">Recent</string>
+    <string name="cd_history">History</string>
     <array name="sort_po">
         <item>Total Cost</item>
         <item>Unit Price</item>

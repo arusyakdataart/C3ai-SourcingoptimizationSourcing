@@ -3,13 +3,14 @@ package com.c3ai.sourcingoptimization.presentation.search
 import android.content.Context
 import android.widget.Toast
 import androidx.compose.animation.*
-import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -39,17 +40,19 @@ import com.c3ai.sourcingoptimization.common.components.*
 import com.c3ai.sourcingoptimization.domain.model.Alert
 import com.c3ai.sourcingoptimization.modifiers.interceptKey
 import com.c3ai.sourcingoptimization.presentation.alerts.AlertCardSimple
+import com.c3ai.sourcingoptimization.presentation.common.search.FiltersGridLayout
 import com.c3ai.sourcingoptimization.presentation.common.search.SearchBar
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalAnimationApi::class)
 @Composable
 fun SearchScreen(
-    navController: NavController,
     scaffoldState: ScaffoldState,
     uiState: SearchUiState,
     onRefresh: () -> Unit,
     onSettingsClick: () -> Unit,
-    onSearch: (String, Set<Int>) -> Unit,
+    onQueryChange: (String) -> Unit = {},
+    onFilterClick: (Int) -> Unit,
+    onSearch: () -> Unit,
 ) {
     val context = LocalContext.current
     var focused by remember { mutableStateOf(false) }
@@ -82,14 +85,20 @@ fun SearchScreen(
                 )
             }
             SearchBar(
-                filters = stringArrayResource(R.array.searchFilters).toList(),
-                singLine = true,
-                onQueryChange = { },
+                suggestions = uiState.suggestions,
+                onQueryChange = { onQueryChange(it.text) },
                 onSearchFocusChange = { focused = it },
                 onSearch = onSearch,
                 modifier = Modifier.fillMaxWidth(),
-                fglModifier = Modifier.padding(top = 30.dp)
-            )
+            ) {
+                FiltersGridLayout(
+                    filters = stringArrayResource(R.array.searchFilters).toList(),
+                    selected = uiState.selectedFilters,
+                    modifier = Modifier.padding(top = if (focused) 10.dp else 30.dp)
+                ) {
+                    onFilterClick(it)
+                }
+            }
         }
     }
 }
@@ -100,12 +109,13 @@ fun SearchScreen(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SearchWithAlertsScreen(
-    navController: NavController,
     scaffoldState: ScaffoldState,
     uiState: SearchUiState,
     onRefresh: () -> Unit,
     onSettingsClick: () -> Unit,
-    onSearch: (String, Set<Int>) -> Unit,
+    onQueryChange: (String) -> Unit = {},
+    onFilterClick: (Int) -> Unit,
+    onSearch: () -> Unit,
 ) {
     val context = LocalContext.current
 
@@ -113,7 +123,10 @@ fun SearchWithAlertsScreen(
         scaffoldState = scaffoldState,
         topBar = {
             SearchTopAppBar(
+                uiState = uiState,
                 onSettingsClick = onSettingsClick,
+                onQueryChange = onQueryChange,
+                onFilterClick = onFilterClick,
                 onSearch = onSearch
             )
         },
@@ -351,46 +364,36 @@ private fun HomeTopAppBar(
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 private fun SearchTopAppBar(
+    uiState: SearchUiState,
+    onQueryChange: (String) -> Unit = {},
     onSettingsClick: () -> Unit,
-    onSearch: (String, Set<Int>) -> Unit,
+    onFilterClick: (Int) -> Unit,
+    onSearch: () -> Unit,
 ) {
-    val transitionState = remember { MutableTransitionState(initialState = false) }
-    Box {
-        C3TopAppBar(
-            title = "",
-            showLogo = true,
-            navigationIcon = {
-                IconButton(onClick = onSettingsClick) {
-                    Icon(
-                        imageVector = Icons.Outlined.Settings,
-                        contentDescription = stringResource(R.string.cd_settings),
-                        tint = MaterialTheme.colors.primary
-                    )
-                }
-            },
-            actions = {
-                IconButton(onClick = { transitionState.targetState = true }) {
-                    Icon(
-                        imageVector = Icons.Filled.Search,
-                        contentDescription = stringResource(R.string.cd_search)
-                    )
-                }
-            },
-        )
-        AnimatedVisibility(
-            visibleState = transitionState,
-            enter = slideInHorizontally(initialOffsetX = { it }),
-            exit = slideOutHorizontally(targetOffsetX = { it }),
+    C3SearchAppBar(
+        title = "",
+        showLogo = true,
+        navigationIcon = {
+            IconButton(onClick = onSettingsClick) {
+                Icon(
+                    imageVector = Icons.Outlined.Settings,
+                    contentDescription = stringResource(R.string.cd_settings),
+                    tint = MaterialTheme.colors.primary
+                )
+            }
+        },
+        actions = {},
+        onQueryChange = onQueryChange,
+        onSearch = onSearch,
+    ) {
+        FiltersGridLayout(
+            filters = stringArrayResource(R.array.searchFilters).toList(),
+            selected = uiState.selectedFilters,
+            modifier = Modifier
+                .padding(top = 10.dp)
+                .horizontalScroll(rememberScrollState())
         ) {
-            SearchBar(
-                filters = stringArrayResource(R.array.searchFilters).toList(),
-                fixed = true,
-                singLine = true,
-                onQueryChange = { },
-                onBackClick = { transitionState.targetState = false },
-                onSearch = onSearch,
-                modifier = Modifier.fillMaxWidth(),
-            )
+            onFilterClick(it)
         }
     }
 }

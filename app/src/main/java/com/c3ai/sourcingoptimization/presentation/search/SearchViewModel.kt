@@ -1,12 +1,16 @@
 package com.c3ai.sourcingoptimization.presentation.search
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.c3ai.sourcingoptimization.domain.model.Alert
+import com.c3ai.sourcingoptimization.domain.model.RecentSearchItem
 import com.c3ai.sourcingoptimization.domain.settings.C3AppSettingsProvider
 import com.c3ai.sourcingoptimization.domain.settings.C3AppSettingsProviderImpl.Companion.SEARCH_MODE
 import com.c3ai.sourcingoptimization.domain.use_case.SearchUseCases
 import com.c3ai.sourcingoptimization.presentation.ViewModelState
+import com.c3ai.sourcingoptimization.presentation.views.UiRecentSearchItem
+import com.c3ai.sourcingoptimization.presentation.views.convert
 import com.c3ai.sourcingoptimization.utilities.ErrorMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -24,6 +28,8 @@ sealed interface SearchUiState {
     val isLoading: Boolean
     val errorMessages: List<ErrorMessage>
     val searchInput: String
+    val selectedFilters: Set<Int>
+    val suggestions: List<UiRecentSearchItem>
 
     /**
      * There are search results to render, as contained in [alerts].
@@ -31,10 +37,11 @@ sealed interface SearchUiState {
      */
     data class SearchResults(
         val results: List<Any> = emptyList(),
-        val suggestions: List<String> = emptyList(),
         override val isLoading: Boolean,
         override val errorMessages: List<ErrorMessage>,
         override val searchInput: String,
+        override val selectedFilters: Set<Int> = emptySet(),
+        override val suggestions: List<UiRecentSearchItem> = emptyList(),
     ) : SearchUiState
 
     /**
@@ -44,10 +51,11 @@ sealed interface SearchUiState {
      * waiting to reload them.
      */
     data class NoAlerts(
-        val selectedAlert: Alert? = null,
         override val isLoading: Boolean,
         override val errorMessages: List<ErrorMessage>,
         override val searchInput: String,
+        override val selectedFilters: Set<Int> = emptySet(),
+        override val suggestions: List<UiRecentSearchItem> = emptyList(),
     ) : SearchUiState
 
     /**
@@ -60,6 +68,8 @@ sealed interface SearchUiState {
         override val isLoading: Boolean,
         override val errorMessages: List<ErrorMessage>,
         override val searchInput: String,
+        override val selectedFilters: Set<Int> = emptySet(),
+        override val suggestions: List<UiRecentSearchItem> = emptyList(),
     ) : SearchUiState
 }
 
@@ -72,6 +82,8 @@ private data class SearchViewModelState(
     val isLoading: Boolean = false,
     val errorMessages: List<ErrorMessage> = emptyList(),
     val searchInput: String = "",
+    val selectedFilters: Set<Int> = emptySet(),
+    val suggestions: List<RecentSearchItem> = emptyList(),
 ) : ViewModelState() {
 
     /**
@@ -79,11 +91,13 @@ private data class SearchViewModelState(
      * the ui.
      */
     fun toUiState(): SearchUiState =
-        if (settings.getSearchMode() != SEARCH_MODE) {
+        if (settings.getSearchMode() == SEARCH_MODE) {
             SearchUiState.SearchResults(
                 isLoading = isLoading,
                 errorMessages = errorMessages,
                 searchInput = searchInput,
+                selectedFilters = selectedFilters,
+                suggestions = suggestions.map { convert(it) },
             )
         } else {
             if (alerts == null) {
@@ -91,6 +105,8 @@ private data class SearchViewModelState(
                     isLoading = isLoading,
                     errorMessages = errorMessages,
                     searchInput = searchInput,
+                    selectedFilters = selectedFilters,
+                    suggestions = suggestions.map { convert(it) },
                 )
             } else {
                 SearchUiState.HasAlerts(
@@ -99,6 +115,8 @@ private data class SearchViewModelState(
                     isLoading = isLoading,
                     errorMessages = errorMessages,
                     searchInput = searchInput,
+                    selectedFilters = selectedFilters,
+                    suggestions = suggestions.map { convert(it) },
                 )
             }
         }
@@ -131,18 +149,38 @@ class SearchViewModel @Inject constructor(
         }
     }
 
-    fun search(searchInput: String, selectedFilters: Set<Int>) {
-
-    }
-
     /**
      * Update state by user event.
      */
     fun onEvent(event: SearchEvent) {
         viewModelState.update { state ->
             when (event) {
+                is SearchEvent.OnQueryChange -> {
+                    state.copy(searchInput = event.query)
+                }
                 is SearchEvent.OnFilterClick -> {
-                    state.copy()
+                    state.copy(
+                        selectedFilters = state.selectedFilters.toMutableSet().apply {
+                            val isRemoved = remove(event.index)
+                            isRemoved || add(event.index)
+                        }
+                    )
+                }
+                is SearchEvent.Search -> {
+                    if (state.searchInput.isNotEmpty()) {
+                        Log.e("SearchEvent", "call")
+                        state.copy(
+                            suggestions = state.suggestions.toMutableList().apply {
+                                find {
+                                    it.input == state.searchInput
+                                            && it.filters.containsAll(state.selectedFilters)
+                                }?.let { remove(it) }
+                                add(0, RecentSearchItem(state.searchInput, state.selectedFilters))
+                            }
+                        )
+                    } else {
+                        state
+                    }
                 }
             }
         }

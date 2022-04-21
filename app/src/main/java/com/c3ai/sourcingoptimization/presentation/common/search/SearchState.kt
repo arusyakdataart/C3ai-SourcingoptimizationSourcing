@@ -20,16 +20,12 @@ import androidx.compose.ui.text.input.TextFieldValue
 @Composable
 fun <I, R, S> rememberSearchState(
     initialResults: List<I> = emptyList(),
-    suggestions: List<S> = emptyList(),
     searchResults: List<R> = emptyList(),
-    selectedFilters: Set<Int> = emptySet()
-): SearchState<I, R, S> {
+): SearchState<I, R> {
     return remember {
         SearchState(
             initialResults = initialResults,
-            suggestions = suggestions,
             searchResults = searchResults,
-            selectedFilters = selectedFilters
         )
     }
 }
@@ -62,21 +58,17 @@ fun <I, R, S> rememberSearchState(
  *
  */
 @Composable
-fun <I, R, S> rememberSearchState(
+fun <I, R> rememberSearchState(
     initialResults: List<I> = emptyList(),
-    suggestions: List<S> = emptyList(),
     searchResults: List<R> = emptyList(),
-    selectedFilters: Set<Int> = emptySet(),
     timeoutMillis: Long = 0,
     onQueryResult: (TextFieldValue) -> List<R>,
-): SearchState<I, R, S> {
+): SearchState<I, R> {
 
     return remember {
         SearchState(
             initialResults = initialResults,
-            suggestions = suggestions,
             searchResults = searchResults,
-            selectedFilters = selectedFilters
         )
     }.also { state ->
         LaunchedEffect(key1 = Unit) {
@@ -120,11 +112,9 @@ fun <I, R, S> rememberSearchState(
  * but query is empty
  * @param searchResults results of latest search
  */
-class SearchState<I, R, S> internal constructor(
+class SearchState<I, R> internal constructor(
     initialResults: List<I>,
-    suggestions: List<S>,
     searchResults: List<R>,
-    selectedFilters: Set<Int>,
 ) {
     /**
      * Query [TextFieldValue] that contains text and query selection position.
@@ -143,21 +133,10 @@ class SearchState<I, R, S> internal constructor(
     var initialResults by mutableStateOf(initialResults)
 
     /**
-     * Suggestions might contain keywords and display chips to show when Search Composable
-     * is focused but query is empty.
-     */
-    var suggestions by mutableStateOf(suggestions)
-
-    /**
      * Results of a search action. If this list is empty [searchDisplay] is
      * [SearchDisplay.NoResults] state otherwise in [SearchDisplay.Results] state.
      */
     var searchResults by mutableStateOf(searchResults)
-
-    /**
-     * Set of a selected filters. This list affect selected chips on search.
-     */
-    var selectedFilters by mutableStateOf(selectedFilters)
 
     /**
      * Last query text, it might be used to prevent doing search when current query and previous
