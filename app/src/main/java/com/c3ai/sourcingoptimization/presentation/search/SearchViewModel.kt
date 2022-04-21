@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.c3ai.sourcingoptimization.domain.model.Alert
 import com.c3ai.sourcingoptimization.domain.settings.C3AppSettingsProvider
+import com.c3ai.sourcingoptimization.domain.settings.C3AppSettingsProviderImpl.Companion.SEARCH_MODE
 import com.c3ai.sourcingoptimization.domain.use_case.SearchUseCases
 import com.c3ai.sourcingoptimization.presentation.ViewModelState
 import com.c3ai.sourcingoptimization.utilities.ErrorMessage
@@ -31,7 +32,6 @@ sealed interface SearchUiState {
     data class SearchResults(
         val results: List<Any> = emptyList(),
         val suggestions: List<String> = emptyList(),
-        val selectedFilters: Set<Int> = emptySet(),
         override val isLoading: Boolean,
         override val errorMessages: List<ErrorMessage>,
         override val searchInput: String,
@@ -68,7 +68,6 @@ sealed interface SearchUiState {
  */
 private data class SearchViewModelState(
     override val settings: C3AppSettingsProvider,
-    val selectedFilters: Set<Int> = emptySet(),
     val alerts: List<Alert>? = null,
     val isLoading: Boolean = false,
     val errorMessages: List<ErrorMessage> = emptyList(),
@@ -80,7 +79,7 @@ private data class SearchViewModelState(
      * the ui.
      */
     fun toUiState(): SearchUiState =
-        if (true) {
+        if (settings.getSearchMode() != SEARCH_MODE) {
             SearchUiState.SearchResults(
                 isLoading = isLoading,
                 errorMessages = errorMessages,
@@ -132,6 +131,10 @@ class SearchViewModel @Inject constructor(
         }
     }
 
+    fun search(searchInput: String, selectedFilters: Set<Int>) {
+
+    }
+
     /**
      * Update state by user event.
      */
@@ -139,11 +142,7 @@ class SearchViewModel @Inject constructor(
         viewModelState.update { state ->
             when (event) {
                 is SearchEvent.OnFilterClick -> {
-                    state.copy(
-                        selectedFilters = state.selectedFilters.toMutableSet().apply {
-                            val isRemoved = remove(event.index)
-                            isRemoved || add((event.index))
-                        })
+                    state.copy()
                 }
             }
         }

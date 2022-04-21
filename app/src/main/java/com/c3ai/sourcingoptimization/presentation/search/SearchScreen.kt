@@ -3,8 +3,7 @@ package com.c3ai.sourcingoptimization.presentation.search
 import android.content.Context
 import android.widget.Toast
 import androidx.compose.animation.*
-import androidx.compose.animation.core.keyframes
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
@@ -27,12 +26,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -42,7 +40,6 @@ import com.c3ai.sourcingoptimization.domain.model.Alert
 import com.c3ai.sourcingoptimization.modifiers.interceptKey
 import com.c3ai.sourcingoptimization.presentation.alerts.AlertCardSimple
 import com.c3ai.sourcingoptimization.presentation.common.search.SearchBar
-import com.c3ai.sourcingoptimization.presentation.common.search.rememberSearchState
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalAnimationApi::class)
 @Composable
@@ -52,26 +49,20 @@ fun SearchScreen(
     uiState: SearchUiState,
     onRefresh: () -> Unit,
     onSettingsClick: () -> Unit,
+    onSearch: (String, Set<Int>) -> Unit,
 ) {
     val context = LocalContext.current
-
-    val state = rememberSearchState(
-        initialResults = emptyList<Any>(),
-        suggestions = emptyList<Any>(),
-        timeoutMillis = 600,
-    ) { query: TextFieldValue ->
-        emptyList<Any>()
-    }
+    var focused by remember { mutableStateOf(false) }
 
     Scaffold(
         scaffoldState = scaffoldState,
         topBar = {
             AnimatedVisibility(
-                visible = !state.focused,
+                visible = !focused,
                 enter = fadeIn() + expandVertically(),
                 exit = fadeOut() + shrinkVertically(),
             ) {
-                TopAppBar(
+                HomeTopAppBar(
                     onSettingsClick = onSettingsClick
                 )
             }
@@ -82,7 +73,7 @@ fun SearchScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxSize()
         ) {
-            AnimatedVisibility(visible = !state.focused) {
+            AnimatedVisibility(visible = !focused) {
                 Icon(
                     painter = painterResource(R.drawable.ic_home_logo),
                     contentDescription = "",
@@ -91,14 +82,13 @@ fun SearchScreen(
                 )
             }
             SearchBar(
-                query = state.query,
-                onQueryChange = { state.query = it },
-                onSearchFocusChange = { state.focused = it },
-                onClearQuery = { state.query = TextFieldValue("") },
-                onBack = { state.query = TextFieldValue("") },
-                searching = state.searching,
-                focused = state.focused,
+                filters = stringArrayResource(R.array.searchFilters).toList(),
+                singLine = true,
+                onQueryChange = { },
+                onSearchFocusChange = { focused = it },
+                onSearch = onSearch,
                 modifier = Modifier.fillMaxWidth(),
+                fglModifier = Modifier.padding(top = 30.dp)
             )
         }
     }
@@ -114,8 +104,27 @@ fun SearchWithAlertsScreen(
     scaffoldState: ScaffoldState,
     uiState: SearchUiState,
     onRefresh: () -> Unit,
+    onSettingsClick: () -> Unit,
+    onSearch: (String, Set<Int>) -> Unit,
 ) {
+    val context = LocalContext.current
 
+    Scaffold(
+        scaffoldState = scaffoldState,
+        topBar = {
+            SearchTopAppBar(
+                onSettingsClick = onSettingsClick,
+                onSearch = onSearch
+            )
+        },
+        snackbarHost = { C3SnackbarHost(hostState = it) },
+    ) { _ ->
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxSize()
+        ) {
+        }
+    }
 }
 
 /**
@@ -309,14 +318,13 @@ private fun submitSearch(
 /**
  * TopAppBar for the Home screen
  */
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
-private fun TopAppBar(
-    showSearchButtons: Boolean = false,
+private fun HomeTopAppBar(
     onSettingsClick: () -> Unit,
 ) {
     C3TopAppBar(
         title = "",
-        showLogo = showSearchButtons,
         navigationIcon = {
             IconButton(onClick = onSettingsClick) {
                 Icon(
@@ -327,21 +335,62 @@ private fun TopAppBar(
             }
         },
         actions = {
-            if (showSearchButtons) {
-                IconButton(onClick = { /* TODO: Open search */ }) {
+            IconButton(onClick = { /* TODO: Open search */ }) {
+                Icon(
+                    imageVector = Icons.Filled.WarningAmber,
+                    contentDescription = stringResource(R.string.cd_search)
+                )
+            }
+        },
+    )
+}
+
+/**
+ * TopAppBar for the Home+Alerts screen
+ */
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+private fun SearchTopAppBar(
+    onSettingsClick: () -> Unit,
+    onSearch: (String, Set<Int>) -> Unit,
+) {
+    val transitionState = remember { MutableTransitionState(initialState = false) }
+    Box {
+        C3TopAppBar(
+            title = "",
+            showLogo = true,
+            navigationIcon = {
+                IconButton(onClick = onSettingsClick) {
+                    Icon(
+                        imageVector = Icons.Outlined.Settings,
+                        contentDescription = stringResource(R.string.cd_settings),
+                        tint = MaterialTheme.colors.primary
+                    )
+                }
+            },
+            actions = {
+                IconButton(onClick = { transitionState.targetState = true }) {
                     Icon(
                         imageVector = Icons.Filled.Search,
                         contentDescription = stringResource(R.string.cd_search)
                     )
                 }
-            } else {
-                IconButton(onClick = { /* TODO: Open search */ }) {
-                    Icon(
-                        imageVector = Icons.Filled.WarningAmber,
-                        contentDescription = stringResource(R.string.cd_search)
-                    )
-                }
-            }
-        },
-    )
+            },
+        )
+        AnimatedVisibility(
+            visibleState = transitionState,
+            enter = slideInHorizontally(initialOffsetX = { it }),
+            exit = slideOutHorizontally(targetOffsetX = { it }),
+        ) {
+            SearchBar(
+                filters = stringArrayResource(R.array.searchFilters).toList(),
+                fixed = true,
+                singLine = true,
+                onQueryChange = { },
+                onBackClick = { transitionState.targetState = false },
+                onSearch = onSearch,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+    }
 }
