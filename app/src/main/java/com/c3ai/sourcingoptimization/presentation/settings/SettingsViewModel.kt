@@ -8,10 +8,7 @@ import com.c3ai.sourcingoptimization.domain.settings.FakeC3AppSettingsProvider
 import com.c3ai.sourcingoptimization.domain.use_case.SuppliersDetailsUseCases
 import com.c3ai.sourcingoptimization.presentation.ViewModelState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 
 /**
@@ -30,6 +27,9 @@ data class SettingsUiState(
  */
 private data class SettingsViewModelState(
     override val settings: C3AppSettingsProvider,
+    val currency: Int,
+    val dateFormat: String,
+    val searchMode: Int,
 ) : ViewModelState() {
 
     /**
@@ -37,9 +37,9 @@ private data class SettingsViewModelState(
      * a more strongly typed [SettingsUiState] for driving the ui.
      */
     fun toUiState(): SettingsUiState = SettingsUiState(
-        currency = settings.getCurrencyType(),
-        dateFormat = settings.getDateFormatter().toPattern(),
-        searchMode = settings.getSearchMode(),
+        currency = currency,
+        dateFormat = dateFormat,
+        searchMode = searchMode,
     )
 }
 
@@ -55,6 +55,9 @@ class SettingsViewModel @Inject constructor(
     private val viewModelState = MutableStateFlow(
         SettingsViewModelState(
             settings = settings,
+            currency = settings.getCurrencyType(),
+            dateFormat = settings.getDateFormatter().toPattern(),
+            searchMode = settings.getSearchMode(),
         )
     )
 
@@ -71,20 +74,28 @@ class SettingsViewModel @Inject constructor(
      * Update state by user event.
      */
     fun onEvent(event: SettingsEvent) {
-        when (event) {
-            is SettingsEvent.OnCurrencyChanged -> {
-                viewModelState.value.settings.setCurrencyType(event.newCurrency)
+        viewModelState.update { state ->
+            when (event) {
+                is SettingsEvent.OnCurrencyChanged -> {
+                    viewModelState.value.settings.setCurrencyType(event.newCurrency)
+                    state.copy(currency = event.newCurrency)
+                }
+                is SettingsEvent.OnSearchMode -> {
+                    viewModelState.value.settings.setSearchMode(event.mode)
+                    state.copy(searchMode = event.mode)
+                }
             }
         }
     }
 }
 
 @Suppress("FunctionName")
-fun PreviewSupplierDetailsUiState(
-    supplier: C3Vendor,
-    tabIndex: Int = 0,
+fun PreviewSettingsUiState(
 ): SettingsUiState {
     return SettingsViewModelState(
         settings = FakeC3AppSettingsProvider(),
+        currency = 0,
+        dateFormat = "",
+        searchMode = 0,
     ).toUiState()
 }

@@ -117,6 +117,9 @@
     <string name="search_">Search…</string>
     <string name="recent">Recent</string>
     <string name="cd_history">History</string>
+    <string name="currency">Currency</string>
+    <string name="date_format">Date Format</string>
+    <string name="homepage">Homepage</string>
     <array name="sort_po">
         <item>Total Cost</item>
         <item>Unit Price</item>

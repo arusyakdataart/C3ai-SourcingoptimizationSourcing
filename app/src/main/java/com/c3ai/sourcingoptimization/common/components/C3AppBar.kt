@@ -25,6 +25,7 @@ import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.presentation.common.search.FiltersGridLayout
 import com.c3ai.sourcingoptimization.presentation.common.search.SearchBar
 import com.c3ai.sourcingoptimization.presentation.search.SearchUiState
+import com.c3ai.sourcingoptimization.presentation.views.UiRecentSearchItem
 
 
 /**
@@ -92,6 +93,7 @@ fun C3SearchAppBar(
     showLogo: Boolean = false,
     navigationIcon: @Composable (() -> Unit)? = null,
     actions: @Composable RowScope.() -> Unit = {},
+    suggestions: List<UiRecentSearchItem> = emptyList(),
     onQueryChange: (String) -> Unit = {},
     onSearch: () -> Unit,
     subContent: @Composable (() -> Unit)?
@@ -124,6 +126,7 @@ fun C3SearchAppBar(
             exit = slideOutHorizontally(targetOffsetX = { it }),
         ) {
             SearchBar(
+                suggestions = suggestions,
                 fixed = true,
                 onQueryChange = { onQueryChange(it.text) },
                 onBackClick = { transitionState.targetState = false },

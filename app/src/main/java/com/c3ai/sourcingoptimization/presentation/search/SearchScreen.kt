@@ -383,6 +383,7 @@ private fun SearchTopAppBar(
             }
         },
         actions = {},
+        suggestions = uiState.suggestions,
         onQueryChange = onQueryChange,
         onSearch = onSearch,
     ) {

@@ -1,6 +1,7 @@
 package com.c3ai.sourcingoptimization.domain.settings
 
 import android.content.Context
+import android.util.Log
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -26,10 +27,12 @@ class C3AppSettingsProviderImpl constructor(context: Context) : C3AppSettingsPro
     }
 
     override fun setSearchMode(mode: Int) {
+        Log.e("setSearchMode", mode.toString())
         prefs.edit().putInt(SEARCH, mode).apply()
     }
 
     override fun getSearchMode(): Int {
+        Log.e("getSearchMode", "call")
         return prefs.getInt(SEARCH, SEARCH_MODE)
     }
 

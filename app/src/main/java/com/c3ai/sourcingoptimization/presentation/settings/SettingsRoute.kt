@@ -33,5 +33,6 @@ fun SettingsRoute(
         scaffoldState = scaffoldState,
         uiState = uiState,
         onBackButtonClick = { navController.navigateUp() },
+        onSearchModeChange = { viewModel.onEvent(SettingsEvent.OnSearchMode(it)) },
     )
 }
