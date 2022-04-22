@@ -6,8 +6,8 @@ import com.c3ai.sourcingoptimization.domain.model.SearchItem
 
 class Search(private val repository: C3Repository) {
 
-    suspend operator fun invoke(query: String): C3Result<List<SearchItem>> {
-        return repository.search(query)
+    suspend operator fun invoke(query: String, filters: List<Int>): C3Result<List<SearchItem>> {
+        return repository.search(query, filters)
     }
 }
 

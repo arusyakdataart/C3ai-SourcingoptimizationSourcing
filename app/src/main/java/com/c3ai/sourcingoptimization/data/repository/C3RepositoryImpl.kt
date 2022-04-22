@@ -12,8 +12,21 @@ import javax.inject.Inject
  * */
 class C3RepositoryImpl @Inject constructor(private val api: C3ApiService) : C3Repository {
 
-    override suspend fun search(query: String): C3Result<List<SearchItem>> = C3Result.on {
-        api.search(query)
+    override suspend fun search(
+        query: String,
+        filters: List<Int>
+    ): C3Result<List<SearchItem>> = C3Result.on {
+        val typesToFilter = listOf(
+            "Supplier",
+            "Item",
+            "PurchaseOrder",
+            "PurchaseOrderLine",
+            "Alert",
+        )
+        api.search(SearchParameters(
+            queryString = query,
+            typesToFilter = filters.map { typesToFilter[it] }
+        ))
     }
 
     override suspend fun getItemDetails(itemId: String): C3Result<C3Item> = C3Result.on {

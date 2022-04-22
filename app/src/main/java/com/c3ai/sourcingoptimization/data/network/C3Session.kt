@@ -25,8 +25,10 @@ class C3Session private constructor(
     }
 
     fun clear() {
-        val prefs = context.getSharedPreferences(SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
-        prefs.edit().clear().apply()
+        cookie = null
+        context.getSharedPreferences(SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE).edit()
+            .clear()
+            .apply()
     }
 
     companion object {

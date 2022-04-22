@@ -8,7 +8,9 @@ import com.google.gson.GsonBuilder
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.http.*
+import retrofit2.http.Body
+import retrofit2.http.Headers
+import retrofit2.http.POST
 
 /**
  * Api service for the application with internal building of client[OkHttpClient].
@@ -16,8 +18,9 @@ import retrofit2.http.*
  */
 interface C3ApiService {
 
-    @GET("${MAIN_API_URL}search/{searchQuery}")
-    suspend fun search(@Path("searchQuery") query: String): List<SearchItem>
+    @Headers("Accept: application/json")
+    @POST("${MAIN_API_URL}SoSearchHelper?action=unifiedSearchFetch")
+    suspend fun search(@Body request: SearchParameters): List<SearchItem>
 
     @Headers("Accept: application/json")
     @POST("${MAIN_API_URL}Item?action=fetch")

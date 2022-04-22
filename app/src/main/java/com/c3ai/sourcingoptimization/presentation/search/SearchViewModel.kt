@@ -13,6 +13,7 @@ import com.c3ai.sourcingoptimization.presentation.ViewModelState
 import com.c3ai.sourcingoptimization.utilities.ErrorMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
@@ -123,7 +124,7 @@ private data class SearchViewModelState(
 @HiltViewModel
 class SearchViewModel @Inject constructor(
     settingsProvider: C3AppSettingsProvider,
-    private val searchUseCases: SearchUseCases
+    private val useCases: SearchUseCases
 ) : ViewModel(), Observer<SettingsState> {
 
     private val viewModelState = MutableStateFlow(
@@ -165,6 +166,9 @@ class SearchViewModel @Inject constructor(
                 }
                 is SearchEvent.Search -> {
                     if (state.searchInput.isNotEmpty()) {
+                        viewModelScope.launch {
+                            useCases.search(state.searchInput, state.selectedFilters.toList())
+                        }
                         state.copy(
                             suggestions = state.suggestions.toMutableList().apply {
                                 find {

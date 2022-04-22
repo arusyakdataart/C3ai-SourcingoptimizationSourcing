@@ -2,6 +2,7 @@ package com.c3ai.sourcingoptimization.di
 
 import android.content.Context
 import com.c3ai.sourcingoptimization.data.network.C3ApiService
+import com.c3ai.sourcingoptimization.data.network.C3Session
 import com.c3ai.sourcingoptimization.data.repository.C3Repository
 import com.c3ai.sourcingoptimization.data.repository.C3RepositoryImpl
 import com.c3ai.sourcingoptimization.domain.settings.C3AppSettingsProvider
@@ -105,6 +106,13 @@ object AppModule {
             getAlertsFeedbacks = GetAlertsFeedbacks(repository),
             updateAlerts = UpdateAlerts(repository),
             getSupplierContacts = GetSupplierContacts(repository)
+        )
+    }
+
+    @Provides
+    fun provideSettingsUseCases(repository: C3Repository, session: C3Session): SettingsUseCases {
+        return SettingsUseCases(
+            logout = Logout(repository, session),
         )
     }
 }

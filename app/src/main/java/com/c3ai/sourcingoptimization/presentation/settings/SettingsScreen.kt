@@ -47,6 +47,7 @@ fun SettingsScreen(
     onSearchModeChange: (Int) -> Unit,
     onCurrencyChange: (Int) -> Unit,
     onDateFormatChange: (String) -> Unit,
+    logout: () -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
     val bottomState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
@@ -183,7 +184,8 @@ fun SettingsScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 48.dp),
+                    .padding(top = 48.dp)
+                    .clickable { logout() },
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
@@ -229,6 +231,7 @@ fun SettingsScreenPreview() {
             onCurrencyChange = {},
             onDateFormatChange = {},
             onSearchModeChange = {},
+            logout = {},
         )
     }
 }

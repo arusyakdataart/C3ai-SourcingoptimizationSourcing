@@ -1,5 +1,8 @@
 package com.c3ai.sourcingoptimization.presentation.settings
 
+import android.app.Activity
+import android.content.Intent
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Scaffold
 import androidx.compose.material.ScaffoldState
@@ -10,6 +13,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.c3ai.sourcingoptimization.authorization.presentation.LaunchActivity
+import com.c3ai.sourcingoptimization.presentation.MainActivity
 
 /**
  * Displays the Supplier Details route.
@@ -19,7 +24,7 @@ import androidx.navigation.NavController
  * @param viewModel ViewModel that handles the business logic of this screen
  * @param scaffoldState (state) state for the [Scaffold] component on this screen
  */
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalAnimationApi::class)
 @Composable
 fun SettingsRoute(
     navController: NavController,
@@ -33,8 +38,13 @@ fun SettingsRoute(
         scaffoldState = scaffoldState,
         uiState = uiState,
         onBackButtonClick = { navController.navigateUp() },
-        onSearchModeChange = { viewModel.onEvent(SettingsEvent.OnSearchMode(it)) },
+        onSearchModeChange = { viewModel.onEvent(SettingsEvent.OnSearchModeChanged(it)) },
         onCurrencyChange = { viewModel.onEvent(SettingsEvent.OnCurrencyChanged(it))},
-        onDateFormatChange = {viewModel.onEvent(SettingsEvent.OnDateFormatChanged(it))}
+        onDateFormatChange = {viewModel.onEvent(SettingsEvent.OnDateFormatChanged(it))},
+        logout = {
+            viewModel.onEvent(SettingsEvent.Logout)
+            context.startActivity(Intent(context, LaunchActivity::class.java))
+            (context as? Activity)?.finish()
+        }
     )
 }

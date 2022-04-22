@@ -10,7 +10,10 @@ import com.c3ai.sourcingoptimization.utilities.PAGINATED_RESPONSE_LIMIT
  * */
 class C3MockRepositoryImpl : C3Repository {
 
-    override suspend fun search(query: String): C3Result<List<SearchItem>> = C3Result.on {
+    override suspend fun search(
+        query: String,
+        filters: List<Int>
+    ): C3Result<List<SearchItem>> = C3Result.on {
         emptyList()
     }
 

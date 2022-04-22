@@ -6,10 +6,11 @@ import androidx.lifecycle.viewModelScope
 import com.c3ai.sourcingoptimization.domain.settings.C3AppSettingsProvider
 import com.c3ai.sourcingoptimization.domain.settings.FakeC3AppSettingsProvider
 import com.c3ai.sourcingoptimization.domain.settings.SettingsState
-import com.c3ai.sourcingoptimization.domain.use_case.SuppliersDetailsUseCases
+import com.c3ai.sourcingoptimization.domain.use_case.SettingsUseCases
 import com.c3ai.sourcingoptimization.presentation.ViewModelState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
@@ -47,7 +48,7 @@ private data class SettingsViewModelState(
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     val settingsProvider: C3AppSettingsProvider,
-    private val useCases: SuppliersDetailsUseCases
+    private val useCases: SettingsUseCases
 ) : ViewModel(), Observer<SettingsState> {
 
     private val viewModelState = MutableStateFlow(
@@ -81,8 +82,13 @@ class SettingsViewModel @Inject constructor(
             is SettingsEvent.OnDateFormatChanged -> {
                 settingsProvider.setDateFormatter(event.dateFormat)
             }
-            is SettingsEvent.OnSearchMode -> {
+            is SettingsEvent.OnSearchModeChanged -> {
                 settingsProvider.setSearchMode(event.mode)
+            }
+            is SettingsEvent.Logout -> {
+                viewModelScope.launch {
+                    useCases.logout()
+                }
             }
         }
     }
