@@ -34,5 +34,7 @@ fun SettingsRoute(
         uiState = uiState,
         onBackButtonClick = { navController.navigateUp() },
         onSearchModeChange = { viewModel.onEvent(SettingsEvent.OnSearchMode(it)) },
+        onCurrencyChange = { viewModel.onEvent(SettingsEvent.OnCurrencyChanged(it))},
+        onDateFormatChange = {viewModel.onEvent(SettingsEvent.OnDateFormatChanged(it))}
     )
 }

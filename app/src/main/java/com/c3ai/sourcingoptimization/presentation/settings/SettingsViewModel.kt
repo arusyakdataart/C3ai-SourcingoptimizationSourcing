@@ -84,6 +84,10 @@ class SettingsViewModel @Inject constructor(
                     viewModelState.value.settings.setSearchMode(event.mode)
                     state.copy(searchMode = event.mode)
                 }
+                is SettingsEvent.OnDateFormatChanged -> {
+                    viewModelState.value.settings.setDateFormatter(event.dateFormat)
+                    state.copy(dateFormat = event.dateFormat)
+                }
             }
         }
     }
