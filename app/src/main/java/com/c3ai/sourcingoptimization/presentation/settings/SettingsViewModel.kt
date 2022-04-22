@@ -1,10 +1,11 @@
 package com.c3ai.sourcingoptimization.presentation.settings
 
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.c3ai.sourcingoptimization.domain.model.C3Vendor
 import com.c3ai.sourcingoptimization.domain.settings.C3AppSettingsProvider
 import com.c3ai.sourcingoptimization.domain.settings.FakeC3AppSettingsProvider
+import com.c3ai.sourcingoptimization.domain.settings.SettingsState
 import com.c3ai.sourcingoptimization.domain.use_case.SuppliersDetailsUseCases
 import com.c3ai.sourcingoptimization.presentation.ViewModelState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,10 +27,7 @@ data class SettingsUiState(
  * An internal representation of the Settings route state, in a raw form
  */
 private data class SettingsViewModelState(
-    override val settings: C3AppSettingsProvider,
-    val currency: Int,
-    val dateFormat: String,
-    val searchMode: Int,
+    override val settings: SettingsState,
 ) : ViewModelState() {
 
     /**
@@ -37,9 +35,9 @@ private data class SettingsViewModelState(
      * a more strongly typed [SettingsUiState] for driving the ui.
      */
     fun toUiState(): SettingsUiState = SettingsUiState(
-        currency = currency,
-        dateFormat = dateFormat,
-        searchMode = searchMode,
+        currency = settings.currencyType,
+        dateFormat = settings.dateFormat,
+        searchMode = settings.searchMode,
     )
 }
 
@@ -48,18 +46,16 @@ private data class SettingsViewModelState(
  */
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    settings: C3AppSettingsProvider,
+    val settingsProvider: C3AppSettingsProvider,
     private val useCases: SuppliersDetailsUseCases
-) : ViewModel() {
+) : ViewModel(), Observer<SettingsState> {
 
     private val viewModelState = MutableStateFlow(
         SettingsViewModelState(
-            settings = settings,
-            currency = settings.getCurrencyType(),
-            dateFormat = settings.getDateFormatter().toPattern(),
-            searchMode = settings.getSearchMode(),
+            settings = settingsProvider.state,
         )
     )
+    private val settingsLiveData = settingsProvider.asLiveData()
 
     // UI state exposed to the UI
     val uiState = viewModelState
@@ -70,22 +66,32 @@ class SettingsViewModel @Inject constructor(
             viewModelState.value.toUiState()
         )
 
+    init {
+        settingsLiveData.observeForever(this)
+    }
+
     /**
      * Update state by user event.
      */
     fun onEvent(event: SettingsEvent) {
-        viewModelState.update { state ->
-            when (event) {
-                is SettingsEvent.OnCurrencyChanged -> {
-                    viewModelState.value.settings.setCurrencyType(event.newCurrency)
-                    state.copy(currency = event.newCurrency)
-                }
-                is SettingsEvent.OnSearchMode -> {
-                    viewModelState.value.settings.setSearchMode(event.mode)
-                    state.copy(searchMode = event.mode)
-                }
+        when (event) {
+            is SettingsEvent.OnCurrencyChanged -> {
+                settingsProvider.setCurrencyType(event.newCurrency)
+            }
+            is SettingsEvent.OnSearchMode -> {
+                settingsProvider.setSearchMode(event.mode)
             }
         }
+    }
+
+    override fun onChanged(settingsState: SettingsState) {
+        viewModelState.update { state ->
+            state.copy(settings = settingsState)
+        }
+    }
+
+    override fun onCleared() {
+        settingsLiveData.removeObserver(this)
     }
 }
 
@@ -93,9 +99,6 @@ class SettingsViewModel @Inject constructor(
 fun PreviewSettingsUiState(
 ): SettingsUiState {
     return SettingsViewModelState(
-        settings = FakeC3AppSettingsProvider(),
-        currency = 0,
-        dateFormat = "",
-        searchMode = 0,
+        settings = FakeC3AppSettingsProvider().state,
     ).toUiState()
 }

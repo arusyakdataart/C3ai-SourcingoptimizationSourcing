@@ -9,6 +9,7 @@ import com.c3ai.sourcingoptimization.domain.model.AlertFeedback
 import com.c3ai.sourcingoptimization.domain.model.C3Number
 import com.c3ai.sourcingoptimization.domain.model.C3VendorContact
 import com.c3ai.sourcingoptimization.domain.settings.C3AppSettingsProvider
+import com.c3ai.sourcingoptimization.domain.settings.SettingsState
 import com.c3ai.sourcingoptimization.domain.use_case.AlertsUseCases
 import com.c3ai.sourcingoptimization.presentation.ViewModelState
 import com.c3ai.sourcingoptimization.presentation.views.UiAlert
@@ -64,7 +65,7 @@ sealed interface AlertsUiState {
  * An internal representation of the Alerts route state, in a raw form
  */
 private data class AlertsViewModelState(
-    override val settings: C3AppSettingsProvider,
+    override val settings: SettingsState,
     val alerts: Set<Alert>? = null,
     val alertsFeedBacks: Set<AlertFeedback>? = null,
     val supplierContacts: List<C3VendorContact>? = null,
@@ -102,13 +103,13 @@ private data class AlertsViewModelState(
 
 @HiltViewModel
 class AlertsViewModel @Inject constructor(
-    settings: C3AppSettingsProvider,
+    settingsProvider: C3AppSettingsProvider,
     private val useCases: AlertsUseCases
 ) : ViewModel() {
 
     private val viewModelState = MutableStateFlow(
         AlertsViewModelState(
-            settings = settings,
+            settings = settingsProvider.state,
             isLoading = true
         )
     )

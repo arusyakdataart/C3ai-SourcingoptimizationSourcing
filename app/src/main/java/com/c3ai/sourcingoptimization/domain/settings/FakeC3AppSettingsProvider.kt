@@ -1,28 +1,32 @@
 package com.c3ai.sourcingoptimization.domain.settings
 
-import java.text.SimpleDateFormat
-import java.util.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 
-class FakeC3AppSettingsProvider : C3AppSettingsProvider {
+class FakeC3AppSettingsProvider() : C3AppSettingsProvider {
 
-    override fun setCurrencyType(type: Int) {
+    override val state: SettingsState = SettingsState(
+        0,
+        "dd/MM/yyyy",
+        0,
+    )
+
+    override fun asLiveData(): LiveData<SettingsState> {
+        return MutableLiveData(
+            SettingsState(
+                currencyType = 0,
+                dateFormat = "dd/MM/yyyy",
+                searchMode = 0,
+            )
+        )
     }
 
-    override fun getCurrencyType(): Int {
-        return 0
+    override fun setCurrencyType(type: Int) {
     }
 
     override fun setDateFormatter(dateFormat: String) {
     }
 
-    override fun getDateFormatter(): SimpleDateFormat {
-        return SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-    }
-
     override fun setSearchMode(mode: Int) {
-    }
-
-    override fun getSearchMode(): Int {
-        return 0
     }
 }

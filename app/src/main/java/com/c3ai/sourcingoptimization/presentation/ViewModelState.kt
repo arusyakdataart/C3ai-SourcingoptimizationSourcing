@@ -1,7 +1,7 @@
 package com.c3ai.sourcingoptimization.presentation
 
-import com.c3ai.sourcingoptimization.domain.settings.C3AppSettingsProvider
+import com.c3ai.sourcingoptimization.domain.settings.SettingsState
 
 abstract class ViewModelState {
-    abstract val settings: C3AppSettingsProvider
+    abstract val settings: SettingsState
 }

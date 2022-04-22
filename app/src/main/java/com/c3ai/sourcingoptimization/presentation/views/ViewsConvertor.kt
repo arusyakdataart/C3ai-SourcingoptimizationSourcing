@@ -1,8 +1,9 @@
 package com.c3ai.sourcingoptimization.presentation.views
 
 import com.c3ai.sourcingoptimization.domain.model.*
-import com.c3ai.sourcingoptimization.domain.settings.C3AppSettingsProvider
+import com.c3ai.sourcingoptimization.domain.settings.SettingsState
 import com.c3ai.sourcingoptimization.presentation.ViewModelState
+import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -166,40 +167,40 @@ fun filterByCategory(alerts: List<UiAlert>, categories: Set<String>): List<UiAle
     return filteredAlerts
 }
 
-fun C3AppSettingsProvider.format(date: Date?): String {
-    return date?.let { getDateFormatter().format(date) } ?: "-"
+fun SettingsState.format(date: Date?): String {
+    return date?.let { SimpleDateFormat(dateFormat, Locale.getDefault()).format(date) } ?: "-"
 }
 
-fun C3AppSettingsProvider.lastUnitPricePaid(source: C3Item): String {
-    return when (getCurrencyType()) {
+fun SettingsState.lastUnitPricePaid(source: C3Item): String {
+    return when (currencyType) {
         1 -> source.lastUnitPriceLocalPaid
         else -> source.lastUnitPricePaid
     }?.format() ?: ""
 }
 
-fun C3AppSettingsProvider.averageUnitPricePaid(source: C3Item): String {
-    return when (getCurrencyType()) {
+fun SettingsState.averageUnitPricePaid(source: C3Item): String {
+    return when (currencyType) {
         1 -> source.averageUnitPriceLocalPaid
         else -> source.averageUnitPricePaid
     }?.format() ?: ""
 }
 
-fun C3AppSettingsProvider.minimumUnitPricePaid(source: C3Item): String {
-    return when (getCurrencyType()) {
+fun SettingsState.minimumUnitPricePaid(source: C3Item): String {
+    return when (currencyType) {
         1 -> source.minimumUnitPriceLocalPaid
         else -> source.minimumUnitPricePaid
     }?.format() ?: ""
 }
 
-fun C3AppSettingsProvider.formatTotalCost(source: PurchaseOrder): String {
-    return when (getCurrencyType()) {
+fun SettingsState.formatTotalCost(source: PurchaseOrder): String {
+    return when (currencyType) {
         1 -> source.totalCostLocal
         else -> source.totalCost
     }?.format() ?: ""
 }
 
-fun C3AppSettingsProvider.formatUnitPrice(source: PurchaseOrder.Line): String {
-    return when (getCurrencyType()) {
+fun SettingsState.formatUnitPrice(source: PurchaseOrder.Line): String {
+    return when (currencyType) {
         1 -> source.unitPriceLocal
         else -> source.unitPrice
     }.format("%s%.1f")
@@ -209,7 +210,7 @@ fun C3UnitValue.format(pattern: String = "%s%.0f"): String {
     return String.format(Locale.getDefault(), pattern, unit.id, value)
 }
 
-fun C3AppSettingsProvider.formatQuantity(source: PurchaseOrder.Line): String {
+fun SettingsState.formatQuantity(source: PurchaseOrder.Line): String {
     return source.totalQuantity
         .let { String.format(Locale.getDefault(), "%.0f", it.value) }
 }

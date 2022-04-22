@@ -1,18 +1,16 @@
 package com.c3ai.sourcingoptimization.domain.settings
 
-import java.text.SimpleDateFormat
+import androidx.lifecycle.LiveData
 
 interface C3AppSettingsProvider {
 
-    fun setCurrencyType(type: Int)
+    val state: SettingsState
 
-    fun getCurrencyType(): Int
+    fun asLiveData(): LiveData<SettingsState>
+
+    fun setCurrencyType(type: Int)
 
     fun setDateFormatter(dateFormat: String)
 
-    fun getDateFormatter(): SimpleDateFormat
-
     fun setSearchMode(mode: Int)
-
-    fun getSearchMode(): Int
 }

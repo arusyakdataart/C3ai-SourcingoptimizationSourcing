@@ -1,12 +1,14 @@
 package com.c3ai.sourcingoptimization.presentation.search
 
 import android.util.Log
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.c3ai.sourcingoptimization.domain.model.Alert
 import com.c3ai.sourcingoptimization.domain.model.RecentSearchItem
 import com.c3ai.sourcingoptimization.domain.settings.C3AppSettingsProvider
 import com.c3ai.sourcingoptimization.domain.settings.C3AppSettingsProviderImpl.Companion.SEARCH_MODE
+import com.c3ai.sourcingoptimization.domain.settings.SettingsState
 import com.c3ai.sourcingoptimization.domain.use_case.SearchUseCases
 import com.c3ai.sourcingoptimization.presentation.ViewModelState
 import com.c3ai.sourcingoptimization.presentation.views.UiRecentSearchItem
@@ -77,7 +79,7 @@ sealed interface SearchUiState {
  * An internal representation of the Search route state, in a raw form
  */
 private data class SearchViewModelState(
-    override val settings: C3AppSettingsProvider,
+    override val settings: SettingsState,
     val alerts: List<Alert>? = null,
     val isLoading: Boolean = false,
     val errorMessages: List<ErrorMessage> = emptyList(),
@@ -91,7 +93,7 @@ private data class SearchViewModelState(
      * the ui.
      */
     fun toUiState(): SearchUiState =
-        if (settings.getSearchMode() == SEARCH_MODE) {
+        if (settings.searchMode == SEARCH_MODE) {
             SearchUiState.SearchResults(
                 isLoading = isLoading,
                 errorMessages = errorMessages,
@@ -124,16 +126,18 @@ private data class SearchViewModelState(
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
-    settings: C3AppSettingsProvider,
+    settingsProvider: C3AppSettingsProvider,
     private val searchUseCases: SearchUseCases
-) : ViewModel() {
+) : ViewModel(), Observer<SettingsState> {
 
     private val viewModelState = MutableStateFlow(
         SearchViewModelState(
-            settings = settings,
+            settings = settingsProvider.state,
             isLoading = true
         )
     )
+    private val settingsLiveData = settingsProvider.asLiveData()
+
     val uiState = viewModelState
         .map { it.toUiState() }
         .stateIn(
@@ -143,10 +147,7 @@ class SearchViewModel @Inject constructor(
         )
 
     init {
-
-        // Observe for favorite changes in the repo layer
-        viewModelScope.launch {
-        }
+        settingsLiveData.observeForever(this)
     }
 
     /**
@@ -184,6 +185,16 @@ class SearchViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    override fun onChanged(settingsState: SettingsState) {
+        viewModelState.update { state ->
+            state.copy(settings = settingsState)
+        }
+    }
+
+    override fun onCleared() {
+        settingsLiveData.removeObserver(this)
     }
 
 }

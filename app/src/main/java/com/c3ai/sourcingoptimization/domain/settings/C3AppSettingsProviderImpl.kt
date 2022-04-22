@@ -1,39 +1,41 @@
 package com.c3ai.sourcingoptimization.domain.settings
 
 import android.content.Context
-import android.util.Log
-import java.text.SimpleDateFormat
-import java.util.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 
 class C3AppSettingsProviderImpl constructor(context: Context) : C3AppSettingsProvider {
 
     private val prefs = context.getSharedPreferences(SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
 
+    private val stateLive: MutableLiveData<SettingsState> by lazy {
+        MutableLiveData<SettingsState>(SettingsState(
+            currencyType = prefs.getInt(CURRENCY_KEY, CURRENCY_USD),
+            dateFormat = prefs.getString(DATE_FORMAT_KEY, DATE_FORMAT_MONTH_DAY_YEAR)!!,
+            searchMode = prefs.getInt(SEARCH, SEARCH_MODE)
+        ))
+    }
+    override val state: SettingsState
+        get() = stateLive.value!!
+
+
+    override fun asLiveData(): LiveData<SettingsState> {
+        return stateLive
+    }
+
     override fun setCurrencyType(type: Int) {
+        stateLive.postValue(stateLive.value!!.copy(currencyType = type))
         prefs.edit().putInt(CURRENCY_KEY, type).apply()
     }
 
-    override fun getCurrencyType(): Int {
-        return prefs.getInt(CURRENCY_KEY, CURRENCY_USD)
-    }
-
     override fun setDateFormatter(dateFormat: String) {
+        stateLive.postValue(stateLive.value!!.copy(dateFormat = dateFormat))
         prefs.edit().putString(DATE_FORMAT_KEY, dateFormat).apply()
     }
 
-    override fun getDateFormatter(): SimpleDateFormat {
-        val pattern = prefs.getString(DATE_FORMAT_KEY, DATE_FORMAT_MONTH_DAY_YEAR)
-        return SimpleDateFormat(pattern, Locale.getDefault())
-    }
-
     override fun setSearchMode(mode: Int) {
-        Log.e("setSearchMode", mode.toString())
+        stateLive.postValue(stateLive.value!!.copy(searchMode = mode))
         prefs.edit().putInt(SEARCH, mode).apply()
-    }
-
-    override fun getSearchMode(): Int {
-        Log.e("getSearchMode", "call")
-        return prefs.getInt(SEARCH, SEARCH_MODE)
     }
 
     companion object {
