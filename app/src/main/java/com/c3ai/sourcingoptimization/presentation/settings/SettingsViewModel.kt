@@ -78,6 +78,9 @@ class SettingsViewModel @Inject constructor(
             is SettingsEvent.OnCurrencyChanged -> {
                 settingsProvider.setCurrencyType(event.newCurrency)
             }
+            is SettingsEvent.OnDateFormatChanged -> {
+                settingsProvider.setDateFormatter(event.dateFormat)
+            }
             is SettingsEvent.OnSearchMode -> {
                 settingsProvider.setSearchMode(event.mode)
             }

@@ -1,6 +1,5 @@
 package com.c3ai.sourcingoptimization.presentation.search
 
-import android.util.Log
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -11,12 +10,9 @@ import com.c3ai.sourcingoptimization.domain.settings.C3AppSettingsProviderImpl.C
 import com.c3ai.sourcingoptimization.domain.settings.SettingsState
 import com.c3ai.sourcingoptimization.domain.use_case.SearchUseCases
 import com.c3ai.sourcingoptimization.presentation.ViewModelState
-import com.c3ai.sourcingoptimization.presentation.views.UiRecentSearchItem
-import com.c3ai.sourcingoptimization.presentation.views.convert
 import com.c3ai.sourcingoptimization.utilities.ErrorMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
@@ -31,7 +27,7 @@ sealed interface SearchUiState {
     val errorMessages: List<ErrorMessage>
     val searchInput: String
     val selectedFilters: Set<Int>
-    val suggestions: List<UiRecentSearchItem>
+    val suggestions: List<RecentSearchItem>
 
     /**
      * There are search results to render, as contained in [alerts].
@@ -43,7 +39,7 @@ sealed interface SearchUiState {
         override val errorMessages: List<ErrorMessage>,
         override val searchInput: String,
         override val selectedFilters: Set<Int> = emptySet(),
-        override val suggestions: List<UiRecentSearchItem> = emptyList(),
+        override val suggestions: List<RecentSearchItem> = emptyList(),
     ) : SearchUiState
 
     /**
@@ -57,7 +53,7 @@ sealed interface SearchUiState {
         override val errorMessages: List<ErrorMessage>,
         override val searchInput: String,
         override val selectedFilters: Set<Int> = emptySet(),
-        override val suggestions: List<UiRecentSearchItem> = emptyList(),
+        override val suggestions: List<RecentSearchItem> = emptyList(),
     ) : SearchUiState
 
     /**
@@ -71,7 +67,7 @@ sealed interface SearchUiState {
         override val errorMessages: List<ErrorMessage>,
         override val searchInput: String,
         override val selectedFilters: Set<Int> = emptySet(),
-        override val suggestions: List<UiRecentSearchItem> = emptyList(),
+        override val suggestions: List<RecentSearchItem> = emptyList(),
     ) : SearchUiState
 }
 
@@ -99,7 +95,7 @@ private data class SearchViewModelState(
                 errorMessages = errorMessages,
                 searchInput = searchInput,
                 selectedFilters = selectedFilters,
-                suggestions = suggestions.map { convert(it) },
+                suggestions = suggestions,
             )
         } else {
             if (alerts == null) {
@@ -108,7 +104,7 @@ private data class SearchViewModelState(
                     errorMessages = errorMessages,
                     searchInput = searchInput,
                     selectedFilters = selectedFilters,
-                    suggestions = suggestions.map { convert(it) },
+                    suggestions = suggestions,
                 )
             } else {
                 SearchUiState.HasAlerts(
@@ -118,7 +114,7 @@ private data class SearchViewModelState(
                     errorMessages = errorMessages,
                     searchInput = searchInput,
                     selectedFilters = selectedFilters,
-                    suggestions = suggestions.map { convert(it) },
+                    suggestions = suggestions,
                 )
             }
         }
@@ -169,7 +165,6 @@ class SearchViewModel @Inject constructor(
                 }
                 is SearchEvent.Search -> {
                     if (state.searchInput.isNotEmpty()) {
-                        Log.e("SearchEvent", "call")
                         state.copy(
                             suggestions = state.suggestions.toMutableList().apply {
                                 find {

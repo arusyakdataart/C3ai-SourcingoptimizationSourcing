@@ -2,30 +2,22 @@ package com.c3ai.sourcingoptimization.common.components
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.MutableTransitionState
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.c3ai.sourcingoptimization.R
-import com.c3ai.sourcingoptimization.presentation.common.search.FiltersGridLayout
+import com.c3ai.sourcingoptimization.domain.model.RecentSearchItem
 import com.c3ai.sourcingoptimization.presentation.common.search.SearchBar
-import com.c3ai.sourcingoptimization.presentation.search.SearchUiState
-import com.c3ai.sourcingoptimization.presentation.views.UiRecentSearchItem
 
 
 /**
@@ -93,7 +85,7 @@ fun C3SearchAppBar(
     showLogo: Boolean = false,
     navigationIcon: @Composable (() -> Unit)? = null,
     actions: @Composable RowScope.() -> Unit = {},
-    suggestions: List<UiRecentSearchItem> = emptyList(),
+    suggestions: List<RecentSearchItem> = emptyList(),
     onQueryChange: (String) -> Unit = {},
     onSearch: () -> Unit,
     subContent: @Composable (() -> Unit)?

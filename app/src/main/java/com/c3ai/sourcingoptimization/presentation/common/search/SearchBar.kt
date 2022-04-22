@@ -39,15 +39,15 @@ import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.common.components.ListDivider
 import com.c3ai.sourcingoptimization.common.components.OutlinedChip
 import com.c3ai.sourcingoptimization.common.components.StaggeredGrid
+import com.c3ai.sourcingoptimization.domain.model.RecentSearchItem
 import com.c3ai.sourcingoptimization.presentation.search.RecentSearch
-import com.c3ai.sourcingoptimization.presentation.views.UiRecentSearchItem
 
 @ExperimentalAnimationApi
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SearchBar(
     modifier: Modifier = Modifier,
-    suggestions: List<UiRecentSearchItem> = emptyList(),
+    suggestions: List<RecentSearchItem> = emptyList(),
     fixed: Boolean = false,
     onBackClick: () -> Unit = {},
     onQueryChange: (TextFieldValue) -> Unit = {},
@@ -100,7 +100,6 @@ fun SearchBar(
                 )
             }
             subContent?.invoke()
-            Log.e("suggestions", suggestions.size.toString())
             if (suggestions.isNotEmpty() && (fixed || state.focused)) {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),

@@ -6,6 +6,7 @@ import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.data.C3Result
 import com.c3ai.sourcingoptimization.domain.model.C3Vendor
 import com.c3ai.sourcingoptimization.domain.settings.C3AppSettingsProvider
+import com.c3ai.sourcingoptimization.domain.settings.SettingsState
 import com.c3ai.sourcingoptimization.domain.use_case.EditSuppliersUseCases
 import com.c3ai.sourcingoptimization.presentation.ViewModelState
 import com.c3ai.sourcingoptimization.utilities.ErrorMessage
@@ -56,7 +57,7 @@ sealed interface EditSuppliersUiState {
  * An internal representation of the EditSuppliers route state, in a raw form
  */
 private data class EditSuppliersViewModelState(
-    override val settings: C3AppSettingsProvider,
+    override val settings: SettingsState,
     val suppliers: List<C3Vendor>? = null,
     val isLoading: Boolean = false,
     val errorMessages: List<ErrorMessage> = emptyList(),
@@ -88,13 +89,13 @@ private data class EditSuppliersViewModelState(
 
 @HiltViewModel
 class EditSuppliersViewModel @Inject constructor(
-    settings: C3AppSettingsProvider,
+    settingsProvider: C3AppSettingsProvider,
     private val useCases: EditSuppliersUseCases
 ) : ViewModel() {
 
     private val viewModelState = MutableStateFlow(
         EditSuppliersViewModelState(
-            settings = settings,
+            settings = settingsProvider.state,
             isLoading = true
         )
     )

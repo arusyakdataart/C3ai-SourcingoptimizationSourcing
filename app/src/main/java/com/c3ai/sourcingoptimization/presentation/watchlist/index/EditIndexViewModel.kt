@@ -6,6 +6,7 @@ import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.data.C3Result
 import com.c3ai.sourcingoptimization.domain.model.MarketPriceIndex
 import com.c3ai.sourcingoptimization.domain.settings.C3AppSettingsProvider
+import com.c3ai.sourcingoptimization.domain.settings.SettingsState
 import com.c3ai.sourcingoptimization.domain.use_case.EditIndexUseCases
 import com.c3ai.sourcingoptimization.presentation.ViewModelState
 import com.c3ai.sourcingoptimization.presentation.watchlist.suppliers.EditSuppliersEvent
@@ -57,7 +58,7 @@ sealed interface EditIndexUiState {
  * An internal representation of the EditIndex route state, in a raw form
  */
 private data class EditIndexViewModelState(
-    override val settings: C3AppSettingsProvider,
+    override val settings: SettingsState,
     val indexes: List<MarketPriceIndex>? = null,
     val isLoading: Boolean = false,
     val errorMessages: List<ErrorMessage> = emptyList(),
@@ -89,13 +90,13 @@ private data class EditIndexViewModelState(
 
 @HiltViewModel
 class EditIndexViewModel @Inject constructor(
-    settings: C3AppSettingsProvider,
+    settingsProvider: C3AppSettingsProvider,
     private val useCases: EditIndexUseCases
 ) : ViewModel() {
 
     private val viewModelState = MutableStateFlow(
         EditIndexViewModelState(
-            settings = settings,
+            settings = settingsProvider.state,
             isLoading = true
         )
     )

@@ -8,6 +8,7 @@ import com.c3ai.sourcingoptimization.data.C3Result
 import com.c3ai.sourcingoptimization.domain.model.PurchaseOrder
 import com.c3ai.sourcingoptimization.domain.settings.C3AppSettingsProvider
 import com.c3ai.sourcingoptimization.domain.settings.FakeC3AppSettingsProvider
+import com.c3ai.sourcingoptimization.domain.settings.SettingsState
 import com.c3ai.sourcingoptimization.domain.use_case.PODetailsUseCases
 import com.c3ai.sourcingoptimization.presentation.ViewModelState
 import com.c3ai.sourcingoptimization.presentation.views.UiPurchaseOrder
@@ -59,7 +60,7 @@ sealed interface PODetailsUiState {
  * An internal representation of the PO details route[PODetailsRoute] state, in a raw form
  */
 private data class PODetailsViewModelState(
-    override val settings: C3AppSettingsProvider,
+    override val settings: SettingsState,
     val order: PurchaseOrder.Order? = null,
     val poLines: List<PurchaseOrder.Line>? = null,
     val isLoading: Boolean = false,
@@ -95,14 +96,14 @@ private data class PODetailsViewModelState(
  */
 @HiltViewModel
 class PODetailsViewModel @Inject constructor(
-    settings: C3AppSettingsProvider,
+    settingsProvider: C3AppSettingsProvider,
     private val savedStateHandle: SavedStateHandle,
     private val useCases: PODetailsUseCases
 ) : ViewModel() {
 
     private val viewModelState = MutableStateFlow(
         PODetailsViewModelState(
-            settings = settings,
+            settings = settingsProvider.state,
             isLoading = true
         )
     )
@@ -239,7 +240,7 @@ class PODetailsViewModel @Inject constructor(
 @Suppress("FunctionName")
 fun PreviewPODetailsUiState(order: PurchaseOrder.Order): PODetailsUiState {
     return PODetailsViewModelState(
-        settings = FakeC3AppSettingsProvider(),
+        settings = FakeC3AppSettingsProvider().state,
         order = order,
         isLoading = false,
         errorMessages = emptyList(),

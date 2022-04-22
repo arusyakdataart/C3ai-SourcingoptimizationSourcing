@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.customActions
@@ -22,8 +23,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.c3ai.sourcingoptimization.R
+import com.c3ai.sourcingoptimization.domain.model.RecentSearchItem
 import com.c3ai.sourcingoptimization.domain.model.SearchItem
-import com.c3ai.sourcingoptimization.presentation.views.UiRecentSearchItem
 
 
 @Composable
@@ -75,7 +76,9 @@ fun SearchCardSimple(
 }
 
 @Composable
-fun RecentSearch(item: UiRecentSearchItem) {
+fun RecentSearch(item: RecentSearchItem) {
+    val searchFilters = stringArrayResource(R.array.searchFilters).toList()
+
     ConstraintLayout {
         val (
             icon,
@@ -104,7 +107,7 @@ fun RecentSearch(item: UiRecentSearchItem) {
                 }
         )
         Text(
-            item.filters,
+            item.filters.joinToString { searchFilters[it] },
             style = MaterialTheme.typography.subtitle1,
             color = MaterialTheme.colors.secondary,
             modifier = Modifier

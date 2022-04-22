@@ -9,6 +9,7 @@ import com.c3ai.sourcingoptimization.domain.model.C3Vendor
 import com.c3ai.sourcingoptimization.domain.model.PurchaseOrder
 import com.c3ai.sourcingoptimization.domain.settings.C3AppSettingsProvider
 import com.c3ai.sourcingoptimization.domain.settings.FakeC3AppSettingsProvider
+import com.c3ai.sourcingoptimization.domain.settings.SettingsState
 import com.c3ai.sourcingoptimization.domain.use_case.SuppliersDetailsUseCases
 import com.c3ai.sourcingoptimization.presentation.ViewModelState
 import com.c3ai.sourcingoptimization.presentation.views.UiItem
@@ -68,7 +69,7 @@ sealed interface SupplierDetailsUiState {
  * An internal representation of the SupplierDetails route state, in a raw form
  */
 private data class SupplierDetailsViewModelState(
-    override val settings: C3AppSettingsProvider,
+    override val settings: SettingsState,
     val supplier: C3Vendor? = null,
     val poLines: List<PurchaseOrder.Order>? = null,
     val items: List<C3Item>? = null,
@@ -110,13 +111,13 @@ private data class SupplierDetailsViewModelState(
  */
 @HiltViewModel
 class SuppliersDetailsViewModel @Inject constructor(
-    settings: C3AppSettingsProvider,
+    settingsProvider: C3AppSettingsProvider,
     private val useCases: SuppliersDetailsUseCases
 ) : ViewModel() {
 
     private val viewModelState = MutableStateFlow(
         SupplierDetailsViewModelState(
-            settings = settings,
+            settings = settingsProvider.state,
             isLoading = true
         )
     )
@@ -251,7 +252,7 @@ fun PreviewSupplierDetailsUiState(
     tabIndex: Int = 0,
 ): SupplierDetailsUiState {
     return SupplierDetailsViewModelState(
-        settings = FakeC3AppSettingsProvider(),
+        settings = FakeC3AppSettingsProvider().state,
         supplier = supplier,
         isLoading = false,
         errorMessages = emptyList(),

@@ -148,12 +148,6 @@ fun ViewModelState.convert(
     return uiAlerts
 }
 
-fun ViewModelState.convert(item: RecentSearchItem) = UiRecentSearchItem(
-    input = item.input,
-    filters = item.filters.joinToString()
-)
-
-
 fun filterByCategory(alerts: List<UiAlert>, categories: Set<String>): List<UiAlert> {
     if (categories.isEmpty()) {
         return alerts

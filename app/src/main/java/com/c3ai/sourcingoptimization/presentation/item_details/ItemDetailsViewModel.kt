@@ -12,6 +12,7 @@ import com.c3ai.sourcingoptimization.data.C3Result.Success
 import com.c3ai.sourcingoptimization.domain.model.*
 import com.c3ai.sourcingoptimization.domain.settings.C3AppSettingsProvider
 import com.c3ai.sourcingoptimization.domain.settings.FakeC3AppSettingsProvider
+import com.c3ai.sourcingoptimization.domain.settings.SettingsState
 import com.c3ai.sourcingoptimization.domain.use_case.ItemDetailsUseCases
 import com.c3ai.sourcingoptimization.presentation.ViewModelState
 import com.c3ai.sourcingoptimization.presentation.common.C3PagingSource
@@ -90,7 +91,7 @@ sealed interface ItemDetailsUiState {
  * An internal representation of the Home route state, in a raw form
  */
 private data class ItemDetailsViewModelState(
-    override val settings: C3AppSettingsProvider,
+    override val settings: SettingsState,
     val item: C3Item? = null,
     val openClosedPOLineQty: OpenClosedPOLineQtyItem? = null,
     val savingsOpportunity: SavingsOpportunityItem? = null,
@@ -270,11 +271,11 @@ private data class ItemDetailsViewModelState(
  */
 @HiltViewModel
 class ItemDetailsViewModel @Inject constructor(
-    settings: C3AppSettingsProvider,
+    settingsProvider: C3AppSettingsProvider,
     private val useCases: ItemDetailsUseCases,
 ) : ViewModel() {
 
-    private val viewModelState = MutableStateFlow(ItemDetailsViewModelState(settings))
+    private val viewModelState = MutableStateFlow(ItemDetailsViewModelState(settingsProvider.state))
     private var offset = 0
     private var itemId: String = ""
 
@@ -683,7 +684,7 @@ fun PreviewItemDetailsUiState(
     tabIndex: Int = 0,
 ): ItemDetailsUiState {
     return ItemDetailsViewModelState(
-        settings = FakeC3AppSettingsProvider(),
+        settings = FakeC3AppSettingsProvider().state,
         item = item,
         isLoading = false,
         tabIndex = tabIndex,

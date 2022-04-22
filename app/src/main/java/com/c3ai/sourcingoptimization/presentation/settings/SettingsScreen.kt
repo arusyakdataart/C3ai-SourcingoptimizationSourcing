@@ -3,7 +3,8 @@ package com.c3ai.sourcingoptimization.presentation.settings
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
@@ -19,6 +20,8 @@ import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.common.components.*
 import com.c3ai.sourcingoptimization.data.C3Result
 import com.c3ai.sourcingoptimization.data.repository.C3MockRepositoryImpl
+import com.c3ai.sourcingoptimization.domain.settings.C3AppSettingsProviderImpl.Companion.DATE_FORMAT_DAY_MONTH_YEAR
+import com.c3ai.sourcingoptimization.domain.settings.C3AppSettingsProviderImpl.Companion.DATE_FORMAT_MONTH_DAY_YEAR
 import com.c3ai.sourcingoptimization.ui.theme.*
 import kotlinx.coroutines.runBlocking
 
@@ -42,9 +45,13 @@ fun SettingsScreen(
     uiState: SettingsUiState,
     onBackButtonClick: () -> Unit,
     onSearchModeChange: (Int) -> Unit,
+    onCurrencyChange: (Int) -> Unit,
+    onDateFormatChange: (String) -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
     val bottomState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+
+    val dateFormats = listOf(DATE_FORMAT_DAY_MONTH_YEAR, DATE_FORMAT_MONTH_DAY_YEAR)
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -59,6 +66,7 @@ fun SettingsScreen(
             modifier = Modifier
                 .padding(16.dp)
                 .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
         ) {
             Text(
                 "BA", // TODO!!! get login
@@ -75,31 +83,21 @@ fun SettingsScreen(
             )
 
             val currencyOptions = listOf("USD", "Local")
-            val (selectedCurrencyOption, onCurrencySelected) = remember {
-                mutableStateOf(
-                    currencyOptions[0]
-                )
-            }
             Column(
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                currencyOptions.forEach { text ->
+                currencyOptions.forEachIndexed { index, text ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 6.dp)
-                            .selectable(
-                                selected = (text == selectedCurrencyOption),
-                                onClick = { onCurrencySelected(text) }
-                            ),
+                            .clickable(onClick = { onCurrencyChange(index) }),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         RadioButton(
                             modifier = Modifier.size(20.dp),
-                            selected = (text == selectedCurrencyOption),
-                            onClick = {
-                                onCurrencySelected(text)
-                            },
+                            selected = index == uiState.currency,
+                            onClick = { onCurrencyChange(index) },
                             colors = RadioButtonDefaults.colors(Blue)
                         )
                         Text(
@@ -120,32 +118,21 @@ fun SettingsScreen(
                 modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
             )
             val dateOptions = listOf("MM/DD/YYYY", "DD/MM/YYYY")
-            val (selectedDateOption, onDateSelected) = remember {
-                mutableStateOf(
-                    dateOptions[0]
-                )
-            }
-
             Column(
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                dateOptions.forEach { text ->
+                dateOptions.forEachIndexed { index, text ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 6.dp)
-                            .selectable(
-                                selected = (text == selectedCurrencyOption),
-                                onClick = { onCurrencySelected(text) }
-                            ),
+                            .clickable(onClick = { onDateFormatChange(dateFormats[index]) }),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         RadioButton(
                             modifier = Modifier.size(20.dp),
-                            selected = (text == selectedDateOption),
-                            onClick = {
-                                onDateSelected(text)
-                            },
+                            selected = uiState.dateFormat == dateFormats[index],
+                            onClick = { onDateFormatChange(dateFormats[index]) },
                             colors = RadioButtonDefaults.colors(Blue)
                         )
                         Text(
@@ -237,8 +224,10 @@ fun SettingsScreenPreview() {
     C3AppTheme {
         SettingsScreen(
             scaffoldState = rememberScaffoldState(),
-            uiState = PreviewSupplierDetailsUiState(supplier, 1),
+            uiState = PreviewSettingsUiState(),
             onBackButtonClick = {},
+            onCurrencyChange = {},
+            onDateFormatChange = {},
             onSearchModeChange = {},
         )
     }
