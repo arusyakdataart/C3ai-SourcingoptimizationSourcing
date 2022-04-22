@@ -3,7 +3,9 @@ package com.c3ai.sourcingoptimization.presentation.settings
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
@@ -59,6 +61,7 @@ fun SettingsScreen(
             modifier = Modifier
                 .padding(16.dp)
                 .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
         ) {
             Text(
                 "BA", // TODO!!! get login
