@@ -1,8 +1,5 @@
 package com.c3ai.sourcingoptimization.presentation.alerts
 
-import android.util.Log
-import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.data.C3Result
@@ -13,6 +10,7 @@ import com.c3ai.sourcingoptimization.domain.model.C3VendorContact
 import com.c3ai.sourcingoptimization.domain.settings.C3AppSettingsProvider
 import com.c3ai.sourcingoptimization.domain.use_case.AlertsUseCases
 import com.c3ai.sourcingoptimization.presentation.ViewModelState
+import com.c3ai.sourcingoptimization.presentation.ViewModelWithPagination
 import com.c3ai.sourcingoptimization.presentation.views.UiAlert
 import com.c3ai.sourcingoptimization.presentation.views.convert
 import com.c3ai.sourcingoptimization.presentation.views.filterByCategory
@@ -111,7 +109,7 @@ private data class AlertsViewModelState(
 class AlertsViewModel @Inject constructor(
     settings: C3AppSettingsProvider,
     private val useCases: AlertsUseCases
-) : ViewModel() {
+) : ViewModelWithPagination() {
 
     private val viewModelState = MutableStateFlow(
         AlertsViewModelState(
@@ -119,8 +117,6 @@ class AlertsViewModel @Inject constructor(
             isLoading = true
         )
     )
-    val page = mutableStateOf(0)
-    var listScrollPosition = 0
 
     // UI state exposed to the UI
     val uiState = viewModelState
@@ -135,42 +131,23 @@ class AlertsViewModel @Inject constructor(
         refreshDetails(page = 0)
     }
 
-    private fun incrementPage(){
-        page.value = page.value + 1
-    }
-
-    fun onChangeListScrollPosition(position: Int){
-        listScrollPosition = position
-    }
-
-    fun nextPage() {
-        viewModelScope.launch {
-            // prevent duplicate event due to recompose happening to quickly
-            if((listScrollPosition + 1) >= (page.value * PAGINATED_RESPONSE_LIMIT) ){
-                viewModelState.update { it.copy(isLoading = true) }
-                incrementPage()
-                Log.d("AlertsViewModel", "nextPage: triggered: ${page.value}")
-
-                if (page.value > 0) {
-                    refreshDetails(page = page.value)
-                }
-            }
-        }
-    }
-
     /**
      * Refresh alerts data and update the UI state accordingly
      */
-    fun refreshDetails(sortOrder: String = "", page: Int) {
-        viewModelState.update { it.copy(isLoading = true) }
+    override fun refreshDetails(sortOrder: String, page: Int) {
+        if (page == 0) {
+            viewModelState.update { it.copy(isLoading = true) }
+        }
 
         viewModelScope.launch {
             val result = useCases.getAlerts(sortOrder, page * PAGINATED_RESPONSE_LIMIT)
             viewModelState.update {
                 when (result) {
                     is C3Result.Success -> {
-                        //getSupplierContacts(result.data)
-                        getFeedbacks(result.data.map { it.id })
+                        val alertIds = result.data.map { it.id }
+                        if (!alertIds.isNullOrEmpty()) {
+                            getFeedbacks(result.data.map { it.id })
+                        }
                         it.copy(alerts = appendAlerts(result.data.toSet()))
                     }
                     is C3Result.Error -> {
@@ -183,6 +160,17 @@ class AlertsViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    /**
+     * Refresh alerts data and update the UI state accordingly
+     */
+    override fun refreshDetails(sortOrder: String, page: Int, index: Int) {
+        refreshDetails(sortOrder, page)
+    }
+
+    override fun setSize() {
+        size = 1
     }
 
     private fun appendAlerts(alerts: Set<Alert>): MutableSet<Alert>? {
@@ -294,7 +282,7 @@ class AlertsViewModel @Inject constructor(
                         viewModelState.update { state ->
                             when (result) {
                                 is C3Result.Success -> state.copy(
-                                    selectedSupplierContact = result.data
+                                    selectedSupplierContact = result.data, isLoading = false
                                 )
                                 is C3Result.Error -> {
                                     state.copy(isLoading = false)
