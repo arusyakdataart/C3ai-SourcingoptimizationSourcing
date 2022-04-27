@@ -162,6 +162,17 @@ class AlertsViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Refresh alerts data and update the UI state accordingly
+     */
+    override fun refreshDetails(sortOrder: String, page: Int, index: Int) {
+        refreshDetails(sortOrder, page)
+    }
+
+    override fun setSize() {
+        size = 1
+    }
+
     private fun appendAlerts(alerts: Set<Alert>): MutableSet<Alert>? {
         if (viewModelState.value.alerts == null) {
             viewModelState.value.alerts = setOf()
