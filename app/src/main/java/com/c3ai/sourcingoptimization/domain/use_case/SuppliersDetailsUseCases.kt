@@ -15,15 +15,15 @@ class GetSupplierDetails(private val repository: C3Repository) {
 
 class GetPOsForSupplier(private val repository: C3Repository) {
 
-    suspend operator fun invoke(supplierId: String, order: String): C3Result<List<PurchaseOrder.Order>> {
-        return repository.getPOsForVendor(supplierId, order)
+    suspend operator fun invoke(supplierId: String, order: String, page: Int): C3Result<List<PurchaseOrder.Order>> {
+        return repository.getPOsForVendor(supplierId, order, page)
     }
 }
 
 class GetSuppliedItems(private val repository: C3Repository) {
 
-    suspend operator fun invoke(supplierId: String, order: String): C3Result<List<C3Item>> {
-        return repository.getSuppliedItems(supplierId, order)
+    suspend operator fun invoke(supplierId: String, order: String, page: Int): C3Result<List<C3Item>> {
+        return repository.getSuppliedItems(supplierId, order, page)
     }
 }
 
