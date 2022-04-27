@@ -136,16 +136,9 @@ fun SupplierDetailsScreen(
                                     }
                                 },
                                 loadNext = {
-                                    if (selectedTabIndex == 0) {
-                                        viewModel.onChangeListScrollPosition(viewModel.poListScrollPosition, it)
-                                        if ((it + 1) >= (viewModel.poLinesPage.value * PAGINATED_RESPONSE_LIMIT)) {
-                                            viewModel.nextPage(viewModel.poLinesPage, viewModel.poListScrollPosition, selectedTabIndex)
-                                        }
-                                    } else {
-                                        viewModel.onChangeListScrollPosition(viewModel.itemsScrollPosition, it)
-                                        if ((it + 1) >= (viewModel.itemsPage.value * PAGINATED_RESPONSE_LIMIT)) {
-                                            viewModel.nextPage(viewModel.itemsPage, viewModel.itemsScrollPosition, selectedTabIndex)
-                                        }
+                                    viewModel.onChangeListScrollPosition(it, selectedTabIndex)
+                                    if ((it + 1) >= (viewModel.pages[selectedTabIndex].value * PAGINATED_RESPONSE_LIMIT)){
+                                        viewModel.nextPage(selectedTabIndex)
                                     }
                                 },
                                 header = {

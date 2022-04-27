@@ -124,11 +124,6 @@ class SuppliersDetailsViewModel @Inject constructor(
         )
     )
 
-    val poLinesPage: MutableState<Int> = mutableStateOf(0)
-    val poListScrollPosition: MutableState<Int> = mutableStateOf(0)
-    val itemsPage: MutableState<Int> = mutableStateOf(0)
-    val itemsScrollPosition: MutableState<Int> = mutableStateOf(0)
-
     // UI state exposed to the UI
     val uiState = viewModelState
         .map { it.toUiState() }
@@ -172,15 +167,19 @@ class SuppliersDetailsViewModel @Inject constructor(
         getSuppliedItems(sortOrder, page)
     }
 
-    override fun refreshDetails(sortOrder: String, page: Int, tabPosition: Int) {
+    override fun refreshDetails(sortOrder: String, page: Int, index: Int) {
         if (page == 0) {
             viewModelState.update { it.copy(isLoading = true) }
         }
-        if (tabPosition == 0) {
+        if (index == 0) {
             getPOs(sortOrder, page)
         } else {
             getSuppliedItems(sortOrder, page)
         }
+    }
+
+    override fun setSize() {
+        size = 2
     }
 
     private fun getPOs(order: String = "", page: Int) {

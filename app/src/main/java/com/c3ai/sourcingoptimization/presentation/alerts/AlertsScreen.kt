@@ -76,7 +76,7 @@ fun AlertsScreen(
             )
         }
     ) {
-        val page = viewModel.page.value
+        val page = viewModel.pages[0].value
 
         Scaffold(
             scaffoldState = scaffoldState,

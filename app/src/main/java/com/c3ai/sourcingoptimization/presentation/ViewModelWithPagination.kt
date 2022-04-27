@@ -10,52 +10,58 @@ import kotlinx.coroutines.launch
 
 abstract class ViewModelWithPagination : ViewModel() {
 
-    val page = mutableStateOf(0)
-    var listScrollPosition = 0
+    /**
+     * Variable to hold state of page value for screen each tab.
+     */
+    val pages = mutableListOf<MutableState<Int>>()
 
-    private fun incrementPage() {
-        page.value = page.value + 1
+    /**
+     * Variable to hold state of list scroll position for screen each tab.
+     */
+    private val listScrollPositions = mutableListOf<MutableState<Int>>()
+    var size: Int = 1
+
+    init {
+        setSize()
+        for (i in 0..size) {
+            pages.add(mutableStateOf(0))
+            listScrollPositions.add(mutableStateOf(0))
+        }
     }
 
-    fun onChangeListScrollPosition(position: Int) {
-        listScrollPosition = position
+    private fun incrementPage(index: Int) {
+        pages[index].value = pages[index].value + 1
     }
 
-    fun nextPage() {
+    fun onChangeListScrollPosition(position: Int, index: Int = 0) {
+        listScrollPositions[index].value = position
+    }
+
+    fun nextPage(index: Int = 0) {
         viewModelScope.launch {
-            if ((listScrollPosition + 1) >= (page.value * PAGINATED_RESPONSE_LIMIT) ) {
-                incrementPage()
-                Log.d("AlertsViewModel", "nextPage: triggered: ${page.value}")
+            if ((listScrollPositions[index].value + 1) >= (pages[index].value * PAGINATED_RESPONSE_LIMIT) ) {
+                incrementPage(index)
+                Log.d("AlertsViewModel", "nextPage: triggered: ${pages[index].value}")
 
-                if (page.value > 0) {
-                    refreshDetails(page = page.value)
+                if (pages[index].value > 0) {
+                    refreshDetails(page = pages[index].value, index = index)
                 }
             }
         }
     }
 
+    /**
+     * Refresh data for screen all tabs
+     */
     abstract fun refreshDetails(sortOrder: String = "", page: Int)
 
-    private fun incrementPage(page: MutableState<Int>) {
-        page.value = page.value + 1
-    }
+    /**
+     * Refresh data for screen particular tab
+     */
+    abstract fun refreshDetails(sortOrder: String = "", page: Int, index: Int)
 
-    fun onChangeListScrollPosition(listScrollPosition: MutableState<Int>, position: Int) {
-        listScrollPosition.value = position
-    }
-
-    fun nextPage(page: MutableState<Int>, listScrollPosition: MutableState<Int>, tabPosition: Int) {
-        viewModelScope.launch {
-            if ((listScrollPosition.value + 1) >= (page.value * PAGINATED_RESPONSE_LIMIT) ) {
-                incrementPage(page)
-                Log.d("AlertsViewModel", "nextPage: triggered: ${page.value}")
-
-                if (page.value > 0) {
-                    refreshDetails(page = page.value, tabPosition = tabPosition)
-                }
-            }
-        }
-    }
-
-    abstract fun refreshDetails(sortOrder: String = "", page: Int, tabPosition: Int)
+    /**
+     * Set size of tabs for screen. In case there aren't any, set 1
+     */
+    abstract fun setSize()
 }
