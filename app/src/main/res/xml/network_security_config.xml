@@ -3,5 +3,6 @@
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="true">192.168.170.229</domain>
         <domain includeSubdomains="true">sourcingopt</domain>
+        <domain includeSubdomains="true">sc-sourcingoptimizationmobileapp.c3-e.com</domain>
     </domain-config>
 </network-security-config>

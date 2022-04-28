@@ -12,7 +12,9 @@ class C3MockRepositoryImpl : C3Repository {
 
     override suspend fun search(
         query: String,
-        filters: List<Int>
+        filters: List<Int>?,
+        limit: Int,
+        offset: Int
     ): C3Result<List<SearchItem>> = C3Result.on {
         emptyList()
     }

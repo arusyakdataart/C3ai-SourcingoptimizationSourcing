@@ -1,5 +1,6 @@
 package com.c3ai.sourcingoptimization.data.network
 
+import com.c3ai.sourcingoptimization.data.network.converters.C3SearchItemJsonDeserializer
 import com.c3ai.sourcingoptimization.data.network.converters.C3SpecJsonSerializer
 import com.c3ai.sourcingoptimization.data.network.requests.*
 import com.c3ai.sourcingoptimization.domain.model.*
@@ -20,7 +21,7 @@ interface C3ApiService {
 
     @Headers("Accept: application/json")
     @POST("${MAIN_API_URL}SoSearchHelper?action=unifiedSearchFetch")
-    suspend fun search(@Body request: SearchParameters): List<SearchItem>
+    suspend fun search(@Body request: SearchParameters): C3Response<SearchItem>
 
     @Headers("Accept: application/json")
     @POST("${MAIN_API_URL}Item?action=fetch")
@@ -108,6 +109,7 @@ interface C3ApiService {
             val gson = GsonBuilder()
                 .setDateFormat("yyyy-MM-dd'T'HH:mm:ss")
                 .registerTypeAdapter(C3Spec::class.java, C3SpecJsonSerializer())
+                .registerTypeAdapter(SearchItem::class.java, C3SearchItemJsonDeserializer())
                 .create()
 
             return Retrofit.Builder()

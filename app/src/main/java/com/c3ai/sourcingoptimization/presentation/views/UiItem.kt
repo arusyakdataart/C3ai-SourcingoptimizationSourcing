@@ -14,7 +14,7 @@ data class UiItem(
     val averageUnitPricePaid: String,
     val minimumUnitPricePaid: String,
     val itemFacilityInventoryParams: List<InventoryParams>?,
-    val currentInventory: Value?,
+    val currentInventory: String,
     val unfulfilledOrderQuantity: String,
     val unfulfilledOrderCost: String,
     val numberOfVendors: Int?,

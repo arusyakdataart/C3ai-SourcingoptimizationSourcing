@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -34,10 +35,12 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.common.components.*
+import com.c3ai.sourcingoptimization.data.C3Result
 import com.c3ai.sourcingoptimization.domain.model.Alert
+import com.c3ai.sourcingoptimization.domain.model.RecentSearchItem
+import com.c3ai.sourcingoptimization.domain.model.SearchItem
 import com.c3ai.sourcingoptimization.modifiers.interceptKey
 import com.c3ai.sourcingoptimization.presentation.alerts.AlertCardSimple
 import com.c3ai.sourcingoptimization.presentation.common.search.FiltersGridLayout
@@ -47,21 +50,21 @@ import com.c3ai.sourcingoptimization.presentation.common.search.SearchBar
 @Composable
 fun SearchScreen(
     scaffoldState: ScaffoldState,
-    uiState: SearchUiState,
+    uiState: SearchUiState.SearchResults,
     onRefresh: () -> Unit,
     onSettingsClick: () -> Unit,
-    onQueryChange: (String) -> Unit = {},
     onFilterClick: (Int) -> Unit,
-    onSearch: () -> Unit,
+    onRecentSearchClick: (RecentSearchItem) -> Unit,
+    onSearchResultClick: (SearchItem) -> Unit,
+    search: suspend (String, List<Int>?, offset: Int) -> C3Result<List<SearchItem>>,
 ) {
-    val context = LocalContext.current
-    var focused by remember { mutableStateOf(false) }
+    var oppened by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
         scaffoldState = scaffoldState,
         topBar = {
             AnimatedVisibility(
-                visible = !focused,
+                visible = !oppened,
                 enter = fadeIn() + expandVertically(),
                 exit = fadeOut() + shrinkVertically(),
             ) {
@@ -76,7 +79,7 @@ fun SearchScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxSize()
         ) {
-            AnimatedVisibility(visible = !focused) {
+            AnimatedVisibility(visible = !oppened) {
                 Icon(
                     painter = painterResource(R.drawable.ic_home_logo),
                     contentDescription = "",
@@ -85,16 +88,17 @@ fun SearchScreen(
                 )
             }
             SearchBar(
-                suggestions = uiState.suggestions,
-                onQueryChange = { onQueryChange(it.text) },
-                onSearchFocusChange = { focused = it },
-                onSearch = onSearch,
+                onStateChanged = { oppened = it },
+                onRecentSearchClick = onRecentSearchClick,
+                onSearchResultClick = onSearchResultClick,
+                search = search,
+                selectedFilters = uiState.selectedFilters,
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 FiltersGridLayout(
                     filters = stringArrayResource(R.array.searchFilters).toList(),
                     selected = uiState.selectedFilters,
-                    modifier = Modifier.padding(top = if (focused) 10.dp else 30.dp)
+                    modifier = Modifier.padding(top = if (oppened) 10.dp else 30.dp)
                 ) {
                     onFilterClick(it)
                 }
@@ -113,21 +117,19 @@ fun SearchWithAlertsScreen(
     uiState: SearchUiState,
     onRefresh: () -> Unit,
     onSettingsClick: () -> Unit,
-    onQueryChange: (String) -> Unit = {},
     onFilterClick: (Int) -> Unit,
-    onSearch: () -> Unit,
+    onSearchResultClick: (SearchItem) -> Unit,
+    search: suspend (String, List<Int>?, offset: Int) -> C3Result<List<SearchItem>>,
 ) {
-    val context = LocalContext.current
-
     Scaffold(
         scaffoldState = scaffoldState,
         topBar = {
             SearchTopAppBar(
                 uiState = uiState,
                 onSettingsClick = onSettingsClick,
-                onQueryChange = onQueryChange,
                 onFilterClick = onFilterClick,
-                onSearch = onSearch
+                onSearchResultClick = onSearchResultClick,
+                search = search
             )
         },
         snackbarHost = { C3SnackbarHost(hostState = it) },
@@ -365,10 +367,10 @@ private fun HomeTopAppBar(
 @Composable
 private fun SearchTopAppBar(
     uiState: SearchUiState,
-    onQueryChange: (String) -> Unit = {},
     onSettingsClick: () -> Unit,
     onFilterClick: (Int) -> Unit,
-    onSearch: () -> Unit,
+    onSearchResultClick: (SearchItem) -> Unit,
+    search: suspend (String, List<Int>?, offset: Int) -> C3Result<List<SearchItem>>,
 ) {
     C3SearchAppBar(
         title = "",
@@ -383,9 +385,9 @@ private fun SearchTopAppBar(
             }
         },
         actions = {},
-        suggestions = uiState.suggestions,
-        onQueryChange = onQueryChange,
-        onSearch = onSearch,
+        onSearchResultClick = onSearchResultClick,
+        selectedFilters = uiState.selectedFilters,
+        search = search,
     ) {
         FiltersGridLayout(
             filters = stringArrayResource(R.array.searchFilters).toList(),

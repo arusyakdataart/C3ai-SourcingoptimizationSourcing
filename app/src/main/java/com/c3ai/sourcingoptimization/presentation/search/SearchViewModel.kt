@@ -4,7 +4,6 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.c3ai.sourcingoptimization.domain.model.Alert
-import com.c3ai.sourcingoptimization.domain.model.RecentSearchItem
 import com.c3ai.sourcingoptimization.domain.settings.C3AppSettingsProvider
 import com.c3ai.sourcingoptimization.domain.settings.C3AppSettingsProviderImpl.Companion.SEARCH_MODE
 import com.c3ai.sourcingoptimization.domain.settings.SettingsState
@@ -13,7 +12,6 @@ import com.c3ai.sourcingoptimization.presentation.ViewModelState
 import com.c3ai.sourcingoptimization.utilities.ErrorMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
@@ -26,21 +24,16 @@ sealed interface SearchUiState {
 
     val isLoading: Boolean
     val errorMessages: List<ErrorMessage>
-    val searchInput: String
-    val selectedFilters: Set<Int>
-    val suggestions: List<RecentSearchItem>
+    val selectedFilters: List<Int>
 
     /**
      * There are search results to render, as contained in [alerts].
      *
      */
     data class SearchResults(
-        val results: List<Any> = emptyList(),
         override val isLoading: Boolean,
         override val errorMessages: List<ErrorMessage>,
-        override val searchInput: String,
-        override val selectedFilters: Set<Int> = emptySet(),
-        override val suggestions: List<RecentSearchItem> = emptyList(),
+        override val selectedFilters: List<Int> = emptyList(),
     ) : SearchUiState
 
     /**
@@ -52,9 +45,7 @@ sealed interface SearchUiState {
     data class NoAlerts(
         override val isLoading: Boolean,
         override val errorMessages: List<ErrorMessage>,
-        override val searchInput: String,
-        override val selectedFilters: Set<Int> = emptySet(),
-        override val suggestions: List<RecentSearchItem> = emptyList(),
+        override val selectedFilters: List<Int> = emptyList(),
     ) : SearchUiState
 
     /**
@@ -66,9 +57,7 @@ sealed interface SearchUiState {
         val selectedAlert: Alert?,
         override val isLoading: Boolean,
         override val errorMessages: List<ErrorMessage>,
-        override val searchInput: String,
-        override val selectedFilters: Set<Int> = emptySet(),
-        override val suggestions: List<RecentSearchItem> = emptyList(),
+        override val selectedFilters: List<Int> = emptyList(),
     ) : SearchUiState
 }
 
@@ -80,9 +69,7 @@ private data class SearchViewModelState(
     val alerts: List<Alert>? = null,
     val isLoading: Boolean = false,
     val errorMessages: List<ErrorMessage> = emptyList(),
-    val searchInput: String = "",
     val selectedFilters: Set<Int> = emptySet(),
-    val suggestions: List<RecentSearchItem> = emptyList(),
 ) : ViewModelState() {
 
     /**
@@ -94,18 +81,14 @@ private data class SearchViewModelState(
             SearchUiState.SearchResults(
                 isLoading = isLoading,
                 errorMessages = errorMessages,
-                searchInput = searchInput,
-                selectedFilters = selectedFilters,
-                suggestions = suggestions,
+                selectedFilters = selectedFilters.toList(),
             )
         } else {
             if (alerts == null) {
                 SearchUiState.NoAlerts(
                     isLoading = isLoading,
                     errorMessages = errorMessages,
-                    searchInput = searchInput,
-                    selectedFilters = selectedFilters,
-                    suggestions = suggestions,
+                    selectedFilters = selectedFilters.toList(),
                 )
             } else {
                 SearchUiState.HasAlerts(
@@ -113,18 +96,18 @@ private data class SearchViewModelState(
                     selectedAlert = null,
                     isLoading = isLoading,
                     errorMessages = errorMessages,
-                    searchInput = searchInput,
-                    selectedFilters = selectedFilters,
-                    suggestions = suggestions,
+                    selectedFilters = selectedFilters.toList(),
                 )
             }
         }
 }
-
+/**
+* ViewModel class which provides all necessary functionality for searching.
+* */
 @HiltViewModel
 class SearchViewModel @Inject constructor(
     settingsProvider: C3AppSettingsProvider,
-    private val useCases: SearchUseCases
+    val useCases: SearchUseCases
 ) : ViewModel(), Observer<SettingsState> {
 
     private val viewModelState = MutableStateFlow(
@@ -151,12 +134,9 @@ class SearchViewModel @Inject constructor(
      * Update state by user event.
      */
     fun onEvent(event: SearchEvent) {
-        viewModelState.update { state ->
-            when (event) {
-                is SearchEvent.OnQueryChange -> {
-                    state.copy(searchInput = event.query)
-                }
-                is SearchEvent.OnFilterClick -> {
+        when (event) {
+            is SearchEvent.OnFilterClick -> {
+                viewModelState.update { state ->
                     state.copy(
                         selectedFilters = state.selectedFilters.toMutableSet().apply {
                             val isRemoved = remove(event.index)
@@ -164,23 +144,12 @@ class SearchViewModel @Inject constructor(
                         }
                     )
                 }
-                is SearchEvent.Search -> {
-                    if (state.searchInput.isNotEmpty()) {
-                        viewModelScope.launch {
-                            useCases.search(state.searchInput, state.selectedFilters.toList())
-                        }
-                        state.copy(
-                            suggestions = state.suggestions.toMutableList().apply {
-                                find {
-                                    it.input == state.searchInput
-                                            && it.filters.containsAll(state.selectedFilters)
-                                }?.let { remove(it) }
-                                add(0, RecentSearchItem(state.searchInput, state.selectedFilters))
-                            }
-                        )
-                    } else {
-                        state
-                    }
+            }
+            is SearchEvent.OnSearchRecentClick -> {
+                viewModelState.update { state ->
+                    state.copy(
+                        selectedFilters = event.item.filters?.toSet() ?: emptySet()
+                    )
                 }
             }
         }

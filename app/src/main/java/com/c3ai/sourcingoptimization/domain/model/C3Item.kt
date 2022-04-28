@@ -14,7 +14,7 @@ data class C3Item(
     val minimumUnitPricePaid: C3UnitValue? = null,
     val minimumUnitPriceLocalPaid: C3UnitValue? = null,
     val itemFacilityInventoryParams: List<InventoryParams>? = emptyList(),
-    val currentInventory: Value? = null,
+    val currentInventory: C3UnitValue? = null,
     val unfulfilledOrderQuantity: C3UnitValue? = null,
     val unfulfilledOrderCost: C3UnitValue? = null,
     val numberOfVendors: Int? = null,
@@ -40,5 +40,5 @@ data class Id(
 )
 
 data class Value(
-    val value: Int?
+    val value: Double?
 )

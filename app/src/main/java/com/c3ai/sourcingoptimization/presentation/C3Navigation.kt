@@ -2,6 +2,7 @@ package com.c3ai.sourcingoptimization.presentation
 
 import androidx.navigation.*
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import com.c3ai.sourcingoptimization.domain.model.*
 
 /**
  * Destinations used in the [C3App].
@@ -16,6 +17,22 @@ object C3Destinations {
     const val EDIT_INDEX_ROUTE = "edit_index?indexId={indexId}"
     const val ALERTS_ROUTE = "alerts"
     const val ALERT_SETTINGS_ROUTE = "alert_settings?categories={categories}"
+}
+
+/**
+ * Navigate to the a page according search item's type[SearchItem]
+ *
+ * @param item the item to navigate to the corresponding page
+ */
+fun NavController.navigateFromSearch(
+    item: SearchItem,
+) = when(item) {
+    is ItemSearchItem -> navigateToItemDetails(item.id)
+    is AlertSearchItem -> navigateToAlerts()
+    is POSearchItem -> navigateToPoDetails(item.id)
+    is POLSearchItem -> navigateToPoDetails(item.id)
+    is SupplierSearchItem -> navigateToSupplierDetails(item.id)
+    else -> null
 }
 
 /**

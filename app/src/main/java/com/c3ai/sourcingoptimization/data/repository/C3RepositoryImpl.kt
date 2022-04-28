@@ -14,7 +14,9 @@ class C3RepositoryImpl @Inject constructor(private val api: C3ApiService) : C3Re
 
     override suspend fun search(
         query: String,
-        filters: List<Int>
+        filters: List<Int>?,
+        limit: Int,
+        offset: Int
     ): C3Result<List<SearchItem>> = C3Result.on {
         val typesToFilter = listOf(
             "Supplier",
@@ -25,8 +27,10 @@ class C3RepositoryImpl @Inject constructor(private val api: C3ApiService) : C3Re
         )
         api.search(SearchParameters(
             queryString = query,
-            typesToFilter = filters.map { typesToFilter[it] }
-        ))
+            typesToFilter = filters?.map { typesToFilter[it] },
+            numResultsToReturn = limit,
+            offset = offset
+        )).objs ?: emptyList()
     }
 
     override suspend fun getItemDetails(itemId: String): C3Result<C3Item> = C3Result.on {

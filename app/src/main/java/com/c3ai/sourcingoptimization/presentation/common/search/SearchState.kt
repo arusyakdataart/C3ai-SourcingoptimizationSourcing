@@ -1,12 +1,20 @@
 package com.c3ai.sourcingoptimization.presentation.common.search
 
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.text.input.TextFieldValue
+import com.c3ai.sourcingoptimization.data.network.converters.C3SearchItemJsonDeserializer
+import com.c3ai.sourcingoptimization.domain.model.*
 import com.c3ai.sourcingoptimization.presentation.common.search.SearchDisplay.*
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonElement
+import com.google.gson.JsonSerializationContext
+import com.google.gson.JsonSerializer
+import kotlinx.android.parcel.Parcelize
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import androidx.compose.ui.text.input.TextFieldValue
+import java.lang.reflect.Type
 
 /**
  * Creates a [SearchState] that is remembered across compositions.
@@ -18,13 +26,64 @@ import androidx.compose.ui.text.input.TextFieldValue
  *
  */
 @Composable
-fun <I, R, S> rememberSearchState(
-    initialResults: List<I> = emptyList(),
+fun rememberSaveableSearchState(
+    initialResults: List<SearchItem> = emptyList(),
+    suggestions: List<RecentSearchItem> = emptyList(),
+    searchResults: List<SearchItem> = emptyList(),
+    timeoutMillis: Long = 0,
+): SearchState<SearchItem, RecentSearchItem> {
+    return rememberSaveable(saver = StateSaver()) {
+        SearchState(
+            initialResults = initialResults,
+            suggestions = suggestions,
+            searchResults = searchResults,
+        )
+    }.also { state ->
+        LaunchedEffect(key1 = Unit) {
+
+            snapshotFlow { state.query }
+                .distinctUntilChanged()
+                .filter { query: TextFieldValue ->
+                    query.text.isNotEmpty() && !state.sameAsPreviousQuery()
+                }
+                .map { query: TextFieldValue ->
+                    if (timeoutMillis > 0) {
+                        state.searching = false
+                    }
+                    query
+                }
+                .debounce(timeoutMillis)
+                .mapLatest { query: TextFieldValue ->
+                    state.searching = true
+                    // This delay is for showing circular progress bar, it's optional
+                    delay(300)
+                }
+                .collect { result ->
+                    state.searching = false
+                }
+        }
+    }
+}
+
+/**
+ * Creates a [SearchState] that is remembered across compositions.
+ *
+ * @param initialResults results that can be displayed before doing a search
+ * @param suggestions chip or cards that can be suggested to user when Search composable is focused
+ * but query is empty
+ * @param searchResults results of latest search
+ *
+ */
+@Composable
+fun <R, S> rememberSearchState(
+    initialResults: List<R> = emptyList(),
+    suggestions: List<S> = emptyList(),
     searchResults: List<R> = emptyList(),
-): SearchState<I, R> {
+): SearchState<R, S> {
     return remember {
         SearchState(
             initialResults = initialResults,
+            suggestions = suggestions,
             searchResults = searchResults,
         )
     }
@@ -53,21 +112,19 @@ fun <I, R, S> rememberSearchState(
  * timeout [SearchState.searching]
  * is set to true.
  *
- *
- * @param onQueryResult this lambda is for getting results from db, REST api or a ViewModel.
- *
  */
 @Composable
-fun <I, R> rememberSearchState(
-    initialResults: List<I> = emptyList(),
+fun <R, S> rememberSearchState(
+    initialResults: List<R> = emptyList(),
+    suggestions: List<S> = emptyList(),
     searchResults: List<R> = emptyList(),
     timeoutMillis: Long = 0,
-    onQueryResult: (TextFieldValue) -> List<R>,
-): SearchState<I, R> {
+): SearchState<R, S> {
 
     return remember {
         SearchState(
             initialResults = initialResults,
+            suggestions = suggestions,
             searchResults = searchResults,
         )
     }.also { state ->
@@ -79,10 +136,9 @@ fun <I, R> rememberSearchState(
                     query.text.isNotEmpty() && !state.sameAsPreviousQuery()
                 }
                 .map { query: TextFieldValue ->
-                    if (timeoutMillis>0) {
+                    if (timeoutMillis > 0) {
                         state.searching = false
                     }
-                    state.searchInProgress = true
                     query
                 }
                 .debounce(timeoutMillis)
@@ -90,11 +146,8 @@ fun <I, R> rememberSearchState(
                     state.searching = true
                     // This delay is for showing circular progress bar, it's optional
                     delay(300)
-                    onQueryResult(query)
                 }
                 .collect { result ->
-                    state.searchResults = result
-                    state.searchInProgress = false
                     state.searching = false
                 }
         }
@@ -112,25 +165,35 @@ fun <I, R> rememberSearchState(
  * but query is empty
  * @param searchResults results of latest search
  */
-class SearchState<I, R> internal constructor(
-    initialResults: List<I>,
+@Parcelize
+class SearchState<R, S> internal constructor(
+    initialResults: List<R> = emptyList(),
+    suggestions: List<S>,
     searchResults: List<R>,
+    initialQuery: String = "",
+    opened: Boolean = false
 ) {
     /**
      * Query [TextFieldValue] that contains text and query selection position.
      */
-    var query by mutableStateOf(TextFieldValue())
+    var query by mutableStateOf(TextFieldValue(initialQuery))
 
     /**
      * Flag  Search composable(TextField) focus state.
      */
-    var focused by mutableStateOf(false)
+    var opened by mutableStateOf(opened)
 
     /**
      * Initial results to show initially before any search commenced. Show these items when
      * [searchDisplay] is in [SearchDisplay.InitialResults].
      */
     var initialResults by mutableStateOf(initialResults)
+
+    /**
+     * Suggestions might contain keywords and display chips to show when Search Composable
+     * is focused but query is empty.
+     */
+    var suggestions by mutableStateOf(suggestions)
 
     /**
      * Results of a search action. If this list is empty [searchDisplay] is
@@ -160,11 +223,10 @@ class SearchState<I, R> internal constructor(
     var searchInProgress = searching
 
 
-
     val searchDisplay: SearchDisplay
         get() = when {
-            !focused && query.text.isEmpty() -> InitialResults
-            focused && query.text.isEmpty() -> Suggestions
+            !opened && query.text.isEmpty() -> InitialResults
+            opened && query.text.isEmpty() -> Suggestions
             searchInProgress -> SearchInProgress
             !searchInProgress && searchResults.isEmpty() -> {
                 previousQueryText = query.text
@@ -178,7 +240,7 @@ class SearchState<I, R> internal constructor(
 
     override fun toString(): String {
         return "🚀 STATE\n" +
-                "query: ${query.text}, focused: $focused\n" +
+                "query: ${query.text}, focused: $opened\n" +
                 "searchInProgress: $searchInProgress searching: $searching\n" +
                 " searchDisplay: $searchDisplay\n\n"
     }
@@ -212,4 +274,58 @@ class SearchState<I, R> internal constructor(
  */
 enum class SearchDisplay {
     InitialResults, Suggestions, SearchInProgress, Results, NoResults
+}
+
+private class SearchItemJsonSerializer : JsonSerializer<SearchItem> {
+
+    override fun serialize(
+        src: SearchItem,
+        typeOfSrc: Type,
+        context: JsonSerializationContext
+    ): JsonElement {
+        return when (src) {
+            is ItemSearchItem -> context.serialize(src, ItemSearchItem::class.java)
+            is SupplierSearchItem -> context.serialize(src, SupplierSearchItem::class.java)
+            is AlertSearchItem -> context.serialize(src, AlertSearchItem::class.java)
+            is POSearchItem -> context.serialize(src, POSearchItem::class.java)
+            is POLSearchItem -> context.serialize(src, POLSearchItem::class.java)
+            else -> context.serialize(src, UnknownSearchItem::class.java)
+        }
+    }
+
+}
+
+private data class SearchStateSaveable(
+    val suggestions: List<RecentSearchItem>,
+    val searchResults: List<SearchItem>,
+    val query: String,
+    val opened: Boolean,
+)
+
+private fun StateSaver(): Saver<SearchState<SearchItem, RecentSearchItem>, String> {
+    val gson = GsonBuilder()
+        .registerTypeAdapter(SearchItem::class.java, C3SearchItemJsonDeserializer())
+        .registerTypeAdapter(SearchItem::class.java, SearchItemJsonSerializer())
+        .create()
+    return Saver(
+        save = {
+            val state = SearchStateSaveable(
+                suggestions = it.suggestions,
+                searchResults = it.searchResults,
+                query = it.query.text,
+                opened = it.opened,
+            )
+            val json = gson.toJson(state)
+            json
+        },
+        restore = { json ->
+            val state = gson.fromJson(json, SearchStateSaveable::class.java)
+            SearchState(
+                suggestions = state.suggestions,
+                searchResults = state.searchResults,
+                initialQuery = state.query,
+                opened = state.opened,
+            )
+        }
+    )
 }

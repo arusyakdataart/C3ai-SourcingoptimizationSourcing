@@ -10,6 +10,7 @@ import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.c3ai.sourcingoptimization.presentation.C3Destinations.SETTINGS_ROUTE
+import com.c3ai.sourcingoptimization.presentation.navigateFromSearch
 import com.c3ai.sourcingoptimization.presentation.search.SearchScreenType.SearchHome
 import com.c3ai.sourcingoptimization.presentation.search.SearchScreenType.SearchWithAlerts
 
@@ -34,12 +35,15 @@ fun SearchRoute(
         SearchHome -> {
             SearchScreen(
                 scaffoldState = scaffoldState,
-                uiState = uiState,
+                uiState = uiState as SearchUiState.SearchResults,
                 onRefresh = {},
                 onSettingsClick = { navController.navigate(SETTINGS_ROUTE) },
-                onQueryChange = { viewModel.onEvent(SearchEvent.OnQueryChange(it)) },
                 onFilterClick = { viewModel.onEvent(SearchEvent.OnFilterClick(it)) },
-                onSearch = { viewModel.onEvent(SearchEvent.Search) }
+                onRecentSearchClick = { viewModel.onEvent(SearchEvent.OnSearchRecentClick(it)) },
+                onSearchResultClick = { navController.navigateFromSearch(it) },
+                search = { query, filters, offset ->
+                    viewModel.useCases.search(query, filters, offset)
+                },
             )
         }
         SearchWithAlerts -> {
@@ -48,9 +52,11 @@ fun SearchRoute(
                 uiState = uiState,
                 onRefresh = {},
                 onSettingsClick = { navController.navigate(SETTINGS_ROUTE) },
-                onQueryChange = { viewModel.onEvent(SearchEvent.OnQueryChange(it)) },
                 onFilterClick = { viewModel.onEvent(SearchEvent.OnFilterClick(it)) },
-                onSearch = { viewModel.onEvent(SearchEvent.Search) }
+                onSearchResultClick = { navController.navigateFromSearch(it) },
+                search = { query, filters, offset ->
+                    viewModel.useCases.search(query, filters, offset)
+                },
             )
         }
     }

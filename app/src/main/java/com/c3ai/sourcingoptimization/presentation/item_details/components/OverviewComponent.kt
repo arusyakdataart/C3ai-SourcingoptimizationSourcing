@@ -225,7 +225,7 @@ private fun ItemDetailsInfo(
             LabeledValue(
                 label = stringResource(R.string.inventory),
                 value = String.format(
-                    "%s %s", item.currentInventory?.value, stringResource(R.string.cases)
+                    "%s %s", item.currentInventory, stringResource(R.string.cases)
                 ),
                 labelModifier = Modifier.height(32.dp),
                 modifier = Modifier

@@ -54,6 +54,7 @@
     <string name="promised_delivery_date">Promised Delivery Date</string>
     <string name="delivery_facility">Delivery facility</string>
     <string name="po_">PO %s</string>
+    <string name="pol_">POL %s</string>
     <string name="cd_read_more">Read More</string>
     <string name="buyer_">Buyer %s</string>
     <string name="item">Item</string>
@@ -120,6 +121,10 @@
     <string name="currency">Currency</string>
     <string name="date_format">Date Format</string>
     <string name="homepage">Homepage</string>
+    <string name="something_went_wrong">Something went wrong</string>
+    <string name="alert_for_">Alert for %s</string>
+    <string name="flagged">Flagged</string>
+    <string name="search_results">Search results</string>
     <array name="sort_po">
         <item>Total Cost</item>
         <item>Unit Price</item>

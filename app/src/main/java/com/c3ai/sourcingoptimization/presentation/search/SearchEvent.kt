@@ -1,8 +1,9 @@
 package com.c3ai.sourcingoptimization.presentation.search
 
+import com.c3ai.sourcingoptimization.domain.model.RecentSearchItem
+
 
 sealed class SearchEvent {
-    data class OnQueryChange(val query: String) : SearchEvent()
     data class OnFilterClick(val index: Int) : SearchEvent()
-    object Search : SearchEvent()
+    data class OnSearchRecentClick(val item: RecentSearchItem) : SearchEvent()
 }

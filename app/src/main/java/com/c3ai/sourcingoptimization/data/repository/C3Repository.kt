@@ -9,7 +9,12 @@ import com.c3ai.sourcingoptimization.utilities.PAGINATED_RESPONSE_LIMIT
  * */
 interface C3Repository {
 
-    suspend fun search(query: String, filters: List<Int>): C3Result<List<SearchItem>>
+    suspend fun search(
+        query: String,
+        filters: List<Int>?,
+        limit: Int = PAGINATED_RESPONSE_LIMIT,
+        offset: Int = 0
+    ): C3Result<List<SearchItem>>
 
     suspend fun getItemDetails(itemId: String): C3Result<C3Item>
 
