@@ -1,6 +1,7 @@
 package com.c3ai.sourcingoptimization.presentation.supplier_details
 
-import androidx.lifecycle.ViewModel
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.data.C3Result
@@ -12,11 +13,13 @@ import com.c3ai.sourcingoptimization.domain.settings.FakeC3AppSettingsProvider
 import com.c3ai.sourcingoptimization.domain.settings.SettingsState
 import com.c3ai.sourcingoptimization.domain.use_case.SuppliersDetailsUseCases
 import com.c3ai.sourcingoptimization.presentation.ViewModelState
+import com.c3ai.sourcingoptimization.presentation.ViewModelWithPagination
 import com.c3ai.sourcingoptimization.presentation.views.UiItem
 import com.c3ai.sourcingoptimization.presentation.views.UiPurchaseOrder
 import com.c3ai.sourcingoptimization.presentation.views.UiVendor
 import com.c3ai.sourcingoptimization.presentation.views.convert
 import com.c3ai.sourcingoptimization.utilities.ErrorMessage
+import com.c3ai.sourcingoptimization.utilities.PAGINATED_RESPONSE_LIMIT
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -71,8 +74,8 @@ sealed interface SupplierDetailsUiState {
 private data class SupplierDetailsViewModelState(
     override val settings: SettingsState,
     val supplier: C3Vendor? = null,
-    val poLines: List<PurchaseOrder.Order>? = null,
-    val items: List<C3Item>? = null,
+    var poLines: List<PurchaseOrder.Order>? = null,
+    var items: List<C3Item>? = null,
     val isLoading: Boolean = false,
     val errorMessages: List<ErrorMessage> = emptyList(),
     val searchInput: String = "",
@@ -88,8 +91,8 @@ private data class SupplierDetailsViewModelState(
         if (supplier != null && poLines != null && items != null) {
             SupplierDetailsUiState.HasDetails(
                 supplier = convert(supplier),
-                poLines = poLines.map { convert(it) },
-                items = items.map { convert(it) },
+                poLines = poLines!!.map { convert(it) },
+                items = items!!.map { convert(it) },
                 expandedListItemIds = expandedListItemIds,
                 isLoading = isLoading,
                 errorMessages = errorMessages,
@@ -113,7 +116,7 @@ private data class SupplierDetailsViewModelState(
 class SuppliersDetailsViewModel @Inject constructor(
     settingsProvider: C3AppSettingsProvider,
     private val useCases: SuppliersDetailsUseCases
-) : ViewModel() {
+) : ViewModelWithPagination() {
 
     private val viewModelState = MutableStateFlow(
         SupplierDetailsViewModelState(
@@ -132,14 +135,16 @@ class SuppliersDetailsViewModel @Inject constructor(
         )
 
     init {
-        refreshDetails()
+        refreshDetails(page = 0)
     }
 
     /**
      * Refresh supplier details and update the UI state accordingly
      */
-    fun refreshDetails() {
-        viewModelState.update { it.copy(isLoading = true) }
+    override fun refreshDetails(sortOrder: String, page: Int) {
+        if (page == 0) {
+            viewModelState.update { it.copy(isLoading = true) }
+        }
 
         viewModelScope.launch {
             val itemsResult = useCases.getSupplierDetails("supplier0")
@@ -159,19 +164,37 @@ class SuppliersDetailsViewModel @Inject constructor(
                 }
             }
         }
-        getPOs()
-        getSuppliedItems()
+        getPOs(sortOrder, page)
+        getSuppliedItems(sortOrder, page)
     }
 
-    private fun getPOs(order: String = "") {
-        viewModelState.update { it.copy(isLoading = true) }
+    override fun refreshDetails(sortOrder: String, page: Int, index: Int) {
+        if (page == 0) {
+            viewModelState.update { it.copy(isLoading = true) }
+        }
+        if (index == 0) {
+            getPOs(sortOrder, page)
+        } else {
+            getSuppliedItems(sortOrder, page)
+        }
+    }
+
+    override fun setSize() {
+        size = 2
+    }
+
+    private fun getPOs(order: String = "", page: Int) {
+        if (page == 0) {
+            viewModelState.update { it.copy(isLoading = true) }
+        }
 
         viewModelScope.launch {
-            val result = useCases.getPOsForSupplier("supplier0", order)
+            val result =
+                useCases.getPOsForSupplier("supplier0", order, page * PAGINATED_RESPONSE_LIMIT)
             viewModelState.update {
                 when (result) {
                     is C3Result.Success -> it.copy(
-                        poLines = result.data,
+                        poLines = appendPOLines(result.data),
                         isLoading = viewModelState.value.items == null || viewModelState.value.supplier == null
                     )
                     is C3Result.Error -> {
@@ -186,15 +209,27 @@ class SuppliersDetailsViewModel @Inject constructor(
         }
     }
 
-    private fun getSuppliedItems(order: String = "") {
-        viewModelState.update { it.copy(isLoading = true) }
+    private fun appendPOLines(poLines: List<PurchaseOrder.Order>): MutableList<PurchaseOrder.Order> {
+        if (viewModelState.value.poLines == null) {
+            viewModelState.value.poLines = listOf()
+        }
+        val appendedList = viewModelState.value.poLines!!.toMutableList()
+        appendedList.addAll(poLines)
+        return appendedList
+    }
+
+    private fun getSuppliedItems(order: String = "", page: Int) {
+        if (page == 0) {
+            viewModelState.update { it.copy(isLoading = true) }
+        }
 
         viewModelScope.launch {
-            val result = useCases.getSuppliedItems("supplier0", order)
+            val result =
+                useCases.getSuppliedItems("supplier0", order, page * PAGINATED_RESPONSE_LIMIT)
             viewModelState.update {
                 when (result) {
                     is C3Result.Success -> it.copy(
-                        items = result.data,
+                        items = appendSuppliedItems(result.data),
                         isLoading = viewModelState.value.supplier == null || viewModelState.value.poLines == null
                     )
                     is C3Result.Error -> {
@@ -207,6 +242,15 @@ class SuppliersDetailsViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    private fun appendSuppliedItems(items: List<C3Item>): MutableList<C3Item> {
+        if (viewModelState.value.items == null) {
+            viewModelState.value.items = listOf()
+        }
+        val appendedList = viewModelState.value.items!!.toMutableList()
+        appendedList.addAll(items)
+        return appendedList
     }
 
     /**
@@ -237,9 +281,9 @@ class SuppliersDetailsViewModel @Inject constructor(
         when (event) {
             is SupplierDetailsEvent.OnSortChanged -> {
                 if (uiState.value.tabIndex == 0) {
-                    getPOs(event.sortOption)
+                    getPOs(event.sortOption, page = 0)
                 } else {
-                    getSuppliedItems(event.sortOption)
+                    getSuppliedItems(event.sortOption, page = 0)
                 }
             }
         }

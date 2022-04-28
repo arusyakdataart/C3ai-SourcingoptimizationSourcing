@@ -32,31 +32,16 @@ fun SupplierDetailsRoute(
 
     SupplierDetailsScreen(
         scaffoldState = scaffoldState,
+        viewModel = viewModel,
         uiState = uiState,
-        onRefreshDetails = { viewModel.refreshDetails() },
+        onRefreshDetails = { viewModel.refreshDetails(page = 0) },
         onSearchInputChanged = { viewModel.onEvent(SupplierDetailsEvent.OnSearchInputChanged(it)) },
         supplierId = supplierId ?: "",
         onTabItemClick = { viewModel.onEvent(SupplierDetailsEvent.OnTabItemClick(it)) },
         onExpandableItemClick = { viewModel.onEvent(SupplierDetailsEvent.OnExpandableItemClick(it)) },
         onPOItemClick = { navController.navigateToPoDetails(it) },
         onC3ItemClick = { navController.navigateToItemDetails(it) },
-        onAlertsClick = {
-//            navController.navigateToEditSuppliers(
-//                it,
-//                Gson().toJson(
-//                    listOf(
-//                        "supplier42",
-//                        "supplier32",
-//                        "supplier48",
-//                        "supplier8",
-//                        "supplier38"
-//                    )
-//                )
-//            )
-
-//            navController.navigateToEditIndex("mpi0")
-            navController.navigateToAlerts()
-        },
+        onAlertsClick = { navController.navigateToAlerts() },
         onSortChanged = { viewModel.onEvent(SupplierDetailsEvent.OnSortChanged(it)) },
         onBackButtonClick = { navController.navigateUp() },
     )

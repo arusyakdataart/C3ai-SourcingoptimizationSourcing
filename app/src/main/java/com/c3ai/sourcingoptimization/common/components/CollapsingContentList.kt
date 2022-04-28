@@ -3,10 +3,7 @@ package com.c3ai.sourcingoptimization.common.components
 import androidx.compose.animation.*
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyItemScope
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.*
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
@@ -26,6 +23,7 @@ inline fun <T> CollapsingContentList(
     modifier: Modifier = Modifier,
     contentModifier: Modifier = Modifier,
     items: List<T>,
+    crossinline loadNext: (Int) -> Unit,
     reverseLayout: Boolean = false,
     verticalArrangement: Arrangement.Vertical =
         if (!reverseLayout) Arrangement.Top else Arrangement.Bottom,
@@ -57,7 +55,10 @@ inline fun <T> CollapsingContentList(
                 )
             }
             header?.let { stickyHeader(content = header) }
-            items(items = items, itemContent = itemContent)
+            itemsIndexed(items = items) { index, it ->
+                itemContent(it)
+                loadNext(index)
+            }
         }
         val showButton by remember {
             derivedStateOf { listState.firstVisibleItemIndex > 0 }

@@ -34,14 +34,15 @@ interface C3Repository {
 
     suspend fun getPOsForVendor(
         vendorId: String,
-        order: String
+        order: String,
+        page: Int
     ): C3Result<List<PurchaseOrder.Order>>
 
     suspend fun getSupplierContacts(id: String): C3Result<C3VendorContact>
 
     suspend fun getBuyerContacts(id: String): C3Result<C3BuyerContact>
 
-    suspend fun getSuppliedItems(vendorId: String, order: String): C3Result<List<C3Item>>
+    suspend fun getSuppliedItems(vendorId: String, order: String, page: Int): C3Result<List<C3Item>>
 
     suspend fun getEvalMetricsForPOLineQty(
         itemId: String, expressions: List<String>, startDate: String,
@@ -84,7 +85,7 @@ interface C3Repository {
         interval: String
     ): C3Result<ItemMarketPriceIndexRelationMetrics>
 
-    suspend fun getAlertsForUser(order: String): C3Result<List<Alert>>
+    suspend fun getAlertsForUser(order: String, page: Int): C3Result<List<Alert>>
 
     suspend fun getAlertsFeedbacks(
         alertIds: List<String>,
