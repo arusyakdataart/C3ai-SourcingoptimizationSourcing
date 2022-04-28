@@ -19,6 +19,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.common.SortType
 import com.c3ai.sourcingoptimization.common.components.*
@@ -27,6 +28,7 @@ import com.c3ai.sourcingoptimization.data.repository.C3MockRepositoryImpl
 import com.c3ai.sourcingoptimization.presentation.views.UiItem
 import com.c3ai.sourcingoptimization.presentation.views.UiPurchaseOrder
 import com.c3ai.sourcingoptimization.ui.theme.*
+import com.c3ai.sourcingoptimization.utilities.PAGINATED_RESPONSE_LIMIT
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
@@ -47,6 +49,7 @@ import kotlinx.coroutines.runBlocking
 @Composable
 fun SupplierDetailsScreen(
     scaffoldState: ScaffoldState,
+    viewModel: SuppliersDetailsViewModel,
     supplierId: String,
     uiState: SupplierDetailsUiState,
     onRefreshDetails: () -> Unit,
@@ -117,6 +120,7 @@ fun SupplierDetailsScreen(
                         is SupplierDetailsUiState.HasDetails -> {
                             phoneNumber = uiState.supplier.phone ?: "+37455504112"
                             emailAddress = uiState.supplier.email ?: "test@test.com"
+
                             CollapsingContentList(
                                 contentModifier = Modifier.height(156.dp),
                                 verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -128,6 +132,12 @@ fun SupplierDetailsScreen(
                                     else -> {
                                         selectedTabIndex = 0
                                         uiState.poLines
+                                    }
+                                },
+                                loadNext = {
+                                    viewModel.onChangeListScrollPosition(it, selectedTabIndex)
+                                    if ((it + 1) >= (viewModel.pages[selectedTabIndex].value * PAGINATED_RESPONSE_LIMIT)){
+                                        viewModel.nextPage(selectedTabIndex)
                                     }
                                 },
                                 header = {
@@ -145,8 +155,9 @@ fun SupplierDetailsScreen(
                                         }
                                     )
                                 },
-                                content = { SuppliersDetailsInfo(uiState) }
-                            ) { item ->
+                                content = { SuppliersDetailsInfo(uiState) },
+
+                            ) { item->
                                 when (item) {
                                     is UiItem -> ItemsSuppliedList(
                                         item,
@@ -658,6 +669,7 @@ fun SupplierDetailsPreview() {
     C3AppTheme {
         SupplierDetailsScreen(
             scaffoldState = rememberScaffoldState(),
+            viewModel = hiltViewModel(),
             supplierId = supplier.id,
             uiState = PreviewSupplierDetailsUiState(supplier),
             onRefreshDetails = {},
@@ -683,6 +695,7 @@ fun SupplierDetailsItemsSuppliedTabPreview() {
     C3AppTheme {
         SupplierDetailsScreen(
             scaffoldState = rememberScaffoldState(),
+            viewModel = hiltViewModel(),
             supplierId = supplier.id,
             uiState = PreviewSupplierDetailsUiState(supplier, 1),
             onRefreshDetails = {},

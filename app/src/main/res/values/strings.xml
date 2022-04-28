@@ -121,6 +121,7 @@
     <string name="currency">Currency</string>
     <string name="date_format">Date Format</string>
     <string name="homepage">Homepage</string>
+    <string name="alerts_for_you">Alerts for you</string>
     <string name="something_went_wrong">Something went wrong</string>
     <string name="alert_for_">Alert for %s</string>
     <string name="flagged">Flagged</string>

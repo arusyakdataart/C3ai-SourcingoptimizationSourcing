@@ -34,8 +34,9 @@ fun C3NavGraph(
         startDestination = startDestination,
         modifier = modifier
     ) {
-        composable(C3Destinations.SEARCH_ROUTE) {
-            SearchRoute(navController = navController)
+        composable(C3Destinations.SEARCH_ROUTE) { entry ->
+            val data = entry.savedStateHandle.get<String>("categories")
+            SearchRoute(navController = navController, selectedCategories = data ?: "")
         }
         composable(C3Destinations.SETTINGS_ROUTE) {
             SettingsRoute(navController = navController)

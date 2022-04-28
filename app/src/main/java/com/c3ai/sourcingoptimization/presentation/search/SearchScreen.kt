@@ -42,9 +42,10 @@ import com.c3ai.sourcingoptimization.domain.model.Alert
 import com.c3ai.sourcingoptimization.domain.model.RecentSearchItem
 import com.c3ai.sourcingoptimization.domain.model.SearchItem
 import com.c3ai.sourcingoptimization.modifiers.interceptKey
-import com.c3ai.sourcingoptimization.presentation.alerts.AlertCardSimple
+import com.c3ai.sourcingoptimization.presentation.alerts.*
 import com.c3ai.sourcingoptimization.presentation.common.search.FiltersGridLayout
 import com.c3ai.sourcingoptimization.presentation.common.search.SearchBar
+import com.c3ai.sourcingoptimization.ui.theme.PrimaryColor
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalAnimationApi::class)
 @Composable
@@ -110,34 +111,94 @@ fun SearchScreen(
 /**
  * The home screen displaying the feed along with an article details.
  */
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
 @Composable
 fun SearchWithAlertsScreen(
     scaffoldState: ScaffoldState,
     uiState: SearchUiState,
+    viewModel: AlertsViewModel,
+    alertsUiState: AlertsUiState,
+    selectedCategories: List<String>?,
+    onCategoriesSelected: () -> Unit,
     onRefresh: () -> Unit,
     onSettingsClick: () -> Unit,
     onFilterClick: (Int) -> Unit,
     onSearchResultClick: (SearchItem) -> Unit,
     search: suspend (String, List<Int>?, offset: Int) -> C3Result<List<SearchItem>>,
+    onRefreshDetails: () -> Unit,
+    onCollapsableItemClick: (String) -> Unit,
+    onSupplierClick: (String) -> Unit,
+    onItemClick: (String) -> Unit,
+    onPOClick: (String) -> Unit,
+    onContactClick: (String) -> Unit,
 ) {
-    Scaffold(
-        scaffoldState = scaffoldState,
-        topBar = {
-            SearchTopAppBar(
-                uiState = uiState,
-                onSettingsClick = onSettingsClick,
-                onFilterClick = onFilterClick,
-                onSearchResultClick = onSearchResultClick,
-                search = search
+    val context = LocalContext.current
+
+    val coroutineScope = rememberCoroutineScope()
+    val bottomState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+
+    if (selectedCategories != null) {
+        onCategoriesSelected()
+    }
+
+    ModalBottomSheetLayout(
+        sheetState = bottomState,
+        sheetContent = {
+            ContactSupplierBottomSheetContent(
+                alertsUiState.selectedSupplierContact?.phone ?: "",
+                alertsUiState.selectedSupplierContact?.email ?: "",
             )
-        },
-        snackbarHost = { C3SnackbarHost(hostState = it) },
-    ) { _ ->
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxSize()
-        ) {
+        }
+    ) {
+        Scaffold(
+            scaffoldState = scaffoldState,
+            topBar = {
+                SearchTopAppBar(
+                    uiState = uiState,
+                    onSettingsClick = onSettingsClick,
+                    onFilterClick = onFilterClick,
+                    onSearchResultClick = onSearchResultClick,
+                    search = search
+                )
+            },
+            snackbarHost = { C3SnackbarHost(hostState = it) },
+        ) { innerPadding ->
+
+            val contentModifier = Modifier.padding(innerPadding)
+            LoadingContent(
+                empty = when (alertsUiState) {
+                    is AlertsUiState.HasData -> false
+                    is AlertsUiState.NoData -> uiState.isLoading
+                },
+                emptyContent = { FullScreenLoading() },
+                loading = uiState.isLoading,
+                onRefresh = onRefresh,
+                content = {
+                    Column(modifier = Modifier.fillMaxSize()) {
+
+                        Text(
+                            text = stringResource(id = R.string.alerts_for_you),
+                            style = MaterialTheme.typography.caption,
+                            color = PrimaryColor,
+                            modifier = Modifier.padding(all = 16.dp)
+                        )
+
+                        AlertsContent(
+                            uiState = alertsUiState,
+                            viewModel = viewModel,
+                            coroutineScope = coroutineScope,
+                            bottomState = bottomState,
+                            modifier = contentModifier,
+                            onRefreshDetails = onRefreshDetails,
+                            onCollapsableItemClick = onCollapsableItemClick,
+                            onSupplierClick = onSupplierClick,
+                            onItemClick = onItemClick,
+                            onPOClick = onPOClick,
+                            onContactClick = onContactClick
+                        )
+                    }
+                }
+            )
         }
     }
 }
