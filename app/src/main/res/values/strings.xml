@@ -120,6 +120,7 @@
     <string name="currency">Currency</string>
     <string name="date_format">Date Format</string>
     <string name="homepage">Homepage</string>
+    <string name="alerts_for_you">Alerts for you</string>
     <array name="sort_po">
         <item>Total Cost</item>
         <item>Unit Price</item>

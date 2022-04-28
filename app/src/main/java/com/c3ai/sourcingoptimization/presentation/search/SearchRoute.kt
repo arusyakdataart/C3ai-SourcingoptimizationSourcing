@@ -10,8 +10,14 @@ import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.c3ai.sourcingoptimization.presentation.C3Destinations.SETTINGS_ROUTE
+import com.c3ai.sourcingoptimization.presentation.alerts.AlertsEvent
+import com.c3ai.sourcingoptimization.presentation.alerts.AlertsViewModel
+import com.c3ai.sourcingoptimization.presentation.navigateToItemDetails
+import com.c3ai.sourcingoptimization.presentation.navigateToPoDetails
+import com.c3ai.sourcingoptimization.presentation.navigateToSupplierDetails
 import com.c3ai.sourcingoptimization.presentation.search.SearchScreenType.SearchHome
 import com.c3ai.sourcingoptimization.presentation.search.SearchScreenType.SearchWithAlerts
+import com.google.gson.Gson
 
 /**
  * Displays the Home route.
@@ -26,9 +32,12 @@ import com.c3ai.sourcingoptimization.presentation.search.SearchScreenType.Search
 fun SearchRoute(
     navController: NavController,
     viewModel: SearchViewModel = hiltViewModel(),
-    scaffoldState: ScaffoldState = rememberScaffoldState()
+    alertsViewModel: AlertsViewModel = hiltViewModel(),
+    scaffoldState: ScaffoldState = rememberScaffoldState(),
+    selectedCategories: String
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val alertsUiState by alertsViewModel.uiState.collectAsState()
 
     when (getSearchScreenType(uiState)) {
         SearchHome -> {
@@ -46,11 +55,32 @@ fun SearchRoute(
             SearchWithAlertsScreen(
                 scaffoldState = scaffoldState,
                 uiState = uiState,
+                viewModel = alertsViewModel,
+                alertsUiState = alertsUiState,
+                selectedCategories = Gson().fromJson(selectedCategories, Array<String>::class.java)
+                    ?.asList(),
+                onCategoriesSelected = {
+                    alertsViewModel.onEvent(
+                        AlertsEvent.OnFilterChanged(
+                            Gson().fromJson(
+                                selectedCategories,
+                                Array<String>::class.java
+                            )?.asList() ?: emptyList()
+                        )
+                    )
+                },
                 onRefresh = {},
                 onSettingsClick = { navController.navigate(SETTINGS_ROUTE) },
                 onQueryChange = { viewModel.onEvent(SearchEvent.OnQueryChange(it)) },
                 onFilterClick = { viewModel.onEvent(SearchEvent.OnFilterClick(it)) },
-                onSearch = { viewModel.onEvent(SearchEvent.Search) }
+                onSearch = { viewModel.onEvent(SearchEvent.Search) },
+                onRefreshDetails = { alertsViewModel.refreshDetails(page = 0) },
+                onCollapsableItemClick = { alertsViewModel.onEvent(AlertsEvent.OnCollapsableItemClick(it)) },
+                onSupplierClick = { navController.navigateToSupplierDetails(it) },
+                onItemClick = { navController.navigateToItemDetails(it) },
+                onPOClick = { navController.navigateToPoDetails(it) },
+                onContactClick = { alertsViewModel.onEvent(AlertsEvent.OnSupplierContactSelected(it)) },
+
             )
         }
     }
