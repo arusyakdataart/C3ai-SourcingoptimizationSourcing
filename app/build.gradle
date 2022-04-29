@@ -50,6 +50,7 @@ dependencies {
     implementation "androidx.appcompat:appcompat:$appCompatVersion"
     implementation "com.google.android.material:material:$materialVersion"
     implementation 'androidx.constraintlayout:constraintlayout:2.1.2'
+    implementation 'androidx.security:security-crypto-ktx:1.1.0-alpha03'
 
     // Compose dependencies
     implementation "androidx.compose.runtime:runtime:$compose_version"

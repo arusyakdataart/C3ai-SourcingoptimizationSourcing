@@ -42,7 +42,7 @@ data class AlertSearchItem(
 
 data class POSearchItem(
     val name: String,
-    val order: LinkId,
+    val vendor: LinkId,
     val fulfilled: Boolean,
     val fulfilledStr: String,
     override val id: String,

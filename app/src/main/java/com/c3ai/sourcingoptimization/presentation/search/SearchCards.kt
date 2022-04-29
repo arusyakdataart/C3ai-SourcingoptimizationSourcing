@@ -81,7 +81,7 @@ fun SearchCardSimple(
             when (item) {
                 is ItemSearchItem ->
                     Text(
-                        "${item.name}, ${item.description}",
+                        "${item.name.uppercase()}, ${item.description}",
                         style = MaterialTheme.typography.h4,
                         color = MaterialTheme.colors.secondary
                     )
@@ -120,7 +120,7 @@ fun SearchCardSimple(
                         overflow = TextOverflow.Ellipsis,
                         maxLines = 1,
                         SpanStyle(fulfilledColor) to item.fulfilledStr,
-                        SpanStyle(MaterialTheme.colors.primary) to item.order.id,
+                        SpanStyle(MaterialTheme.colors.primary) to item.vendor.id,
                     )
                 }
                 is POLSearchItem -> {

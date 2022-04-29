@@ -117,6 +117,7 @@ fun SearchBar(
             ) {
                 SearchIconButton(selected = fixed || state.opened) {
                     state.query = TextFieldValue("")
+                    state.searchResults = emptyList()
                     state.opened = false
                     onStateChanged(false)
                     onBackClick()
@@ -166,9 +167,9 @@ fun SearchBar(
                     } else {
                         items(state.suggestions) { item ->
                             RecentSearch(item) {
+                                onSearch(it.input, it.filters)
                                 state.query = TextFieldValue(it.input)
                                 onRecentSearchClick(it)
-                                onSearch(it.input, it.filters)
                             }
                             ListDivider()
                         }

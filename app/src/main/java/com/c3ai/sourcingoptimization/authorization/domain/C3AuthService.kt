@@ -1,14 +1,18 @@
 package com.c3ai.sourcingoptimization.authorization.domain
 
 import com.c3ai.sourcingoptimization.authorization.domain.C3AuthService.Companion.create
+import com.c3ai.sourcingoptimization.authorization.domain.model.User
 import com.c3ai.sourcingoptimization.data.network.C3Session
 import com.c3ai.sourcingoptimization.utilities.API_DOMAIN
+import com.c3ai.sourcingoptimization.utilities.API_VERSION
+import com.c3ai.sourcingoptimization.utilities.PATH
 import com.c3ai.sourcingoptimization.utilities.SCHEMA
 import com.facebook.stetho.okhttp3.StethoInterceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.http.Headers
 import retrofit2.http.POST
 
 /**
@@ -19,6 +23,10 @@ interface C3AuthService {
 
     @POST("/auth/1/token")
     suspend fun authorize()
+
+    @Headers("Accept: application/json")
+    @POST("/$API_VERSION/${PATH}User?action=myUser")
+    suspend fun getUser(): User
 
     companion object {
 

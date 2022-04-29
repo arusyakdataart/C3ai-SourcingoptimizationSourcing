@@ -73,14 +73,14 @@ fun SearchRoute(
                         )
                     )
                 },
-                onRefresh = {},
+                onRefresh = {alertsViewModel.refreshDetails(page = 0)},
                 onSettingsClick = { navController.navigate(SETTINGS_ROUTE) },
                 onFilterClick = { viewModel.onEvent(SearchEvent.OnFilterClick(it)) },
+                onRecentSearchClick = { viewModel.onEvent(SearchEvent.OnSearchRecentClick(it)) },
                 onSearchResultClick = { navController.navigateFromSearch(it) },
                 search = { query, filters, offset ->
                     viewModel.useCases.search(query, filters, offset)
                 },
-                onRefreshDetails = { alertsViewModel.refreshDetails(page = 0) },
                 onCollapsableItemClick = { alertsViewModel.onEvent(AlertsEvent.OnCollapsableItemClick(it)) },
                 onSupplierClick = { navController.navigateToSupplierDetails(it) },
                 onItemClick = { navController.navigateToItemDetails(it) },

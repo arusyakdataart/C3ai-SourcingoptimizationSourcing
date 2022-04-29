@@ -7,9 +7,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -55,6 +53,7 @@ fun SignInScreen(
         }
     }
 
+    var rememberMe by remember { mutableStateOf(false) }
     val username = stringResource(R.string.username)
     val password = stringResource(R.string.password)
 
@@ -93,8 +92,8 @@ fun SignInScreen(
         )
         SharedPrefsToggle(
             text = stringResource(R.string.remember_me),
-            value = false,
-            onValueChanged = {}
+            value = rememberMe,
+            onValueChanged = { rememberMe = it }
         )
         SButton(
             modifier = Modifier
@@ -102,7 +101,7 @@ fun SignInScreen(
                 .padding(top = 40.dp),
             enabled = state.isLoginEnabled,
             text = stringResource(R.string.login),
-            onClick = { viewModel.authorize() }
+            onClick = { viewModel.onEvent(AuthEvent.Authorize(rememberMe)) }
         )
     }
 }

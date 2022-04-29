@@ -51,15 +51,17 @@ class AuthViewModel @Inject constructor(
                     isLoginEnabled = state.value.login.isNotEmpty() && event.text.isNotEmpty()
                 )
             }
-        }
-    }
-
-    fun authorize() {
-        viewModelScope.launch {
-            session.login = _state.value.login
-            session.password = _state.value.password
-            authUseCases.signin()
-            _eventFlow.emit(UiEvent.OnAuthorized)
+            is AuthEvent.Authorize -> {
+                viewModelScope.launch {
+                    session.login = _state.value.login
+                    session.password = _state.value.password
+                    authUseCases.signin()
+                    val user = authUseCases.getUser()
+                    session.userId = user.id
+                    if (event.shouldSaveSession) session.save()
+                    _eventFlow.emit(UiEvent.OnAuthorized)
+                }
+            }
         }
     }
 

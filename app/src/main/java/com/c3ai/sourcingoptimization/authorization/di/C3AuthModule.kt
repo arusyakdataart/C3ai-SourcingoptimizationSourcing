@@ -2,6 +2,7 @@ package com.c3ai.sourcingoptimization.authorization.di
 
 import com.c3ai.sourcingoptimization.authorization.domain.C3AuthService
 import com.c3ai.sourcingoptimization.authorization.domain.use_case.AuthUseCases
+import com.c3ai.sourcingoptimization.authorization.domain.use_case.GetUser
 import com.c3ai.sourcingoptimization.authorization.domain.use_case.SignIn
 import com.c3ai.sourcingoptimization.data.network.C3Session
 import dagger.Module
@@ -25,7 +26,8 @@ object C3AuthModule {
     @Provides
     fun provideAuthUseCases(service: C3AuthService): AuthUseCases {
         return AuthUseCases(
-            SignIn(service)
+            SignIn(service),
+            GetUser(service)
         )
     }
 }

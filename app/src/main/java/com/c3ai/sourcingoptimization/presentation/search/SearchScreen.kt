@@ -123,9 +123,9 @@ fun SearchWithAlertsScreen(
     onRefresh: () -> Unit,
     onSettingsClick: () -> Unit,
     onFilterClick: (Int) -> Unit,
+    onRecentSearchClick: (RecentSearchItem) -> Unit,
     onSearchResultClick: (SearchItem) -> Unit,
     search: suspend (String, List<Int>?, offset: Int) -> C3Result<List<SearchItem>>,
-    onRefreshDetails: () -> Unit,
     onCollapsableItemClick: (String) -> Unit,
     onSupplierClick: (String) -> Unit,
     onItemClick: (String) -> Unit,
@@ -157,6 +157,7 @@ fun SearchWithAlertsScreen(
                     uiState = uiState,
                     onSettingsClick = onSettingsClick,
                     onFilterClick = onFilterClick,
+                    onRecentSearchClick = onRecentSearchClick,
                     onSearchResultClick = onSearchResultClick,
                     search = search
                 )
@@ -189,7 +190,7 @@ fun SearchWithAlertsScreen(
                             coroutineScope = coroutineScope,
                             bottomState = bottomState,
                             modifier = contentModifier,
-                            onRefreshDetails = onRefreshDetails,
+                            onRefreshDetails = onRefresh,
                             onCollapsableItemClick = onCollapsableItemClick,
                             onSupplierClick = onSupplierClick,
                             onItemClick = onItemClick,
@@ -430,6 +431,7 @@ private fun SearchTopAppBar(
     uiState: SearchUiState,
     onSettingsClick: () -> Unit,
     onFilterClick: (Int) -> Unit,
+    onRecentSearchClick: (RecentSearchItem) -> Unit,
     onSearchResultClick: (SearchItem) -> Unit,
     search: suspend (String, List<Int>?, offset: Int) -> C3Result<List<SearchItem>>,
 ) {
@@ -446,6 +448,7 @@ private fun SearchTopAppBar(
             }
         },
         actions = {},
+        onRecentSearchClick = onRecentSearchClick,
         onSearchResultClick = onSearchResultClick,
         selectedFilters = uiState.selectedFilters,
         search = search,

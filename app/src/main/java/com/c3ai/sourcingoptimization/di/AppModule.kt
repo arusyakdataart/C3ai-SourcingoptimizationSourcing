@@ -100,11 +100,11 @@ object AppModule {
     }
 
     @Provides
-    fun provideAlertsUseCases(repository: C3Repository): AlertsUseCases {
+    fun provideAlertsUseCases(repository: C3Repository, session: C3Session): AlertsUseCases {
         return AlertsUseCases(
             getAlerts = GetAlertsForUser(repository),
-            getAlertsFeedbacks = GetAlertsFeedbacks(repository),
-            updateAlerts = UpdateAlerts(repository),
+            getAlertsFeedbacks = GetAlertsFeedbacks(repository, session.userId),
+            updateAlerts = UpdateAlerts(repository, session.userId),
             getSupplierContacts = GetSupplierContacts(repository)
         )
     }

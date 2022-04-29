@@ -12,21 +12,21 @@ class GetAlertsForUser(private val repository: C3Repository) {
     }
 }
 
-class GetAlertsFeedbacks(private val repository: C3Repository) {
+class GetAlertsFeedbacks(private val repository: C3Repository, private val userId: String) {
 
     suspend operator fun invoke(alertIds: List<String>): C3Result<List<AlertFeedback>> {
-        return repository.getAlertsFeedbacks(alertIds, "BA")
+        return repository.getAlertsFeedbacks(alertIds, userId)
     }
 }
 
-class UpdateAlerts(private val repository: C3Repository) {
+class UpdateAlerts(private val repository: C3Repository, private val userId: String) {
 
     suspend operator fun invoke(
         alertIds: List<String>,
         statusType: String,
         statusValue: Boolean?
     ) {
-        return repository.updateAlert(alertIds, "BA", statusType, statusValue)
+        return repository.updateAlert(alertIds, userId, statusType, statusValue)
     }
 }
 

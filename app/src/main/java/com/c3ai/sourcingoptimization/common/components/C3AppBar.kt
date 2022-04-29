@@ -89,6 +89,7 @@ fun C3SearchAppBar(
     showLogo: Boolean = false,
     navigationIcon: @Composable (() -> Unit)? = null,
     actions: @Composable RowScope.() -> Unit = {},
+    onRecentSearchClick: (RecentSearchItem) -> Unit,
     onSearchResultClick: (SearchItem) -> Unit,
     search: suspend (String, List<Int>?, offset: Int) -> C3Result<List<SearchItem>>,
     selectedFilters: List<Int>? = null,
@@ -124,6 +125,7 @@ fun C3SearchAppBar(
             SearchBar(
                 fixed = true,
                 onBackClick = { oppened = false },
+                onRecentSearchClick = onRecentSearchClick,
                 onSearchResultClick = onSearchResultClick,
                 search = search,
                 selectedFilters = selectedFilters,

@@ -20,7 +20,7 @@ class C3SearchItemJsonDeserializer : JsonDeserializer<SearchItem> {
     ): SearchItem {
         return when (json.asJsonObject.get("type").asString) {
             "Item" -> gson.fromJson(json, ItemSearchItem::class.java)
-            "Supplier" -> gson.fromJson(json, SupplierSearchItem::class.java)
+            "Vendor" -> gson.fromJson(json, SupplierSearchItem::class.java)
             "SoAlertHelper" -> gson.fromJson(json, AlertSearchItem::class.java)
             "PurchaseOrder" -> gson.fromJson(json, POSearchItem::class.java)
             "PurchaseOrderLine" -> gson.fromJson(json, POLSearchItem::class.java)
