@@ -147,9 +147,9 @@ class AlertsViewModel @Inject constructor(
                     is C3Result.Success -> {
                         val alertIds = result.data.map { it.id }
                         if (!alertIds.isNullOrEmpty()) {
-                            getFeedbacks(result.data.map { it.id })
+                            getFeedbacks(result.data.map { it.id }, page)
                         }
-                        it.copy(alerts = appendAlerts(result.data.toSet()))
+                        it.copy(alerts = appendAlerts(result.data.toSet(), page))
                     }
                     is C3Result.Error -> {
                         val errorMessages = it.errorMessages + ErrorMessage(
@@ -174,8 +174,8 @@ class AlertsViewModel @Inject constructor(
         size = 1
     }
 
-    private fun appendAlerts(alerts: Set<Alert>): MutableSet<Alert>? {
-        if (viewModelState.value.alerts == null) {
+    private fun appendAlerts(alerts: Set<Alert>, page: Int): MutableSet<Alert>? {
+        if (viewModelState.value.alerts == null || page == 0) {
             viewModelState.value.alerts = setOf()
         }
         val appendedSet = viewModelState.value.alerts?.toMutableSet()
@@ -183,8 +183,8 @@ class AlertsViewModel @Inject constructor(
         return appendedSet
     }
 
-    private fun appendFeedbacks(feedbacks: Set<AlertFeedback>): MutableSet<AlertFeedback>? {
-        if (viewModelState.value.alertsFeedBacks == null) {
+    private fun appendFeedbacks(feedbacks: Set<AlertFeedback>, page: Int): MutableSet<AlertFeedback>? {
+        if (viewModelState.value.alertsFeedBacks == null || page == 0) {
             viewModelState.value.alertsFeedBacks = setOf()
         }
         val appendedSet = viewModelState.value.alertsFeedBacks?.toMutableSet()
@@ -192,14 +192,14 @@ class AlertsViewModel @Inject constructor(
         return appendedSet
     }
 
-    private fun getFeedbacks(alertIds: List<String>) {
+    private fun getFeedbacks(alertIds: List<String>, page: Int) {
         viewModelScope.launch {
             val result = useCases.getAlertsFeedbacks(alertIds)
             viewModelState.update {
                 when (result) {
                     is C3Result.Success -> {
                         it.copy(
-                            alertsFeedBacks = appendFeedbacks(result.data.toSet()),
+                            alertsFeedBacks = appendFeedbacks(result.data.toSet(), page),
                             isLoading = false
                         )
                     }

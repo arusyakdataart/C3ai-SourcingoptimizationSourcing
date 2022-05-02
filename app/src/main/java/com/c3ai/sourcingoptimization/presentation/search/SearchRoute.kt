@@ -9,13 +9,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.c3ai.sourcingoptimization.presentation.*
 import com.c3ai.sourcingoptimization.presentation.C3Destinations.SETTINGS_ROUTE
 import com.c3ai.sourcingoptimization.presentation.alerts.AlertsEvent
 import com.c3ai.sourcingoptimization.presentation.alerts.AlertsViewModel
-import com.c3ai.sourcingoptimization.presentation.navigateFromSearch
-import com.c3ai.sourcingoptimization.presentation.navigateToItemDetails
-import com.c3ai.sourcingoptimization.presentation.navigateToPoDetails
-import com.c3ai.sourcingoptimization.presentation.navigateToSupplierDetails
 import com.c3ai.sourcingoptimization.presentation.search.SearchScreenType.SearchHome
 import com.c3ai.sourcingoptimization.presentation.search.SearchScreenType.SearchWithAlerts
 import com.google.gson.Gson
@@ -73,6 +70,8 @@ fun SearchRoute(
                         )
                     )
                 },
+                onAlertsSortChanged = { alertsViewModel.onEvent(AlertsEvent.OnSortChanged(it)) },
+                onChangeAlertsFilter = { navController.navigateToAlertSettings(it) },
                 onRefresh = {alertsViewModel.refreshDetails(page = 0)},
                 onSettingsClick = { navController.navigate(SETTINGS_ROUTE) },
                 onFilterClick = { viewModel.onEvent(SearchEvent.OnFilterClick(it)) },

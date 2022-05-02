@@ -35,6 +35,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.common.components.*
 import com.c3ai.sourcingoptimization.data.C3Result
@@ -45,6 +46,8 @@ import com.c3ai.sourcingoptimization.modifiers.interceptKey
 import com.c3ai.sourcingoptimization.presentation.alerts.*
 import com.c3ai.sourcingoptimization.presentation.common.search.FiltersGridLayout
 import com.c3ai.sourcingoptimization.presentation.common.search.SearchBar
+import com.c3ai.sourcingoptimization.presentation.navigateToItemDetails
+import com.c3ai.sourcingoptimization.presentation.navigateToSupplierDetails
 import com.c3ai.sourcingoptimization.ui.theme.PrimaryColor
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalAnimationApi::class)
@@ -120,6 +123,8 @@ fun SearchWithAlertsScreen(
     alertsUiState: AlertsUiState,
     selectedCategories: List<String>?,
     onCategoriesSelected: () -> Unit,
+    onAlertsSortChanged: (String) -> Unit,
+    onChangeAlertsFilter: (String) -> Unit,
     onRefresh: () -> Unit,
     onSettingsClick: () -> Unit,
     onFilterClick: (Int) -> Unit,
@@ -155,6 +160,9 @@ fun SearchWithAlertsScreen(
             topBar = {
                 SearchTopAppBar(
                     uiState = uiState,
+                    alertsUiState = alertsUiState,
+                    onAlertsSortChanged = onAlertsSortChanged,
+                    onChangeAlertsFilter = onChangeAlertsFilter,
                     onSettingsClick = onSettingsClick,
                     onFilterClick = onFilterClick,
                     onRecentSearchClick = onRecentSearchClick,
@@ -429,6 +437,9 @@ private fun HomeTopAppBar(
 @Composable
 private fun SearchTopAppBar(
     uiState: SearchUiState,
+    alertsUiState: AlertsUiState,
+    onAlertsSortChanged: (String) -> Unit,
+    onChangeAlertsFilter: (String) -> Unit,
     onSettingsClick: () -> Unit,
     onFilterClick: (Int) -> Unit,
     onRecentSearchClick: (RecentSearchItem) -> Unit,
@@ -447,7 +458,13 @@ private fun SearchTopAppBar(
                 )
             }
         },
-        actions = {},
+        actions = {
+            AlertsActions(
+                uiState = alertsUiState,
+                onSortChanged = onAlertsSortChanged,
+                onChangeFilter = onChangeAlertsFilter
+            )
+        },
         onRecentSearchClick = onRecentSearchClick,
         onSearchResultClick = onSearchResultClick,
         selectedFilters = uiState.selectedFilters,

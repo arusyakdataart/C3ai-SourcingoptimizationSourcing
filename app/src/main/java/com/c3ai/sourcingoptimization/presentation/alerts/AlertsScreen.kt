@@ -64,7 +64,7 @@ fun AlertsScreen(
         Scaffold(
             scaffoldState = scaffoldState,
             topBar = {
-                TopAppBar(
+                AlertsTopAppBar(
                     title = stringResource(R.string.alerts),
                     uiState = uiState,
                     searchInput = uiState.searchInput,
@@ -115,13 +115,12 @@ fun AlertsScreen(
 }
 
 
-
 /**
  * TopAppBar for the alerts screen[AlertsScreen]
  */
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-private fun TopAppBar(
+fun AlertsTopAppBar(
     title: String,
     uiState: AlertsUiState,
     searchInput: String,
@@ -136,9 +135,6 @@ private fun TopAppBar(
     var showClearButton by remember { mutableStateOf(false) }
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusRequester = remember { FocusRequester() }
-    var sortMenuExpanded by remember { mutableStateOf(false) }
-    var sortApplied by remember { mutableStateOf("") }
-    var sortType by remember { mutableStateOf(SortType.ASCENDING) }
 
     C3TopAppBar(
         title = title,
@@ -150,70 +146,11 @@ private fun TopAppBar(
                     contentDescription = stringResource(R.string.cd_search_menu)
                 )
             }
-            IconButton(onClick = { sortMenuExpanded = true }) {
-                Icon(
-                    imageVector = Icons.Filled.Sort,
-                    contentDescription = stringResource(R.string.cd_sort_menu)
-                )
-            }
-            DropdownMenu(
-                modifier = Modifier,
-                expanded = sortMenuExpanded,
-                onDismissRequest = { sortMenuExpanded = false }
-            ) {
-                val resources = listOf(
-                    "timestamp" to "Alert Creation Date",
-                    "flagged" to "Alert Flag Status",
-                    "currentState" to "Alert State",
-                    "readStatus" to "Alert Status"
-                )
-                resources.map { it ->
-                    DropdownMenuItem(
-                        onClick = {
-                            sortMenuExpanded = false
-                            if (sortApplied == it.first) {
-                                sortType =
-                                    if (sortType == SortType.ASCENDING) SortType.DESCENDING else SortType.ASCENDING
-                            } else {
-                                sortType = SortType.DESCENDING
-                            }
-                            val orderType =
-                                if (sortType == SortType.DESCENDING) "descending" else "ascending"
-                            sortApplied = it.first
-
-                            onSortChanged(orderType + "(" + it.first + ")")
-                        },
-                    ) {
-                        Row(modifier = Modifier.fillMaxSize()) {
-                            if (sortApplied == it.first) {
-                                Icon(
-                                    imageVector = if (sortType == SortType.ASCENDING) Icons.Filled.ArrowUpward else Icons.Filled.ArrowDownward,
-                                    contentDescription = "",
-                                    tint = Blue
-                                )
-                            } else {
-                                Spacer(modifier = Modifier.width(24.dp))
-                            }
-                            Spacer(modifier = Modifier.width(16.dp))
-                            Text(
-                                it.second,
-                                style = MaterialTheme.typography.subtitle1,
-                                color = if (sortApplied == it.first) Blue else MaterialTheme.colors.secondaryVariant,
-                            )
-                        }
-                    }
-                }
-            }
-            IconButton(
-                onClick = {
-                    onChangeFilter(Gson().toJson((uiState as AlertsUiState.HasData).selectedCategoriesList))
-                }
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Settings,
-                    contentDescription = stringResource(R.string.cd_settings_menu)
-                )
-            }
+            AlertsActions(
+                uiState = uiState,
+                onSortChanged = onSortChanged,
+                onChangeFilter = onChangeFilter
+            )
         }
     )
 }
