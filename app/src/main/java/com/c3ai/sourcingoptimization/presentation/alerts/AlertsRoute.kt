@@ -47,5 +47,7 @@ fun AlertsRoute(
         onItemClick = { navController.navigateToItemDetails(it) },
         onPOClick = { navController.navigateToPoDetails(it) },
         onContactClick = { viewModel.onEvent(AlertsEvent.OnSupplierContactSelected(it)) },
+        onRetry = { viewModel.onEvent(AlertsEvent.OnRetry("")) },
+        onError = { viewModel.onEvent(AlertsEvent.OnError("")) }
     )
 }
