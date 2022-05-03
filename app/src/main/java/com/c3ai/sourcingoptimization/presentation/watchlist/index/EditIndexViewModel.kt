@@ -117,8 +117,19 @@ class EditIndexViewModel @Inject constructor(
     /**
      * Update state by user event.
      */
-    fun onEvent(event: EditSuppliersEvent) {
-
+    fun onEvent(event: EditIndexEvent) {
+        viewModelState.update { state ->
+            when (event) {
+                is EditIndexEvent.OnRetry -> {
+                    refreshDetails(page = 0)
+                    state.copy(isLoading = true)
+                }
+                is EditIndexEvent.OnError -> {
+                    state.copy(errorMessages = emptyList())
+                }
+                else -> state.copy()
+            }
+        }
     }
 
     /**
