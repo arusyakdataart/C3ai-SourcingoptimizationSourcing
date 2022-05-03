@@ -56,6 +56,7 @@ interface C3Repository {
 
     suspend fun getItemDetailsSuppliers(
         itemId: String,
+        page: Int,
         limit: Int = PAGINATED_RESPONSE_LIMIT
     ): C3Result<List<C3Vendor>>
 

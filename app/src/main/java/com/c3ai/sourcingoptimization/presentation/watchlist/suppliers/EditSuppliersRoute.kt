@@ -34,11 +34,12 @@ fun EditSuppliersRoute(
 
     EditSuppliersScreen(
         navController = navController,
+        viewModel = viewModel,
         scaffoldState = scaffoldState,
         uiState = uiState,
         itemId = itemId ?: "",
         suppliers = suppliers ?: listOf(),
-        onRefreshDetails = { viewModel.refreshDetails() },
+        onRefreshDetails = { viewModel.refreshDetails(page = 0) },
         onSearchInputChanged = { viewModel.onEvent(EditSuppliersEvent.OnSearchInputChanged(it)) },
         onSupplierClick = {},
         onCheckSupplier = { viewModel.onEvent(EditSuppliersEvent.OnSupplierChecked(it)) },

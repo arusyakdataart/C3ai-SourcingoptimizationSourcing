@@ -4,7 +4,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
@@ -28,6 +28,7 @@ import com.c3ai.sourcingoptimization.domain.model.C3Vendor
 import com.c3ai.sourcingoptimization.ui.theme.BackgroundColor
 import com.c3ai.sourcingoptimization.ui.theme.Blue
 import com.c3ai.sourcingoptimization.ui.theme.Gray70
+import com.c3ai.sourcingoptimization.utilities.PAGINATED_RESPONSE_LIMIT
 import com.google.gson.Gson
 
 /**
@@ -41,6 +42,7 @@ import com.google.gson.Gson
 @Composable
 fun EditSuppliersScreen(
     navController: NavController,
+    viewModel: EditSuppliersViewModel,
     scaffoldState: ScaffoldState,
     uiState: EditSuppliersUiState,
     itemId: String,
@@ -69,6 +71,8 @@ fun EditSuppliersScreen(
         val contentModifier = Modifier.padding(innerPadding)
         val checkedSuppliers = mutableListOf<C3Vendor>()
         val openDialog = remember { mutableStateOf(false) }
+
+        val page = viewModel.pages[0].value
 
         LoadingContent(
             empty = when (uiState) {
@@ -107,7 +111,12 @@ fun EditSuppliersScreen(
                                 }
                             }
                             val supplierIds = suppliers.map { it }
-                            items(items = uiState.suppliers, itemContent = {
+                            itemsIndexed(items = uiState.suppliers) { index, it ->
+                                viewModel.onChangeListScrollPosition(index)
+                                if ((index + 1) >= (page * PAGINATED_RESPONSE_LIMIT)){
+                                    viewModel.nextPage()
+                                }
+
                                 val isChecked = supplierIds.contains(it.id)
                                 val checkedState = remember { mutableStateOf(isChecked) }
                                 ConstraintLayout(
@@ -223,7 +232,7 @@ fun EditSuppliersScreen(
                                     )
                                 }
 
-                            })
+                            }
                         }
                     }
                     is EditSuppliersUiState.NoData -> {

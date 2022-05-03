@@ -55,8 +55,8 @@ class GetEvalMetricsForSavingsOpportunity(private val repository: C3Repository) 
 
 class GetItemDetailsSuppliers(private val repository: C3Repository) {
 
-    suspend operator fun invoke(itemId: String, limit: Int = PAGINATED_RESPONSE_LIMIT): C3Result<List<C3Vendor>> {
-        return repository.getItemDetailsSuppliers(itemId = itemId, limit = limit)
+    suspend operator fun invoke(itemId: String, page: Int, limit: Int = PAGINATED_RESPONSE_LIMIT): C3Result<List<C3Vendor>> {
+        return repository.getItemDetailsSuppliers(itemId = itemId, page = page, limit = limit)
     }
 
 }

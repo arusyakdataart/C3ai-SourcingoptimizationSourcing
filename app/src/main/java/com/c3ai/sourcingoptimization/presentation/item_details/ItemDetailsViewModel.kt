@@ -467,7 +467,7 @@ class ItemDetailsViewModel @Inject constructor(
     }
 
     private suspend fun updateSourcingAnalysis(startDate: String, endDate: String) {
-        val suppliersResult = useCases.getItemDetailsSuppliers(itemId, limit = 5)
+        val suppliersResult = useCases.getItemDetailsSuppliers(itemId, page = 0, limit = 5)
         viewModelState.update { state ->
             when (suppliersResult) {
                 is Success -> {
