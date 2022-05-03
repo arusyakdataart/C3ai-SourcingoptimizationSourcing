@@ -36,5 +36,7 @@ fun PODetailsRoute(
         onSearchInputChanged = { viewModel.onEvent(PODetailsEvent.OnSearchInputChanged(it)) },
         onSortChanged = { viewModel.onEvent(PODetailsEvent.OnSortChanged(it)) },
         onBackButtonClick = { navController.navigateUp() },
+        onRetry = { viewModel.onEvent(PODetailsEvent.OnRetry(""))},
+        onError = { viewModel.onEvent(PODetailsEvent.OnError(""))}
     )
 }

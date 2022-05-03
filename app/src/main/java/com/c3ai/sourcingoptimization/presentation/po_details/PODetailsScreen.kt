@@ -51,7 +51,9 @@ fun PODetailsScreen(
     onSearchInputChanged: (String) -> Unit,
     onSortChanged: (String) -> Unit,
     onBackButtonClick: () -> Unit,
-) {
+    onRetry: () -> Unit,
+    onError: () -> Unit
+ ) {
     val coroutineScope = rememberCoroutineScope()
     val bottomState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
 
@@ -185,9 +187,11 @@ fun PODetailsScreen(
             )
             if (snackbarResult == SnackbarResult.ActionPerformed) {
                 onRefreshPostsState()
+                onRetry()
             }
             // Once the message is displayed and dismissed, notify the ViewModel
             onErrorDismissState()
+            onError()
         }
     }
 }
@@ -333,6 +337,8 @@ fun ComposablePreview() {
             onSearchInputChanged = {},
             onSortChanged = {},
             onBackButtonClick = {},
+            onRetry = {},
+            onError = {}
         )
     }
 }
