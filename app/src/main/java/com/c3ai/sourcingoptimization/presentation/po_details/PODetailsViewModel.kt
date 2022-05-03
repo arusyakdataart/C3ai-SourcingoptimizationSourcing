@@ -228,9 +228,20 @@ class PODetailsViewModel @Inject constructor(
     }
 
     fun onEvent(event: PODetailsEvent) {
-        when (event) {
-            is PODetailsEvent.OnSortChanged -> {
-                reloadPOLines(event.sortOption)
+        viewModelState.update { state ->
+            when (event) {
+                is PODetailsEvent.OnSortChanged -> {
+                    reloadPOLines(event.sortOption)
+                    state.copy()
+                }
+                is PODetailsEvent.OnRetry -> {
+                    refreshDetails()
+                    state.copy(isLoading = true)
+                }
+                is PODetailsEvent.OnError -> {
+                    state.copy(errorMessages = emptyList())
+                }
+                else -> state.copy()
             }
         }
     }

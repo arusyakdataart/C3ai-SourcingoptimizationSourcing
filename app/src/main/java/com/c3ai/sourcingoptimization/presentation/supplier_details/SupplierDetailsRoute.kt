@@ -44,5 +44,7 @@ fun SupplierDetailsRoute(
         onAlertsClick = { navController.navigateToAlerts() },
         onSortChanged = { viewModel.onEvent(SupplierDetailsEvent.OnSortChanged(it)) },
         onBackButtonClick = { navController.navigateUp() },
+        onRetry = { viewModel.onEvent(SupplierDetailsEvent.OnRetry("")) },
+        onError = { viewModel.onEvent(SupplierDetailsEvent.OnError("")) }
     )
 }

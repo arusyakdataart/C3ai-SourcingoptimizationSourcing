@@ -6,8 +6,8 @@ import com.c3ai.sourcingoptimization.domain.model.C3Vendor
 
 class GetSuppliersForItem(private val repository: C3Repository) {
 
-    suspend operator fun invoke(itemId: String): C3Result<List<C3Vendor>> {
-        return repository.getItemDetailsSuppliers(itemId)
+    suspend operator fun invoke(itemId: String, page: Int): C3Result<List<C3Vendor>> {
+        return repository.getItemDetailsSuppliers(itemId, page)
     }
 }
 

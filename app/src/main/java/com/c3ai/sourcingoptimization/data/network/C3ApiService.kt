@@ -77,7 +77,7 @@ interface C3ApiService {
 
     @Headers("Accept: application/json")
     @POST("${MAIN_API_URL}MarketPriceIndex?action=fetch")
-    suspend fun getMarketPriceIndexes(): C3Response<MarketPriceIndex>
+    suspend fun getMarketPriceIndexes(@Body request: MarketPriceIndexParameters): C3Response<MarketPriceIndex>
 
     @Headers("Accept: application/json")
     @POST("${MAIN_API_URL}ItemMarketPriceIndexRelation?action=fetch")

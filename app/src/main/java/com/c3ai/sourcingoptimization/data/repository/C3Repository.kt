@@ -56,6 +56,7 @@ interface C3Repository {
 
     suspend fun getItemDetailsSuppliers(
         itemId: String,
+        page: Int,
         limit: Int = PAGINATED_RESPONSE_LIMIT
     ): C3Result<List<C3Vendor>>
 
@@ -70,7 +71,7 @@ interface C3Repository {
         interval: String
     ): C3Result<ItemVendorRelationMetrics>
 
-    suspend fun getMarketPriceIndexes(): C3Result<List<MarketPriceIndex>>
+    suspend fun getMarketPriceIndexes(page: Int): C3Result<List<MarketPriceIndex>>
 
     suspend fun getItemMarketPriceIndexRelation(
         itemId: String,

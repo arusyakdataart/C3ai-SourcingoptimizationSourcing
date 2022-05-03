@@ -4,7 +4,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -23,6 +23,7 @@ import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.common.components.*
 import com.c3ai.sourcingoptimization.ui.theme.BackgroundColor
 import com.c3ai.sourcingoptimization.ui.theme.Blue
+import com.c3ai.sourcingoptimization.utilities.PAGINATED_RESPONSE_LIMIT
 import com.google.gson.Gson
 
 /**
@@ -36,12 +37,15 @@ import com.google.gson.Gson
 @Composable
 fun EditIndexScreen(
     navController: NavController,
+    viewModel: EditIndexViewModel,
     scaffoldState: ScaffoldState,
     uiState: EditIndexUiState,
     indexId: String,
     onRefreshDetails: () -> Unit,
     onSearchInputChanged: (String) -> Unit,
     onBackButtonClick: () -> Unit,
+    onRetry: () -> Unit,
+    onError: () -> Unit
 ) {
     Scaffold(
         scaffoldState = scaffoldState,
@@ -57,6 +61,7 @@ fun EditIndexScreen(
         },
         snackbarHost = { C3SnackbarHost(hostState = it) },
     ) { innerPadding ->
+        val page = viewModel.pages[0].value
         val contentModifier = Modifier.padding(innerPadding)
         LoadingContent(
             empty = when (uiState) {
@@ -89,7 +94,12 @@ fun EditIndexScreen(
                                     )
                                 }
                             }
-                            items(items = uiState.indexes, itemContent = {
+                            itemsIndexed(items = uiState.indexes) { index, it ->
+                                viewModel.onChangeListScrollPosition(index)
+                                if ((index + 1) >= (page * PAGINATED_RESPONSE_LIMIT)){
+                                    viewModel.nextPage()
+                                }
+
                                 ConstraintLayout(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -146,8 +156,7 @@ fun EditIndexScreen(
                                             }
                                     )
                                 }
-
-                            })
+                            }
                         }
                     }
                     is EditIndexUiState.NoData -> {
@@ -166,6 +175,38 @@ fun EditIndexScreen(
                 }
             }
         )
+    }
+
+    // Process one error message at a time and show them as Snackbars in the UI
+    if (uiState.errorMessages.isNotEmpty()) {
+        // Remember the errorMessage to display on the screen
+        val errorMessage = remember(uiState) { uiState.errorMessages[0] }
+
+        // Get the text to show on the message from resources
+        val errorMessageText: String = stringResource(errorMessage.messageId)
+        val retryMessageText = stringResource(id = R.string.retry)
+
+        // If onRefreshPosts or onErrorDismiss change while the LaunchedEffect is running,
+        // don't restart the effect and use the latest lambda values.
+        val onRefreshPostsState by rememberUpdatedState({ })
+        val onErrorDismissState by rememberUpdatedState({ })
+
+        // Effect running in a coroutine that displays the Snackbar on the screen
+        // If there's a change to errorMessageText, retryMessageText or scaffoldState,
+        // the previous effect will be cancelled and a new one will start with the new values
+        LaunchedEffect(errorMessageText, retryMessageText, scaffoldState) {
+            val snackbarResult = scaffoldState.snackbarHostState.showSnackbar(
+                message = errorMessageText,
+                actionLabel = retryMessageText
+            )
+            if (snackbarResult == SnackbarResult.ActionPerformed) {
+                onRefreshPostsState()
+                onRetry()
+            }
+            // Once the message is displayed and dismissed, notify the ViewModel
+            onErrorDismissState()
+            onError()
+        }
     }
 }
 

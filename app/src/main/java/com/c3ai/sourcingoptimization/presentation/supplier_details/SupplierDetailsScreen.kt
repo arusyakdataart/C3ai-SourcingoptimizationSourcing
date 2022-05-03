@@ -62,6 +62,8 @@ fun SupplierDetailsScreen(
     onAlertsClick: (String) -> Unit,
     onSortChanged: (String) -> Unit,
     onBackButtonClick: () -> Unit,
+    onRetry: () -> Unit,
+    onError: () -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
     val bottomState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
@@ -226,9 +228,11 @@ fun SupplierDetailsScreen(
             )
             if (snackbarResult == SnackbarResult.ActionPerformed) {
                 onRefreshPostsState()
+                onRetry()
             }
             // Once the message is displayed and dismissed, notify the ViewModel
             onErrorDismissState()
+            onError()
         }
     }
 }
@@ -682,6 +686,8 @@ fun SupplierDetailsPreview() {
             onAlertsClick = {},
             onSortChanged = {},
             onBackButtonClick = {},
+            onRetry = {},
+            onError = {}
         )
     }
 }
@@ -708,6 +714,8 @@ fun SupplierDetailsItemsSuppliedTabPreview() {
             onAlertsClick = {},
             onSortChanged = {},
             onBackButtonClick = {},
+            onRetry = {},
+            onError = {}
         )
     }
 }

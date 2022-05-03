@@ -8,4 +8,6 @@ sealed class AlertsEvent {
     data class OnFeedbackChanged(val alertId: String, val statusValue: Boolean) : AlertsEvent()
     data class OnFlaggedChanged(val alertId: String, val statusValue: Boolean) : AlertsEvent()
     data class OnSupplierContactSelected(val supplierId: String) : AlertsEvent()
+    data class OnRetry(val retry: String) : AlertsEvent()
+    data class OnError(val error: String) : AlertsEvent()
 }

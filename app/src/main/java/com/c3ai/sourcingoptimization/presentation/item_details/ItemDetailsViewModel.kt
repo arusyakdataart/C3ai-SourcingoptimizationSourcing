@@ -6,6 +6,7 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.map
+import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.common.*
 import com.c3ai.sourcingoptimization.data.C3Result.Error
 import com.c3ai.sourcingoptimization.data.C3Result.Success
@@ -19,12 +20,13 @@ import com.c3ai.sourcingoptimization.presentation.views.*
 import com.c3ai.sourcingoptimization.presentation.views.itemdetails.ChartSuppliers
 import com.c3ai.sourcingoptimization.presentation.views.itemdetails.IndexPriceCharts
 import com.c3ai.sourcingoptimization.presentation.views.itemdetails.SuppliersCharts
+import com.c3ai.sourcingoptimization.utilities.ErrorMessage
 import com.c3ai.sourcingoptimization.utilities.PAGINATED_RESPONSE_LIMIT
-import com.c3ai.sourcingoptimization.utilities.VISIBLE_THRESHOLD
 import com.c3ai.sourcingoptimization.utilities.extentions.formatNumberLocal
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import java.util.*
 import javax.inject.Inject
 
 /**
@@ -36,6 +38,7 @@ import javax.inject.Inject
 sealed interface ItemDetailsUiState {
 
     val isLoading: Boolean
+    val errorMessages: List<ErrorMessage>
     val itemId: String
     val tabIndex: Int
     val dateRangeSelected: Int
@@ -52,6 +55,7 @@ sealed interface ItemDetailsUiState {
      */
     data class NoItem(
         override val isLoading: Boolean,
+        override val errorMessages: List<ErrorMessage>,
         override val itemId: String,
         override val tabIndex: Int,
         override val dateRangeSelected: Int,
@@ -76,6 +80,7 @@ sealed interface ItemDetailsUiState {
         val poLines: Flow<PagingData<UiPurchaseOrder.Line>>? = null,
         val suppliers: Flow<PagingData<UiVendor>>? = null,
         override val isLoading: Boolean,
+        override val errorMessages: List<ErrorMessage>,
         override val itemId: String,
         override val tabIndex: Int,
         override val dateRangeSelected: Int,
@@ -104,6 +109,7 @@ private data class ItemDetailsViewModelState(
     val suppliersFlow: Flow<PagingData<UiVendor>>? = null,
     val selectedSupplierContact: C3VendorContact? = null,
     val isLoading: Boolean = false,
+    val errorMessages: List<ErrorMessage> = emptyList(),
     val itemId: String = "",
     val tabIndex: Int = 0,
     val dateRangeSelected: Int = 0,
@@ -197,7 +203,8 @@ private data class ItemDetailsViewModelState(
                 chartsHashCode = chartsHashCode,
                 poLines = poLinesFlow,
                 suppliers = suppliersFlow,
-                selectedSupplierContact = selectedSupplierContact
+                selectedSupplierContact = selectedSupplierContact,
+                errorMessages = errorMessages,
             )
         } else {
             ItemDetailsUiState.NoItem(
@@ -205,7 +212,8 @@ private data class ItemDetailsViewModelState(
                 itemId = itemId,
                 tabIndex = tabIndex,
                 dateRangeSelected = dateRangeSelected,
-                statsTypeSelected = statsTypeSelected
+                statsTypeSelected = statsTypeSelected,
+                errorMessages = errorMessages,
             )
         }
     }
@@ -274,7 +282,7 @@ class ItemDetailsViewModel @Inject constructor(
     private val useCases: ItemDetailsUseCases,
 ) : ViewModel() {
 
-    private val viewModelState = MutableStateFlow(ItemDetailsViewModelState(settings))
+    private val viewModelState = MutableStateFlow(ItemDetailsViewModelState(settings, isLoading = true))
     private var offset = 0
     private var itemId: String = ""
 
@@ -345,7 +353,11 @@ class ItemDetailsViewModel @Inject constructor(
                     )
                 }
                 is Error -> {
-                    state.copy(isLoading = false)
+                    val errorMessages = state.errorMessages + ErrorMessage(
+                        id = UUID.randomUUID().mostSignificantBits,
+                        messageId = R.string.load_error
+                    )
+                    state.copy(errorMessages = errorMessages, isLoading = false)
                 }
             }
         }
@@ -367,7 +379,11 @@ class ItemDetailsViewModel @Inject constructor(
                     state.copy(openClosedPOLineQty = openClosedPOLineQtyResult.data)
                 }
                 is Error -> {
-                    state.copy()
+                    val errorMessages = state.errorMessages + ErrorMessage(
+                        id = UUID.randomUUID().mostSignificantBits,
+                        messageId = R.string.load_error
+                    )
+                    state.copy(errorMessages = errorMessages, isLoading = false)
                 }
             }
         }
@@ -389,7 +405,11 @@ class ItemDetailsViewModel @Inject constructor(
                     state.copy(savingsOpportunity = savingsOpportunityResult.data)
                 }
                 is Error -> {
-                    state.copy()
+                    val errorMessages = state.errorMessages + ErrorMessage(
+                        id = UUID.randomUUID().mostSignificantBits,
+                        messageId = R.string.load_error
+                    )
+                    state.copy(errorMessages = errorMessages, isLoading = false)
                 }
             }
         }
@@ -419,7 +439,11 @@ class ItemDetailsViewModel @Inject constructor(
                     )
                 }
                 is Error -> {
-                    state.copy()
+                    val errorMessages = state.errorMessages + ErrorMessage(
+                        id = UUID.randomUUID().mostSignificantBits,
+                        messageId = R.string.load_error
+                    )
+                    state.copy(errorMessages = errorMessages, isLoading = false)
                 }
             }
         }
@@ -448,7 +472,11 @@ class ItemDetailsViewModel @Inject constructor(
                     )
                 }
                 is Error -> {
-                    state.copy()
+                    val errorMessages = state.errorMessages + ErrorMessage(
+                        id = UUID.randomUUID().mostSignificantBits,
+                        messageId = R.string.load_error
+                    )
+                    state.copy(errorMessages = errorMessages, isLoading = false)
                 }
             }
         }
@@ -467,7 +495,7 @@ class ItemDetailsViewModel @Inject constructor(
     }
 
     private suspend fun updateSourcingAnalysis(startDate: String, endDate: String) {
-        val suppliersResult = useCases.getItemDetailsSuppliers(itemId, limit = 5)
+        val suppliersResult = useCases.getItemDetailsSuppliers(itemId, page = 0, limit = 5)
         viewModelState.update { state ->
             when (suppliersResult) {
                 is Success -> {
@@ -486,12 +514,16 @@ class ItemDetailsViewModel @Inject constructor(
                     )
                 }
                 is Error -> {
-                    state.copy()
+                    val errorMessages = state.errorMessages + ErrorMessage(
+                        id = UUID.randomUUID().mostSignificantBits,
+                        messageId = R.string.load_error
+                    )
+                    state.copy(errorMessages = errorMessages, isLoading = false)
                 }
             }
         }
 
-        val marketPriceIndex = useCases.getMarketPriceIndex()
+        val marketPriceIndex = useCases.getMarketPriceIndex(page = 0)
         viewModelState.update { state ->
             when (marketPriceIndex) {
                 is Success -> {
@@ -514,7 +546,11 @@ class ItemDetailsViewModel @Inject constructor(
                     )
                 }
                 is Error -> {
-                    state.copy()
+                    val errorMessages = state.errorMessages + ErrorMessage(
+                        id = UUID.randomUUID().mostSignificantBits,
+                        messageId = R.string.load_error
+                    )
+                    state.copy(errorMessages = errorMessages, isLoading = false)
                 }
             }
         }
@@ -652,29 +688,27 @@ class ItemDetailsViewModel @Inject constructor(
                                     selectedSupplierContact = result.data
                                 )
                                 is Error -> {
-                                    state.copy(isLoading = false)
+                                    val errorMessages = state.errorMessages + ErrorMessage(
+                                        id = UUID.randomUUID().mostSignificantBits,
+                                        messageId = R.string.load_error
+                                    )
+                                    state.copy(errorMessages = errorMessages, isLoading = false)
                                 }
                             }
                         }
                     }
                     state
                 }
+                is ItemDetailsEvent.OnRetry -> {
+                    refresh()
+                    state.copy(isLoading = true)
+                }
+                is ItemDetailsEvent.OnError -> {
+                    state.copy(errorMessages = emptyList())
+                }
             }
         }
     }
-}
-
-fun UiAction.Scroll.shouldFetchMore(offset: Int): Boolean {
-    return offset == totalItemCount * PAGINATED_RESPONSE_LIMIT
-            && visibleItemCount + lastVisibleItemPosition + VISIBLE_THRESHOLD >= totalItemCount
-}
-
-sealed class UiAction {
-    data class Scroll(
-        val visibleItemCount: Int,
-        val lastVisibleItemPosition: Int,
-        val totalItemCount: Int
-    ) : UiAction()
 }
 
 @Suppress("FunctionName")

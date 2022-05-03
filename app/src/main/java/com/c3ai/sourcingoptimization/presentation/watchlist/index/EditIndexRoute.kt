@@ -10,7 +10,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.c3ai.sourcingoptimization.presentation.watchlist.suppliers.EditSuppliersEvent
 
 /**
  * Displays the Edit Index route.
@@ -34,11 +33,14 @@ fun EditIndexRoute(
 
     EditIndexScreen(
         navController = navController,
+        viewModel = viewModel,
         scaffoldState = scaffoldState,
         uiState = uiState,
         indexId = indexId ?: "",
-        onRefreshDetails = { viewModel.refreshDetails() },
-        onSearchInputChanged = { viewModel.onEvent(EditSuppliersEvent.OnSearchInputChanged(it)) },
-        onBackButtonClick = { navController.navigateUp() }
+        onRefreshDetails = { viewModel.refreshDetails(page = 0) },
+        onSearchInputChanged = { viewModel.onEvent(EditIndexEvent.OnSearchInputChanged(it)) },
+        onBackButtonClick = { navController.navigateUp() },
+        onRetry = { viewModel.onEvent(EditIndexEvent.OnRetry("")) },
+        onError = { viewModel.onEvent(EditIndexEvent.OnError("")) }
     )
 }
