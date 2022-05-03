@@ -10,6 +10,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.c3ai.sourcingoptimization.presentation.navigateToSupplierDetails
 
 /**
  * Displays the Edit Suppliers route.
@@ -41,9 +42,11 @@ fun EditSuppliersRoute(
         suppliers = suppliers ?: listOf(),
         onRefreshDetails = { viewModel.refreshDetails(page = 0) },
         onSearchInputChanged = { viewModel.onEvent(EditSuppliersEvent.OnSearchInputChanged(it)) },
-        onSupplierClick = {},
+        onSupplierClick = { navController.navigateToSupplierDetails(it)},
         onCheckSupplier = { viewModel.onEvent(EditSuppliersEvent.OnSupplierChecked(it)) },
         onUncheckSupplier = { viewModel.onEvent(EditSuppliersEvent.OnSupplierUnchecked(it)) },
-        onBackButtonClick = { navController.navigateUp() }
+        onBackButtonClick = { navController.navigateUp() },
+        onRetry = { viewModel.onEvent(EditSuppliersEvent.OnRetry("")) },
+        onError = { viewModel.onEvent(EditSuppliersEvent.OnError("")) }
     )
 }

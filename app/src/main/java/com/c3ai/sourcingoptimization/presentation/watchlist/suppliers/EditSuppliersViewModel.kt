@@ -117,7 +117,18 @@ class EditSuppliersViewModel @Inject constructor(
      * Update state by user event.
      */
     fun onEvent(event: EditSuppliersEvent) {
-
+        viewModelState.update { state ->
+            when (event) {
+                is EditSuppliersEvent.OnRetry -> {
+                    refreshDetails(page = 0)
+                    state.copy(isLoading = true)
+                }
+                is EditSuppliersEvent.OnError -> {
+                    state.copy(errorMessages = emptyList())
+                }
+                else -> state.copy()
+            }
+        }
     }
 
     /**

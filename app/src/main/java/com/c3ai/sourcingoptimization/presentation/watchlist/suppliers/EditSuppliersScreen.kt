@@ -2,6 +2,7 @@ package com.c3ai.sourcingoptimization.presentation.watchlist.suppliers
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -53,6 +54,8 @@ fun EditSuppliersScreen(
     onCheckSupplier: (String) -> Unit,
     onUncheckSupplier: (String) -> Unit,
     onBackButtonClick: () -> Unit,
+    onRetry: () -> Unit,
+    onError: () -> Unit
 ) {
     Scaffold(
         scaffoldState = scaffoldState,
@@ -122,6 +125,7 @@ fun EditSuppliersScreen(
                                 ConstraintLayout(
                                     modifier = Modifier
                                         .fillMaxWidth()
+                                        .clickable { onSupplierClick(it.id) }
                                         .padding(
                                             start = 16.dp,
                                             top = 24.dp,
@@ -258,6 +262,38 @@ fun EditSuppliersScreen(
                 }
             }
         )
+    }
+
+    // Process one error message at a time and show them as Snackbars in the UI
+    if (uiState.errorMessages.isNotEmpty()) {
+        // Remember the errorMessage to display on the screen
+        val errorMessage = remember(uiState) { uiState.errorMessages[0] }
+
+        // Get the text to show on the message from resources
+        val errorMessageText: String = stringResource(errorMessage.messageId)
+        val retryMessageText = stringResource(id = R.string.retry)
+
+        // If onRefreshPosts or onErrorDismiss change while the LaunchedEffect is running,
+        // don't restart the effect and use the latest lambda values.
+        val onRefreshPostsState by rememberUpdatedState({ })
+        val onErrorDismissState by rememberUpdatedState({ })
+
+        // Effect running in a coroutine that displays the Snackbar on the screen
+        // If there's a change to errorMessageText, retryMessageText or scaffoldState,
+        // the previous effect will be cancelled and a new one will start with the new values
+        LaunchedEffect(errorMessageText, retryMessageText, scaffoldState) {
+            val snackbarResult = scaffoldState.snackbarHostState.showSnackbar(
+                message = errorMessageText,
+                actionLabel = retryMessageText
+            )
+            if (snackbarResult == SnackbarResult.ActionPerformed) {
+                onRefreshPostsState()
+                onRetry()
+            }
+            // Once the message is displayed and dismissed, notify the ViewModel
+            onErrorDismissState()
+            onError()
+        }
     }
 }
 
