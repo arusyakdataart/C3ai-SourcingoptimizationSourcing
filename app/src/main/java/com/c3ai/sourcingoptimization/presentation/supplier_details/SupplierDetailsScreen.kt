@@ -226,9 +226,11 @@ fun SupplierDetailsScreen(
             )
             if (snackbarResult == SnackbarResult.ActionPerformed) {
                 onRefreshPostsState()
+                viewModel.onEvent(SupplierDetailsEvent.OnRetry(""))
             }
             // Once the message is displayed and dismissed, notify the ViewModel
             onErrorDismissState()
+            viewModel.onEvent(SupplierDetailsEvent.OnError(""))
         }
     }
 }

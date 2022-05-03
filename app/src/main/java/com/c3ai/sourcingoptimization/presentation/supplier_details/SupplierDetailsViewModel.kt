@@ -271,18 +271,20 @@ class SuppliersDetailsViewModel @Inject constructor(
                             isRemoved || add((event.itemId))
                         })
                 }
-                else -> {
-                    state.copy()
+                is SupplierDetailsEvent.OnRetry -> {
+                    refreshDetails("", pages[viewModelState.value.tabIndex].value)
+                    state.copy(isLoading = true)
                 }
-            }
-        }
-
-        when (event) {
-            is SupplierDetailsEvent.OnSortChanged -> {
-                if (uiState.value.tabIndex == 0) {
-                    getPOs(event.sortOption, page = 0)
-                } else {
-                    getSuppliedItems(event.sortOption, page = 0)
+                is SupplierDetailsEvent.OnError -> {
+                    state.copy(errorMessages = emptyList())
+                }
+                is SupplierDetailsEvent.OnSortChanged -> {
+                    if (uiState.value.tabIndex == 0) {
+                        getPOs(event.sortOption, page = 0)
+                    } else {
+                        getSuppliedItems(event.sortOption, page = 0)
+                    }
+                    state.copy()
                 }
             }
         }
