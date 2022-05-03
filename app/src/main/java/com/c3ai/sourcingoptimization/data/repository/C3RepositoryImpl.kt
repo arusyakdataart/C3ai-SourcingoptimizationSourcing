@@ -145,8 +145,8 @@ class C3RepositoryImpl @Inject constructor(private val api: C3ApiService) : C3Re
         )
     }
 
-    override suspend fun getMarketPriceIndexes(): C3Result<List<MarketPriceIndex>> = C3Result.on {
-        api.getMarketPriceIndexes().objs ?: emptyList()
+    override suspend fun getMarketPriceIndexes(page: Int): C3Result<List<MarketPriceIndex>> = C3Result.on {
+        api.getMarketPriceIndexes(MarketPriceIndexParameters(offset = page)).objs ?: emptyList()
     }
 
     override suspend fun getItemMarketPriceIndexRelation(

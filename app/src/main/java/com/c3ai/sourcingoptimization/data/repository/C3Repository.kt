@@ -71,7 +71,7 @@ interface C3Repository {
         interval: String
     ): C3Result<ItemVendorRelationMetrics>
 
-    suspend fun getMarketPriceIndexes(): C3Result<List<MarketPriceIndex>>
+    suspend fun getMarketPriceIndexes(page: Int): C3Result<List<MarketPriceIndex>>
 
     suspend fun getItemMarketPriceIndexRelation(
         itemId: String,

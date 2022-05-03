@@ -63,8 +63,8 @@ class GetItemDetailsSuppliers(private val repository: C3Repository) {
 
 class GetMarketPriceIndex(private val repository: C3Repository) {
 
-    suspend operator fun invoke(): C3Result<List<MarketPriceIndex>> {
-        return repository.getMarketPriceIndexes()
+    suspend operator fun invoke(page: Int): C3Result<List<MarketPriceIndex>> {
+        return repository.getMarketPriceIndexes(page = page)
     }
 
 }

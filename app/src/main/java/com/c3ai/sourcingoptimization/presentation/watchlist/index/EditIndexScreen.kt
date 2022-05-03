@@ -4,7 +4,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -23,6 +23,7 @@ import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.common.components.*
 import com.c3ai.sourcingoptimization.ui.theme.BackgroundColor
 import com.c3ai.sourcingoptimization.ui.theme.Blue
+import com.c3ai.sourcingoptimization.utilities.PAGINATED_RESPONSE_LIMIT
 import com.google.gson.Gson
 
 /**
@@ -36,6 +37,7 @@ import com.google.gson.Gson
 @Composable
 fun EditIndexScreen(
     navController: NavController,
+    viewModel: EditIndexViewModel,
     scaffoldState: ScaffoldState,
     uiState: EditIndexUiState,
     indexId: String,
@@ -57,6 +59,7 @@ fun EditIndexScreen(
         },
         snackbarHost = { C3SnackbarHost(hostState = it) },
     ) { innerPadding ->
+        val page = viewModel.pages[0].value
         val contentModifier = Modifier.padding(innerPadding)
         LoadingContent(
             empty = when (uiState) {
@@ -89,7 +92,12 @@ fun EditIndexScreen(
                                     )
                                 }
                             }
-                            items(items = uiState.indexes, itemContent = {
+                            itemsIndexed(items = uiState.indexes) { index, it ->
+                                viewModel.onChangeListScrollPosition(index)
+                                if ((index + 1) >= (page * PAGINATED_RESPONSE_LIMIT)){
+                                    viewModel.nextPage()
+                                }
+
                                 ConstraintLayout(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -146,8 +154,7 @@ fun EditIndexScreen(
                                             }
                                     )
                                 }
-
-                            })
+                            }
                         }
                     }
                     is EditIndexUiState.NoData -> {

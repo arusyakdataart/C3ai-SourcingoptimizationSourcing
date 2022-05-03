@@ -34,10 +34,11 @@ fun EditIndexRoute(
 
     EditIndexScreen(
         navController = navController,
+        viewModel = viewModel,
         scaffoldState = scaffoldState,
         uiState = uiState,
         indexId = indexId ?: "",
-        onRefreshDetails = { viewModel.refreshDetails() },
+        onRefreshDetails = { viewModel.refreshDetails(page = 0) },
         onSearchInputChanged = { viewModel.onEvent(EditSuppliersEvent.OnSearchInputChanged(it)) },
         onBackButtonClick = { navController.navigateUp() }
     )

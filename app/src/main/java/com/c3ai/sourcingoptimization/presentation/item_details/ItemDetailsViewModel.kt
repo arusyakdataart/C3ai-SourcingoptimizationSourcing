@@ -491,7 +491,7 @@ class ItemDetailsViewModel @Inject constructor(
             }
         }
 
-        val marketPriceIndex = useCases.getMarketPriceIndex()
+        val marketPriceIndex = useCases.getMarketPriceIndex(page = 0)
         viewModelState.update { state ->
             when (marketPriceIndex) {
                 is Success -> {
