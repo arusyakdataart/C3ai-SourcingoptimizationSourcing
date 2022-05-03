@@ -64,5 +64,7 @@ fun ItemDetailsRoute(
         onSortChanged = { viewModel.onEvent(ItemDetailsEvent.OnSortChanged(it)) },
         onAlertsClick = { navController.navigateToAlerts() },
         onContactClick = { viewModel.onEvent(ItemDetailsEvent.OnSupplierContactSelected(it)) },
+        onRetry = { viewModel.onEvent(ItemDetailsEvent.OnRetry(""))},
+        onError = { viewModel.onEvent(ItemDetailsEvent.OnError(""))}
     )
 }
