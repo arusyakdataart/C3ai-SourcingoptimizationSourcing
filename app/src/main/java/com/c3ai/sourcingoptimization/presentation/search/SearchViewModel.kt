@@ -24,7 +24,6 @@ sealed interface SearchUiState {
 
     val isLoading: Boolean
     val errorMessages: List<ErrorMessage>
-    val selectedFilters: List<Int>
 
     /**
      * There are search results to render, as contained in [alerts].
@@ -33,7 +32,6 @@ sealed interface SearchUiState {
     data class SearchResults(
         override val isLoading: Boolean,
         override val errorMessages: List<ErrorMessage>,
-        override val selectedFilters: List<Int> = emptyList(),
     ) : SearchUiState
 
     /**
@@ -45,7 +43,6 @@ sealed interface SearchUiState {
     data class NoAlerts(
         override val isLoading: Boolean,
         override val errorMessages: List<ErrorMessage>,
-        override val selectedFilters: List<Int> = emptyList(),
     ) : SearchUiState
 
     /**
@@ -57,7 +54,6 @@ sealed interface SearchUiState {
         val selectedAlert: Alert?,
         override val isLoading: Boolean,
         override val errorMessages: List<ErrorMessage>,
-        override val selectedFilters: List<Int> = emptyList(),
     ) : SearchUiState
 }
 
@@ -69,7 +65,6 @@ private data class SearchViewModelState(
     val alerts: List<Alert>? = null,
     val isLoading: Boolean = false,
     val errorMessages: List<ErrorMessage> = emptyList(),
-    val selectedFilters: Set<Int> = emptySet(),
 ) : ViewModelState() {
 
     /**
@@ -81,14 +76,12 @@ private data class SearchViewModelState(
             SearchUiState.SearchResults(
                 isLoading = isLoading,
                 errorMessages = errorMessages,
-                selectedFilters = selectedFilters.toList(),
             )
         } else {
             if (alerts == null) {
                 SearchUiState.NoAlerts(
                     isLoading = isLoading,
                     errorMessages = errorMessages,
-                    selectedFilters = selectedFilters.toList(),
                 )
             } else {
                 SearchUiState.HasAlerts(
@@ -96,7 +89,6 @@ private data class SearchViewModelState(
                     selectedAlert = null,
                     isLoading = isLoading,
                     errorMessages = errorMessages,
-                    selectedFilters = selectedFilters.toList(),
                 )
             }
         }
@@ -135,23 +127,7 @@ class SearchViewModel @Inject constructor(
      */
     fun onEvent(event: SearchEvent) {
         when (event) {
-            is SearchEvent.OnFilterClick -> {
-                viewModelState.update { state ->
-                    state.copy(
-                        selectedFilters = state.selectedFilters.toMutableSet().apply {
-                            val isRemoved = remove(event.index)
-                            isRemoved || add(event.index)
-                        }
-                    )
-                }
-            }
-            is SearchEvent.OnSearchRecentClick -> {
-                viewModelState.update { state ->
-                    state.copy(
-                        selectedFilters = event.item.filters?.toSet() ?: emptySet()
-                    )
-                }
-            }
+            //TODO
         }
     }
 

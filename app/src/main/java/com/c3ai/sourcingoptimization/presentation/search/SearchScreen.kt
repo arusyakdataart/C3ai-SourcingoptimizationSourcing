@@ -39,12 +39,12 @@ import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.common.components.*
 import com.c3ai.sourcingoptimization.data.C3Result
 import com.c3ai.sourcingoptimization.domain.model.Alert
-import com.c3ai.sourcingoptimization.domain.model.RecentSearchItem
 import com.c3ai.sourcingoptimization.domain.model.SearchItem
 import com.c3ai.sourcingoptimization.modifiers.interceptKey
 import com.c3ai.sourcingoptimization.presentation.alerts.*
 import com.c3ai.sourcingoptimization.presentation.common.search.FiltersGridLayout
 import com.c3ai.sourcingoptimization.presentation.common.search.SearchBar
+import com.c3ai.sourcingoptimization.presentation.common.search.rememberSaveableFilterState
 import com.c3ai.sourcingoptimization.ui.theme.PrimaryColor
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalAnimationApi::class)
@@ -54,12 +54,14 @@ fun SearchScreen(
     uiState: SearchUiState.SearchResults,
     onRefresh: () -> Unit,
     onSettingsClick: () -> Unit,
-    onFilterClick: (Int) -> Unit,
-    onRecentSearchClick: (RecentSearchItem) -> Unit,
+    onAlertClick: () -> Unit,
     onSearchResultClick: (SearchItem) -> Unit,
     search: suspend (String, List<Int>?, offset: Int) -> C3Result<List<SearchItem>>,
 ) {
     var oppened by rememberSaveable { mutableStateOf(false) }
+    val filterState = rememberSaveableFilterState(
+        stringArrayResource(R.array.searchFilters).toList()
+    )
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -70,7 +72,8 @@ fun SearchScreen(
                 exit = fadeOut() + shrinkVertically(),
             ) {
                 HomeTopAppBar(
-                    onSettingsClick = onSettingsClick
+                    onSettingsClick = onSettingsClick,
+                    onAlertClick = onAlertClick,
                 )
             }
         },
@@ -90,19 +93,15 @@ fun SearchScreen(
             }
             SearchBar(
                 onStateChanged = { oppened = it },
-                onRecentSearchClick = onRecentSearchClick,
                 onSearchResultClick = onSearchResultClick,
                 search = search,
-                selectedFilters = uiState.selectedFilters,
+                filterState = filterState,
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 FiltersGridLayout(
-                    filters = stringArrayResource(R.array.searchFilters).toList(),
-                    selected = uiState.selectedFilters,
+                    filterState = filterState,
                     modifier = Modifier.padding(top = if (oppened) 10.dp else 30.dp)
-                ) {
-                    onFilterClick(it)
-                }
+                )
             }
         }
     }
@@ -115,15 +114,12 @@ fun SearchScreen(
 @Composable
 fun SearchWithAlertsScreen(
     scaffoldState: ScaffoldState,
-    uiState: SearchUiState,
+    uiState: AlertsUiState,
     viewModel: AlertsViewModel,
-    alertsUiState: AlertsUiState,
     selectedCategories: List<String>?,
     onCategoriesSelected: () -> Unit,
     onRefresh: () -> Unit,
     onSettingsClick: () -> Unit,
-    onFilterClick: (Int) -> Unit,
-    onRecentSearchClick: (RecentSearchItem) -> Unit,
     onSearchResultClick: (SearchItem) -> Unit,
     search: suspend (String, List<Int>?, offset: Int) -> C3Result<List<SearchItem>>,
     onCollapsableItemClick: (String) -> Unit,
@@ -132,8 +128,6 @@ fun SearchWithAlertsScreen(
     onPOClick: (String) -> Unit,
     onContactClick: (String) -> Unit,
 ) {
-    val context = LocalContext.current
-
     val coroutineScope = rememberCoroutineScope()
     val bottomState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
 
@@ -145,8 +139,8 @@ fun SearchWithAlertsScreen(
         sheetState = bottomState,
         sheetContent = {
             ContactSupplierBottomSheetContent(
-                alertsUiState.selectedSupplierContact?.phone ?: "",
-                alertsUiState.selectedSupplierContact?.email ?: "",
+                uiState.selectedSupplierContact?.phone ?: "",
+                uiState.selectedSupplierContact?.email ?: "",
             )
         }
     ) {
@@ -154,10 +148,7 @@ fun SearchWithAlertsScreen(
             scaffoldState = scaffoldState,
             topBar = {
                 SearchTopAppBar(
-                    uiState = uiState,
                     onSettingsClick = onSettingsClick,
-                    onFilterClick = onFilterClick,
-                    onRecentSearchClick = onRecentSearchClick,
                     onSearchResultClick = onSearchResultClick,
                     search = search
                 )
@@ -167,7 +158,7 @@ fun SearchWithAlertsScreen(
 
             val contentModifier = Modifier.padding(innerPadding)
             LoadingContent(
-                empty = when (alertsUiState) {
+                empty = when (uiState) {
                     is AlertsUiState.HasData -> false
                     is AlertsUiState.NoData -> uiState.isLoading
                 },
@@ -185,7 +176,7 @@ fun SearchWithAlertsScreen(
                         )
 
                         AlertsContent(
-                            uiState = alertsUiState,
+                            uiState = uiState,
                             viewModel = viewModel,
                             coroutineScope = coroutineScope,
                             bottomState = bottomState,
@@ -399,6 +390,7 @@ private fun submitSearch(
 @Composable
 private fun HomeTopAppBar(
     onSettingsClick: () -> Unit,
+    onAlertClick: () -> Unit,
 ) {
     C3TopAppBar(
         title = "",
@@ -412,10 +404,10 @@ private fun HomeTopAppBar(
             }
         },
         actions = {
-            IconButton(onClick = { /* TODO: Open search */ }) {
+            IconButton(onClick = onAlertClick) {
                 Icon(
                     imageVector = Icons.Filled.WarningAmber,
-                    contentDescription = stringResource(R.string.cd_search)
+                    contentDescription = stringResource(R.string.cd_alerts)
                 )
             }
         },
@@ -428,13 +420,13 @@ private fun HomeTopAppBar(
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 private fun SearchTopAppBar(
-    uiState: SearchUiState,
     onSettingsClick: () -> Unit,
-    onFilterClick: (Int) -> Unit,
-    onRecentSearchClick: (RecentSearchItem) -> Unit,
     onSearchResultClick: (SearchItem) -> Unit,
     search: suspend (String, List<Int>?, offset: Int) -> C3Result<List<SearchItem>>,
 ) {
+    val filterState = rememberSaveableFilterState(
+        stringArrayResource(R.array.searchFilters).toList()
+    )
     C3SearchAppBar(
         title = "",
         showLogo = true,
@@ -448,19 +440,15 @@ private fun SearchTopAppBar(
             }
         },
         actions = {},
-        onRecentSearchClick = onRecentSearchClick,
         onSearchResultClick = onSearchResultClick,
-        selectedFilters = uiState.selectedFilters,
+        filterState = filterState,
         search = search,
     ) {
         FiltersGridLayout(
-            filters = stringArrayResource(R.array.searchFilters).toList(),
-            selected = uiState.selectedFilters,
+            filterState = filterState,
             modifier = Modifier
                 .padding(top = 10.dp)
                 .horizontalScroll(rememberScrollState())
-        ) {
-            onFilterClick(it)
-        }
+        )
     }
 }

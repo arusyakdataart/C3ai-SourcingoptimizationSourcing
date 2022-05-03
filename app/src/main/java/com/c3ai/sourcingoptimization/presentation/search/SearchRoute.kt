@@ -9,13 +9,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.c3ai.sourcingoptimization.presentation.*
 import com.c3ai.sourcingoptimization.presentation.C3Destinations.SETTINGS_ROUTE
 import com.c3ai.sourcingoptimization.presentation.alerts.AlertsEvent
 import com.c3ai.sourcingoptimization.presentation.alerts.AlertsViewModel
-import com.c3ai.sourcingoptimization.presentation.navigateFromSearch
-import com.c3ai.sourcingoptimization.presentation.navigateToItemDetails
-import com.c3ai.sourcingoptimization.presentation.navigateToPoDetails
-import com.c3ai.sourcingoptimization.presentation.navigateToSupplierDetails
 import com.c3ai.sourcingoptimization.presentation.search.SearchScreenType.SearchHome
 import com.c3ai.sourcingoptimization.presentation.search.SearchScreenType.SearchWithAlerts
 import com.google.gson.Gson
@@ -47,8 +44,7 @@ fun SearchRoute(
                 uiState = uiState as SearchUiState.SearchResults,
                 onRefresh = {},
                 onSettingsClick = { navController.navigate(SETTINGS_ROUTE) },
-                onFilterClick = { viewModel.onEvent(SearchEvent.OnFilterClick(it)) },
-                onRecentSearchClick = { viewModel.onEvent(SearchEvent.OnSearchRecentClick(it)) },
+                onAlertClick = { navController.navigateToAlerts() },
                 onSearchResultClick = { navController.navigateFromSearch(it) },
                 search = { query, filters, offset ->
                     viewModel.useCases.search(query, filters, offset)
@@ -58,9 +54,8 @@ fun SearchRoute(
         SearchWithAlerts -> {
             SearchWithAlertsScreen(
                 scaffoldState = scaffoldState,
-                uiState = uiState,
+                uiState = alertsUiState,
                 viewModel = alertsViewModel,
-                alertsUiState = alertsUiState,
                 selectedCategories = Gson().fromJson(selectedCategories, Array<String>::class.java)
                     ?.asList(),
                 onCategoriesSelected = {
@@ -75,8 +70,6 @@ fun SearchRoute(
                 },
                 onRefresh = {alertsViewModel.refreshDetails(page = 0)},
                 onSettingsClick = { navController.navigate(SETTINGS_ROUTE) },
-                onFilterClick = { viewModel.onEvent(SearchEvent.OnFilterClick(it)) },
-                onRecentSearchClick = { viewModel.onEvent(SearchEvent.OnSearchRecentClick(it)) },
                 onSearchResultClick = { navController.navigateFromSearch(it) },
                 search = { query, filters, offset ->
                     viewModel.useCases.search(query, filters, offset)

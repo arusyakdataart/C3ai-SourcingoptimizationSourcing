@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.*
 import java.lang.reflect.Type
 
 /**
- * Creates a [SearchState] that is remembered across compositions.
+ * Creates a [SearchState] that is remembered across compositions and cache itself.
  *
  * @param initialResults results that can be displayed before doing a search
  * @param suggestions chip or cards that can be suggested to user when Search composable is focused
@@ -62,6 +62,26 @@ fun rememberSaveableSearchState(
                     state.searching = false
                 }
         }
+    }
+}
+
+/**
+ * Creates a [FilterState] that is remembered across compositions and cache itself.
+ *
+ * @param filters filters for displaying.
+ * @param selected selected filters by the user.
+ *
+ */
+@Composable
+fun rememberSaveableFilterState(
+    filters: List<String>,
+    selected: Set<Int> = emptySet(),
+): FilterState<String, Int> {
+    return rememberSaveable(saver = FiltersStateSaver()) {
+        FilterState(
+            filters = filters,
+            selected = selected,
+        )
     }
 }
 
@@ -252,6 +272,31 @@ class SearchState<R, S> internal constructor(
 }
 
 /**
+ *  A state object that can be hosted to control and observe filters changing.
+ *
+ * Create instance using [rememberSaveableFilterState].
+ *
+ * @param filters results that can be displayed before doing a search
+ * @param selected chip or cards that can be suggested to user when Search composable is focused
+ * but query is empty
+ */
+@Parcelize
+class FilterState<F, S> internal constructor(
+    filters: List<F>,
+    selected: Set<S> = emptySet(),
+) {
+    /**
+     * filters that should be displayed.
+     */
+    var filters by mutableStateOf(filters)
+
+    /**
+     * selected filters by the user.
+     */
+    var selected by mutableStateOf(selected)
+}
+
+/**
  * Enum class with different values to set search state based on text, focus, initial state and
  * results from search.
  *
@@ -325,6 +370,32 @@ private fun StateSaver(): Saver<SearchState<SearchItem, RecentSearchItem>, Strin
                 searchResults = state.searchResults,
                 initialQuery = state.query,
                 opened = state.opened,
+            )
+        }
+    )
+}
+
+private data class FiltersStateSaveable(
+    val filters: List<String>,
+    val selected: List<Int>,
+)
+
+private fun FiltersStateSaver(): Saver<FilterState<String, Int>, String> {
+    val gson = GsonBuilder().create()
+    return Saver(
+        save = {
+            val state = FiltersStateSaveable(
+                filters = it.filters,
+                selected = it.selected.toList(),
+            )
+            val json = gson.toJson(state)
+            json
+        },
+        restore = { json ->
+            val state = gson.fromJson(json, FiltersStateSaveable::class.java)
+            FilterState(
+                filters = state.filters,
+                selected = state.selected.toSet(),
             )
         }
     )

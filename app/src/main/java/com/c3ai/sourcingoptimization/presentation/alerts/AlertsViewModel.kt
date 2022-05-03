@@ -1,5 +1,6 @@
 package com.c3ai.sourcingoptimization.presentation.alerts
 
+import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.data.C3Result
@@ -71,7 +72,7 @@ sealed interface AlertsUiState {
 private data class AlertsViewModelState(
     override val settings: SettingsState,
     var alerts: Set<Alert>? = null,
-    var alertsFeedBacks: Set<AlertFeedback>? = null,
+    var alertsFeedBacks: Set<AlertFeedback> = emptySet(),
     val selectedSupplierContact: C3VendorContact? = null,
     val isLoading: Boolean = false,
     val errorMessages: List<ErrorMessage> = emptyList(),
@@ -85,8 +86,8 @@ private data class AlertsViewModelState(
      * a more strongly typed [AlertsUiState] for driving the ui.
      */
     fun toUiState(): AlertsUiState =
-        if (alerts != null && alertsFeedBacks != null) {
-            val uiAlert = convert(alerts!!, alertsFeedBacks!!)
+        if (alerts != null) {
+            val uiAlert = convert(alerts!!, alertsFeedBacks)
             AlertsUiState.HasData(
                 alerts = uiAlert,
                 collapsedListItemIds = collapsedListItemIds,
@@ -113,10 +114,7 @@ class AlertsViewModel @Inject constructor(
 ) : ViewModelWithPagination() {
 
     private val viewModelState = MutableStateFlow(
-        AlertsViewModelState(
-            settings = settingsProvider.state,
-            isLoading = true
-        )
+        AlertsViewModelState(settings = settingsProvider.state)
     )
 
     // UI state exposed to the UI
@@ -136,27 +134,28 @@ class AlertsViewModel @Inject constructor(
      * Refresh alerts data and update the UI state accordingly
      */
     override fun refreshDetails(sortOrder: String, page: Int) {
+        Log.e("refreshDetails", viewModelState.value.isLoading.toString())
         if (page == 0) {
             viewModelState.update { it.copy(isLoading = true) }
         }
 
         viewModelScope.launch {
             val result = useCases.getAlerts(sortOrder, page * PAGINATED_RESPONSE_LIMIT)
-            viewModelState.update {
+            viewModelState.update { state ->
                 when (result) {
                     is C3Result.Success -> {
                         val alertIds = result.data.map { it.id }
-                        if (!alertIds.isNullOrEmpty()) {
-                            getFeedbacks(result.data.map { it.id })
-                        }
-                        it.copy(alerts = appendAlerts(result.data.toSet()))
+//                        if (alertIds.isNotEmpty()) {
+//                            getFeedbacks(alertIds)
+//                        }
+                        state.copy(alerts = appendAlerts(result.data.toSet()), isLoading = false)
                     }
                     is C3Result.Error -> {
-                        val errorMessages = it.errorMessages + ErrorMessage(
+                        val errorMessages = state.errorMessages + ErrorMessage(
                             id = UUID.randomUUID().mostSignificantBits,
                             messageId = R.string.load_error
                         )
-                        it.copy(errorMessages = errorMessages, isLoading = false)
+                        state.copy(errorMessages = errorMessages, isLoading = false)
                     }
                 }
             }
@@ -183,32 +182,25 @@ class AlertsViewModel @Inject constructor(
         return appendedSet
     }
 
-    private fun appendFeedbacks(feedbacks: Set<AlertFeedback>): MutableSet<AlertFeedback>? {
-        if (viewModelState.value.alertsFeedBacks == null) {
-            viewModelState.value.alertsFeedBacks = setOf()
+    private fun appendFeedbacks(feedbacks: Set<AlertFeedback>): Set<AlertFeedback> {
+        return viewModelState.value.alertsFeedBacks.toMutableSet().apply {
+            addAll(feedbacks)
         }
-        val appendedSet = viewModelState.value.alertsFeedBacks?.toMutableSet()
-        appendedSet?.addAll(feedbacks)
-        return appendedSet
     }
 
     private fun getFeedbacks(alertIds: List<String>) {
         viewModelScope.launch {
             val result = useCases.getAlertsFeedbacks(alertIds)
-            viewModelState.update {
+            viewModelState.update { state ->
                 when (result) {
                     is C3Result.Success -> {
-                        it.copy(
+                        state.copy(
                             alertsFeedBacks = appendFeedbacks(result.data.toSet()),
                             isLoading = false
                         )
                     }
                     is C3Result.Error -> {
-                        val errorMessages = it.errorMessages + ErrorMessage(
-                            id = UUID.randomUUID().mostSignificantBits,
-                            messageId = R.string.load_error
-                        )
-                        it.copy(errorMessages = errorMessages, isLoading = false)
+                        state
                     }
                 }
             }
@@ -241,10 +233,10 @@ class AlertsViewModel @Inject constructor(
                     state.copy(selectedCategoriesList = event.categories.toMutableSet())
                 }
                 is AlertsEvent.OnFeedbackChanged -> {
-                    val feedback = state.alertsFeedBacks?.find { it.parent?.id == event.alertId }
+                    val feedback = state.alertsFeedBacks.find { it.parent?.id == event.alertId }
                     if (feedback == null) {
                         state.copy(
-                            alertsFeedBacks = state.alertsFeedBacks?.toMutableSet()?.apply {
+                            alertsFeedBacks = state.alertsFeedBacks.toMutableSet().apply {
                                 add(
                                     AlertFeedback(
                                         id = Random().toString(),
@@ -255,11 +247,12 @@ class AlertsViewModel @Inject constructor(
                             })
                     } else {
                         state.copy(
-                            alertsFeedBacks = state.alertsFeedBacks!!.toMutableSet().apply {
-                                val feedback =
-                                    state.alertsFeedBacks!!.filter { it.parent?.id == event.alertId }
+                            alertsFeedBacks = state.alertsFeedBacks.toMutableSet().apply {
+                                removeAll(
+                                    state.alertsFeedBacks
+                                        .filter { it.parent?.id == event.alertId }
                                         .toSet()
-                                removeAll(feedback)
+                                )
                                 add(
                                     AlertFeedback(
                                         id = Random().toString(),

@@ -54,11 +54,10 @@ fun SearchBar(
     fixed: Boolean = false,
     onBackClick: () -> Unit = {},
     onStateChanged: (Boolean) -> Unit = {},
-    onRecentSearchClick: (RecentSearchItem) -> Unit = {},
     onSearchResultClick: (SearchItem) -> Unit,
     search: suspend (String, List<Int>?, offset: Int) -> C3Result<List<SearchItem>>,
-    selectedFilters: List<Int>? = null,
-    subContent: @Composable (() -> Unit)?
+    filterState: FilterState<String, Int>? = null,
+    subContent: @Composable (() -> Unit)? = null,
 ) {
 
     val scope = rememberCoroutineScope()
@@ -137,7 +136,7 @@ fun SearchBar(
                     onClearQuery = { state.query = TextFieldValue("") },
                     searching = state.searching,
                     modifier = modifier.weight(1f),
-                    onSearch = { onSearch(state.query.text, selectedFilters) },
+                    onSearch = { onSearch(state.query.text, filterState?.selected?.toList()) },
                 )
             }
             subContent?.invoke()
@@ -169,7 +168,7 @@ fun SearchBar(
                             RecentSearch(item) {
                                 onSearch(it.input, it.filters)
                                 state.query = TextFieldValue(it.input)
-                                onRecentSearchClick(it)
+                                filterState?.selected = it.filters?.toSet() ?: emptySet()
                             }
                             ListDivider()
                         }
@@ -299,17 +298,20 @@ private fun SearchHint(modifier: Modifier = Modifier) {
 @Composable
 fun FiltersGridLayout(
     modifier: Modifier = Modifier,
-    filters: List<String>,
-    selected: List<Int>,
-    onFilterClick: (Int) -> Unit
+    filterState: FilterState<String, Int>,
 ) {
     StaggeredGrid(modifier = modifier) {
-        filters.forEachIndexed { index, filter ->
+        filterState.filters.forEachIndexed { index, filter ->
             OutlinedChip(
                 modifier = Modifier.padding(4.dp),
                 text = filter,
-                selected = selected.contains(index),
-                onClick = { onFilterClick(index) },
+                selected = filterState.selected.contains(index),
+                onClick = {
+                    filterState.selected = filterState.selected.toMutableSet().apply {
+                        val isRemoved = remove(index)
+                        isRemoved || add(index)
+                    }
+                },
             )
         }
     }
