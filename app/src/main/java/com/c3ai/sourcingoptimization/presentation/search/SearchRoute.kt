@@ -65,6 +65,8 @@ fun SearchRoute(
                         )
                     )
                 },
+                onAlertsSortChanged = { alertsViewModel.onEvent(AlertsEvent.OnSortChanged(it)) },
+                onChangeAlertsFilter = { navController.navigateToAlertSettings(it) },
                 onRefresh = {alertsViewModel.refreshDetails(page = 0)},
                 onSettingsClick = { navController.navigate(SETTINGS_ROUTE) },
                 onSearchResultClick = { navController.navigateFromSearch(it) },

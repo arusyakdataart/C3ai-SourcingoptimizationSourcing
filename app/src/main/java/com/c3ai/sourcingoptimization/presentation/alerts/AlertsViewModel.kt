@@ -1,6 +1,5 @@
 package com.c3ai.sourcingoptimization.presentation.alerts
 
-import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.data.C3Result
@@ -72,7 +71,7 @@ sealed interface AlertsUiState {
 private data class AlertsViewModelState(
     override val settings: SettingsState,
     var alerts: Set<Alert>? = null,
-    var alertsFeedBacks: Set<AlertFeedback> = emptySet(),
+    var alertsFeedBacks: Set<AlertFeedback>? = null,
     val selectedSupplierContact: C3VendorContact? = null,
     val isLoading: Boolean = false,
     val errorMessages: List<ErrorMessage> = emptyList(),
@@ -86,8 +85,8 @@ private data class AlertsViewModelState(
      * a more strongly typed [AlertsUiState] for driving the ui.
      */
     fun toUiState(): AlertsUiState =
-        if (alerts != null) {
-            val uiAlert = convert(alerts!!, alertsFeedBacks)
+        alerts?.let { items ->
+            val uiAlert = convert(items, alertsFeedBacks)
             AlertsUiState.HasData(
                 alerts = uiAlert,
                 collapsedListItemIds = collapsedListItemIds,
@@ -98,13 +97,11 @@ private data class AlertsViewModelState(
                 errorMessages = errorMessages,
                 searchInput = searchInput
             )
-        } else {
-            AlertsUiState.NoData(
-                isLoading = isLoading,
-                errorMessages = errorMessages,
-                searchInput = searchInput
-            )
-        }
+        } ?: AlertsUiState.NoData(
+            isLoading = isLoading,
+            errorMessages = errorMessages,
+            searchInput = searchInput
+        )
 }
 
 @HiltViewModel
@@ -114,7 +111,10 @@ class AlertsViewModel @Inject constructor(
 ) : ViewModelWithPagination() {
 
     private val viewModelState = MutableStateFlow(
-        AlertsViewModelState(settings = settingsProvider.state)
+        AlertsViewModelState(
+            settings = settingsProvider.state,
+            isLoading = true
+        )
     )
 
     // UI state exposed to the UI
@@ -134,7 +134,6 @@ class AlertsViewModel @Inject constructor(
      * Refresh alerts data and update the UI state accordingly
      */
     override fun refreshDetails(sortOrder: String, page: Int) {
-        Log.e("refreshDetails", viewModelState.value.isLoading.toString())
         if (page == 0) {
             viewModelState.update { it.copy(isLoading = true) }
         }
@@ -145,10 +144,13 @@ class AlertsViewModel @Inject constructor(
                 when (result) {
                     is C3Result.Success -> {
                         val alertIds = result.data.map { it.id }
-//                        if (alertIds.isNotEmpty()) {
-//                            getFeedbacks(alertIds)
-//                        }
-                        state.copy(alerts = appendAlerts(result.data.toSet()), isLoading = false)
+                        if (!alertIds.isNullOrEmpty()) {
+                            getFeedbacks(result.data.map { it.id }, page)
+                        }
+                        state.copy(
+                            alerts = appendAlerts(result.data.toSet(), page),
+                            isLoading = false
+                        )
                     }
                     is C3Result.Error -> {
                         val errorMessages = state.errorMessages + ErrorMessage(
@@ -173,8 +175,8 @@ class AlertsViewModel @Inject constructor(
         size = 1
     }
 
-    private fun appendAlerts(alerts: Set<Alert>): MutableSet<Alert>? {
-        if (viewModelState.value.alerts == null) {
+    private fun appendAlerts(alerts: Set<Alert>, page: Int): MutableSet<Alert>? {
+        if (viewModelState.value.alerts == null || page == 0) {
             viewModelState.value.alerts = setOf()
         }
         val appendedSet = viewModelState.value.alerts?.toMutableSet()
@@ -182,25 +184,31 @@ class AlertsViewModel @Inject constructor(
         return appendedSet
     }
 
-    private fun appendFeedbacks(feedbacks: Set<AlertFeedback>): Set<AlertFeedback> {
-        return viewModelState.value.alertsFeedBacks.toMutableSet().apply {
-            addAll(feedbacks)
+    private fun appendFeedbacks(
+        feedbacks: Set<AlertFeedback>,
+        page: Int
+    ): MutableSet<AlertFeedback>? {
+        if (viewModelState.value.alertsFeedBacks == null || page == 0) {
+            viewModelState.value.alertsFeedBacks = setOf()
         }
+        val appendedSet = viewModelState.value.alertsFeedBacks?.toMutableSet()
+        appendedSet?.addAll(feedbacks)
+        return appendedSet
     }
 
-    private fun getFeedbacks(alertIds: List<String>) {
+    private fun getFeedbacks(alertIds: List<String>, page: Int) {
         viewModelScope.launch {
             val result = useCases.getAlertsFeedbacks(alertIds)
-            viewModelState.update { state ->
+            viewModelState.update {
                 when (result) {
                     is C3Result.Success -> {
-                        state.copy(
-                            alertsFeedBacks = appendFeedbacks(result.data.toSet()),
+                        it.copy(
+                            alertsFeedBacks = appendFeedbacks(result.data.toSet(), page),
                             isLoading = false
                         )
                     }
                     is C3Result.Error -> {
-                        state
+                        it.copy(isLoading = false)
                     }
                 }
             }
@@ -233,10 +241,10 @@ class AlertsViewModel @Inject constructor(
                     state.copy(selectedCategoriesList = event.categories.toMutableSet())
                 }
                 is AlertsEvent.OnFeedbackChanged -> {
-                    val feedback = state.alertsFeedBacks.find { it.parent?.id == event.alertId }
+                    val feedback = state.alertsFeedBacks?.find { it.parent?.id == event.alertId }
                     if (feedback == null) {
                         state.copy(
-                            alertsFeedBacks = state.alertsFeedBacks.toMutableSet().apply {
+                            alertsFeedBacks = state.alertsFeedBacks?.toMutableSet()?.apply {
                                 add(
                                     AlertFeedback(
                                         id = Random().toString(),
@@ -247,12 +255,10 @@ class AlertsViewModel @Inject constructor(
                             })
                     } else {
                         state.copy(
-                            alertsFeedBacks = state.alertsFeedBacks.toMutableSet().apply {
-                                removeAll(
-                                    state.alertsFeedBacks
-                                        .filter { it.parent?.id == event.alertId }
-                                        .toSet()
-                                )
+                            alertsFeedBacks = state.alertsFeedBacks!!.toMutableSet().apply {
+                                removeAll(state.alertsFeedBacks!!.filter {
+                                    it.parent?.id == event.alertId
+                                })
                                 add(
                                     AlertFeedback(
                                         id = Random().toString(),
@@ -289,13 +295,6 @@ class AlertsViewModel @Inject constructor(
                     }
                     state
                 }
-                is AlertsEvent.OnRetry -> {
-                    refreshDetails(page = 0)
-                    state.copy(isLoading = true)
-                }
-                is AlertsEvent.OnError -> {
-                    state.copy(errorMessages = emptyList())
-                }
                 else -> {
                     state.copy()
                 }
@@ -306,6 +305,7 @@ class AlertsViewModel @Inject constructor(
             is AlertsEvent.OnSortChanged -> {
                 refreshDetails(event.sortOption, page = 0)
             }
+            else -> {}
         }
     }
 }

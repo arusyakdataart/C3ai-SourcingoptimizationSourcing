@@ -28,7 +28,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
@@ -110,6 +109,8 @@ fun SearchWithAlertsScreen(
     viewModel: AlertsViewModel,
     selectedCategories: List<String>?,
     onCategoriesSelected: () -> Unit,
+    onAlertsSortChanged: (String) -> Unit,
+    onChangeAlertsFilter: (String) -> Unit,
     onRefresh: () -> Unit,
     onSettingsClick: () -> Unit,
     onSearchResultClick: (SearchItem) -> Unit,
@@ -139,8 +140,11 @@ fun SearchWithAlertsScreen(
             scaffoldState = scaffoldState,
             topBar = {
                 SearchTopAppBar(
+                    uiState = uiState,
                     onSettingsClick = onSettingsClick,
                     onSearchResultClick = onSearchResultClick,
+                    onAlertsSortChanged = onAlertsSortChanged,
+                    onChangeAlertsFilter = onChangeAlertsFilter,
                 )
             },
             snackbarHost = { C3SnackbarHost(hostState = it) },
@@ -410,8 +414,11 @@ private fun HomeTopAppBar(
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 private fun SearchTopAppBar(
+    uiState: AlertsUiState,
     onSettingsClick: () -> Unit,
     onSearchResultClick: (SearchItem) -> Unit,
+    onAlertsSortChanged: (String) -> Unit,
+    onChangeAlertsFilter: (String) -> Unit,
 ) {
     C3SearchAppBar(
         title = "",
@@ -425,7 +432,13 @@ private fun SearchTopAppBar(
                 )
             }
         },
-        actions = {},
+        actions = {
+            AlertsActions(
+                uiState = uiState,
+                onSortChanged = onAlertsSortChanged,
+                onChangeFilter = onChangeAlertsFilter
+            )
+        },
         onSearchResultClick = onSearchResultClick,
     ) { state ->
         FiltersGridLayout(

@@ -6,7 +6,7 @@ import com.c3ai.sourcingoptimization.data.C3Result
 import com.c3ai.sourcingoptimization.utilities.PAGINATED_RESPONSE_LIMIT
 
 class C3PagingSource<T : Any>(
-    private val loadData: suspend (Int, Int) -> C3Result<List<T>>?,
+    private val loadData: suspend (Int, Int) -> C3Result<List<T>>,
 ) : PagingSource<Int, T>() {
 
     override fun getRefreshKey(state: PagingState<Int, T>): Int? {
@@ -16,9 +16,7 @@ class C3PagingSource<T : Any>(
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, T> {
         val nextPage = params.key ?: 1
         val offset = (nextPage - 1) * PAGINATED_RESPONSE_LIMIT
-        val response = loadData(PAGINATED_RESPONSE_LIMIT, offset)
-            ?: return LoadResult.Error(IllegalArgumentException())
-        return when (response) {
+        return when (val response = loadData(PAGINATED_RESPONSE_LIMIT, offset)) {
             is C3Result.Success -> {
                 LoadResult.Page(
                     data = response.data,

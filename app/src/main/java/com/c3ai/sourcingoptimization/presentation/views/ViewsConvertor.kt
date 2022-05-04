@@ -127,7 +127,7 @@ fun ViewModelState.convert(
 
 fun ViewModelState.convert(
     alerts: Set<Alert>,
-    feedBacks: Set<AlertFeedback>
+    feedBacks: Set<AlertFeedback>? = emptySet()
 ): List<UiAlert> {
     val uiAlerts = alerts.map {
         UiAlert(
@@ -140,7 +140,7 @@ fun ViewModelState.convert(
             flagged = it.flagged,
             timestamp = settings.format(it.timestamp),
             redirectUrl = it.redirectUrl,
-            feedback = feedBacks.findLast { it1 -> it.id == it1.parent?.id }
+            feedback = feedBacks?.findLast { it1 -> it.id == it1.parent?.id }
         )
     }
     return uiAlerts
