@@ -1,5 +1,6 @@
 package com.c3ai.sourcingoptimization.presentation.watchlist.suppliers
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.data.C3Result
@@ -90,6 +91,7 @@ private data class EditSuppliersViewModelState(
 @HiltViewModel
 class EditSuppliersViewModel @Inject constructor(
     settings: C3AppSettingsProvider,
+    private val savedStateHandle: SavedStateHandle,
     private val useCases: EditSuppliersUseCases
 ) : ViewModelWithPagination() {
 
@@ -139,8 +141,10 @@ class EditSuppliersViewModel @Inject constructor(
             viewModelState.update { it.copy(isLoading = true) }
         }
 
+        val itemId = savedStateHandle.get<String>("itemId") ?: ""
+
         viewModelScope.launch {
-            val result = useCases.getSuppliers("item1", page * PAGINATED_RESPONSE_LIMIT)
+            val result = useCases.getSuppliers(itemId, page * PAGINATED_RESPONSE_LIMIT)
             viewModelState.update {
                 when (result) {
                     is C3Result.Success -> it.copy(suppliers = appendSuppliers(result.data, page), isLoading = false)
