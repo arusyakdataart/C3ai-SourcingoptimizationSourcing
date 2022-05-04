@@ -37,31 +37,25 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.common.components.*
-import com.c3ai.sourcingoptimization.data.C3Result
 import com.c3ai.sourcingoptimization.domain.model.Alert
 import com.c3ai.sourcingoptimization.domain.model.SearchItem
 import com.c3ai.sourcingoptimization.modifiers.interceptKey
 import com.c3ai.sourcingoptimization.presentation.alerts.*
 import com.c3ai.sourcingoptimization.presentation.common.search.FiltersGridLayout
 import com.c3ai.sourcingoptimization.presentation.common.search.SearchBar
-import com.c3ai.sourcingoptimization.presentation.common.search.rememberSaveableFilterState
 import com.c3ai.sourcingoptimization.ui.theme.PrimaryColor
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalAnimationApi::class)
 @Composable
 fun SearchScreen(
     scaffoldState: ScaffoldState,
-    uiState: SearchUiState.SearchResults,
+    uiState: HomeUiState.HasData,
     onRefresh: () -> Unit,
     onSettingsClick: () -> Unit,
     onAlertClick: () -> Unit,
     onSearchResultClick: (SearchItem) -> Unit,
-    search: suspend (String, List<Int>?, offset: Int) -> C3Result<List<SearchItem>>,
 ) {
     var oppened by rememberSaveable { mutableStateOf(false) }
-    val filterState = rememberSaveableFilterState(
-        stringArrayResource(R.array.searchFilters).toList()
-    )
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -94,12 +88,10 @@ fun SearchScreen(
             SearchBar(
                 onStateChanged = { oppened = it },
                 onSearchResultClick = onSearchResultClick,
-                search = search,
-                filterState = filterState,
                 modifier = Modifier.fillMaxWidth(),
-            ) {
+            ) { state ->
                 FiltersGridLayout(
-                    filterState = filterState,
+                    state = state,
                     modifier = Modifier.padding(top = if (oppened) 10.dp else 30.dp)
                 )
             }
@@ -121,7 +113,6 @@ fun SearchWithAlertsScreen(
     onRefresh: () -> Unit,
     onSettingsClick: () -> Unit,
     onSearchResultClick: (SearchItem) -> Unit,
-    search: suspend (String, List<Int>?, offset: Int) -> C3Result<List<SearchItem>>,
     onCollapsableItemClick: (String) -> Unit,
     onSupplierClick: (String) -> Unit,
     onItemClick: (String) -> Unit,
@@ -150,7 +141,6 @@ fun SearchWithAlertsScreen(
                 SearchTopAppBar(
                     onSettingsClick = onSettingsClick,
                     onSearchResultClick = onSearchResultClick,
-                    search = search
                 )
             },
             snackbarHost = { C3SnackbarHost(hostState = it) },
@@ -422,11 +412,7 @@ private fun HomeTopAppBar(
 private fun SearchTopAppBar(
     onSettingsClick: () -> Unit,
     onSearchResultClick: (SearchItem) -> Unit,
-    search: suspend (String, List<Int>?, offset: Int) -> C3Result<List<SearchItem>>,
 ) {
-    val filterState = rememberSaveableFilterState(
-        stringArrayResource(R.array.searchFilters).toList()
-    )
     C3SearchAppBar(
         title = "",
         showLogo = true,
@@ -441,11 +427,9 @@ private fun SearchTopAppBar(
         },
         actions = {},
         onSearchResultClick = onSearchResultClick,
-        filterState = filterState,
-        search = search,
-    ) {
+    ) { state ->
         FiltersGridLayout(
-            filterState = filterState,
+            state = state,
             modifier = Modifier
                 .padding(top = 10.dp)
                 .horizontalScroll(rememberScrollState())

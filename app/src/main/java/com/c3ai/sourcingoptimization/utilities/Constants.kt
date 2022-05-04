@@ -11,4 +11,5 @@ const val API_VERSION = "api/1"
 const val PATH = "" //sourcingOptimization/prod/
 const val MAIN_API_URL = "${SCHEMA}${API_DOMAIN}/${API_VERSION}/${PATH}"
 const val PAGINATED_RESPONSE_LIMIT = 10
+const val BIG_PAGINATED_RESPONSE_LIMIT = 20
 const val VISIBLE_THRESHOLD = 5

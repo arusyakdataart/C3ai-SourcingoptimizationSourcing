@@ -29,7 +29,7 @@ import com.google.gson.Gson
 @Composable
 fun SearchRoute(
     navController: NavController,
-    viewModel: SearchViewModel = hiltViewModel(),
+    viewModel: HomeViewModel = hiltViewModel(),
     alertsViewModel: AlertsViewModel = hiltViewModel(),
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     selectedCategories: String
@@ -41,14 +41,11 @@ fun SearchRoute(
         SearchHome -> {
             SearchScreen(
                 scaffoldState = scaffoldState,
-                uiState = uiState as SearchUiState.SearchResults,
+                uiState = uiState as HomeUiState.HasData,
                 onRefresh = {},
                 onSettingsClick = { navController.navigate(SETTINGS_ROUTE) },
                 onAlertClick = { navController.navigateToAlerts() },
                 onSearchResultClick = { navController.navigateFromSearch(it) },
-                search = { query, filters, offset ->
-                    viewModel.useCases.search(query, filters, offset)
-                },
             )
         }
         SearchWithAlerts -> {
@@ -71,9 +68,6 @@ fun SearchRoute(
                 onRefresh = {alertsViewModel.refreshDetails(page = 0)},
                 onSettingsClick = { navController.navigate(SETTINGS_ROUTE) },
                 onSearchResultClick = { navController.navigateFromSearch(it) },
-                search = { query, filters, offset ->
-                    viewModel.useCases.search(query, filters, offset)
-                },
                 onCollapsableItemClick = { alertsViewModel.onEvent(AlertsEvent.OnCollapsableItemClick(it)) },
                 onSupplierClick = { navController.navigateToSupplierDetails(it) },
                 onItemClick = { navController.navigateToItemDetails(it) },
@@ -99,12 +93,12 @@ private enum class SearchScreenType {
 
 /**
  * Returns the current [SearchScreenType] to display, based on whether or not the screen is expanded
- * and the [SearchUiState].
+ * and the [HomeUiState].
  */
 @Composable
 private fun getSearchScreenType(
-    uiState: SearchUiState
+    uiState: HomeUiState
 ): SearchScreenType = when (uiState) {
-    is SearchUiState.SearchResults -> SearchHome
+    is HomeUiState.HasData -> SearchHome
     else -> SearchWithAlerts
 }

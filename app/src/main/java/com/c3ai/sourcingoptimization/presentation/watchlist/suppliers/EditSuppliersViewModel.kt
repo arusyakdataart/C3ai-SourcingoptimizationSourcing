@@ -1,6 +1,5 @@
 package com.c3ai.sourcingoptimization.presentation.watchlist.suppliers
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.data.C3Result
@@ -9,7 +8,9 @@ import com.c3ai.sourcingoptimization.domain.settings.C3AppSettingsProvider
 import com.c3ai.sourcingoptimization.domain.settings.SettingsState
 import com.c3ai.sourcingoptimization.domain.use_case.EditSuppliersUseCases
 import com.c3ai.sourcingoptimization.presentation.ViewModelState
+import com.c3ai.sourcingoptimization.presentation.ViewModelWithPagination
 import com.c3ai.sourcingoptimization.utilities.ErrorMessage
+import com.c3ai.sourcingoptimization.utilities.PAGINATED_RESPONSE_LIMIT
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -41,7 +42,7 @@ sealed interface EditSuppliersUiState {
     ) : EditSuppliersUiState
 
     /**
-     * There is data to render, as contained in model[index].
+     * There is data to render, as contained in model.
      *
      */
     data class HasData(
@@ -58,7 +59,7 @@ sealed interface EditSuppliersUiState {
  */
 private data class EditSuppliersViewModelState(
     override val settings: SettingsState,
-    val suppliers: List<C3Vendor>? = null,
+    var suppliers: List<C3Vendor>? = null,
     val isLoading: Boolean = false,
     val errorMessages: List<ErrorMessage> = emptyList(),
     val searchInput: String = "",
@@ -72,7 +73,7 @@ private data class EditSuppliersViewModelState(
     fun toUiState(): EditSuppliersUiState =
         if (suppliers != null) {
             EditSuppliersUiState.HasData(
-                suppliers = suppliers,
+                suppliers = suppliers!!,
                 checkedItemsIds = checkedItemsIds,
                 isLoading = isLoading,
                 errorMessages = errorMessages,
@@ -91,7 +92,7 @@ private data class EditSuppliersViewModelState(
 class EditSuppliersViewModel @Inject constructor(
     settingsProvider: C3AppSettingsProvider,
     private val useCases: EditSuppliersUseCases
-) : ViewModel() {
+) : ViewModelWithPagination() {
 
     private val viewModelState = MutableStateFlow(
         EditSuppliersViewModelState(
@@ -110,20 +111,40 @@ class EditSuppliersViewModel @Inject constructor(
         )
 
     init {
-        refreshDetails()
+        refreshDetails(page = 0)
+    }
+
+    /**
+     * Update state by user event.
+     */
+    fun onEvent(event: EditSuppliersEvent) {
+        viewModelState.update { state ->
+            when (event) {
+                is EditSuppliersEvent.OnRetry -> {
+                    refreshDetails(page = 0)
+                    state.copy(isLoading = true)
+                }
+                is EditSuppliersEvent.OnError -> {
+                    state.copy(errorMessages = emptyList())
+                }
+                else -> state.copy()
+            }
+        }
     }
 
     /**
      * Refresh supplier details and update the UI state accordingly
      */
-    fun refreshDetails() {
-        viewModelState.update { it.copy(isLoading = true) }
+    override fun refreshDetails(sortOrder: String, page: Int) {
+        if (page == 0) {
+            viewModelState.update { it.copy(isLoading = true) }
+        }
 
         viewModelScope.launch {
-            val result = useCases.getSuppliers("item1")
+            val result = useCases.getSuppliers("item1", page * PAGINATED_RESPONSE_LIMIT)
             viewModelState.update {
                 when (result) {
-                    is C3Result.Success -> it.copy(suppliers = result.data, isLoading = false)
+                    is C3Result.Success -> it.copy(suppliers = appendSuppliers(result.data, page), isLoading = false)
                     is C3Result.Error -> {
                         val errorMessages = it.errorMessages + ErrorMessage(
                             id = UUID.randomUUID().mostSignificantBits,
@@ -137,9 +158,22 @@ class EditSuppliersViewModel @Inject constructor(
     }
 
     /**
-     * Update state by user event.
+     * Refresh supplier details and update the UI state accordingly
      */
-    fun onEvent(event: EditSuppliersEvent) {
+    override fun refreshDetails(sortOrder: String, page: Int, index: Int) {
+        refreshDetails(sortOrder, page)
+    }
 
+    override fun setSize() {
+        size = 1
+    }
+
+    private fun appendSuppliers(suppliers: List<C3Vendor>, page: Int): MutableList<C3Vendor>? {
+        if (viewModelState.value.suppliers == null || page == 0) {
+            viewModelState.value.suppliers = mutableListOf()
+        }
+        val appendedList = viewModelState.value.suppliers?.toMutableList()
+        appendedList?.addAll(suppliers)
+        return appendedList
     }
 }

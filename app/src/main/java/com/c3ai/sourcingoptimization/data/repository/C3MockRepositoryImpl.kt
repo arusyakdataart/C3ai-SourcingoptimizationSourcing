@@ -91,7 +91,7 @@ class C3MockRepositoryImpl : C3Repository {
         TODO("Not yet implemented")
     }
 
-    override suspend fun getItemDetailsSuppliers(itemId: String, limit: Int): C3Result<List<C3Vendor>> {
+    override suspend fun getItemDetailsSuppliers(itemId: String, page: Int, limit: Int): C3Result<List<C3Vendor>> {
         TODO("Not yet implemented")
     }
 
@@ -112,7 +112,7 @@ class C3MockRepositoryImpl : C3Repository {
         TODO("Not yet implemented")
     }
 
-    override suspend fun getMarketPriceIndexes(): C3Result<List<MarketPriceIndex>> {
+    override suspend fun getMarketPriceIndexes(page: Int): C3Result<List<MarketPriceIndex>> {
         TODO("Not yet implemented")
     }
 

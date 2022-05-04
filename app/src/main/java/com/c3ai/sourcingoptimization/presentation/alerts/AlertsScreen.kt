@@ -44,6 +44,8 @@ fun AlertsScreen(
     onItemClick: (String) -> Unit,
     onPOClick: (String) -> Unit,
     onContactClick: (String) -> Unit,
+    onRetry: () -> Unit,
+    onError: () -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
     val bottomState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
@@ -110,6 +112,37 @@ fun AlertsScreen(
                     )
                 }
             )
+        }
+    }
+    // Process one error message at a time and show them as Snackbars in the UI
+    if (uiState.errorMessages.isNotEmpty()) {
+        // Remember the errorMessage to display on the screen
+        val errorMessage = remember(uiState) { uiState.errorMessages[0] }
+
+        // Get the text to show on the message from resources
+        val errorMessageText: String = stringResource(errorMessage.messageId)
+        val retryMessageText = stringResource(id = R.string.retry)
+
+        // If onRefreshPosts or onErrorDismiss change while the LaunchedEffect is running,
+        // don't restart the effect and use the latest lambda values.
+        val onRefreshPostsState by rememberUpdatedState({ })
+        val onErrorDismissState by rememberUpdatedState({ })
+
+        // Effect running in a coroutine that displays the Snackbar on the screen
+        // If there's a change to errorMessageText, retryMessageText or scaffoldState,
+        // the previous effect will be cancelled and a new one will start with the new values
+        LaunchedEffect(errorMessageText, retryMessageText, scaffoldState) {
+            val snackbarResult = scaffoldState.snackbarHostState.showSnackbar(
+                message = errorMessageText,
+                actionLabel = retryMessageText
+            )
+            if (snackbarResult == SnackbarResult.ActionPerformed) {
+                onRefreshPostsState()
+                onRetry()
+            }
+            // Once the message is displayed and dismissed, notify the ViewModel
+            onErrorDismissState()
+            onError()
         }
     }
 }

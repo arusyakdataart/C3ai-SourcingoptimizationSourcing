@@ -289,6 +289,13 @@ class AlertsViewModel @Inject constructor(
                     }
                     state
                 }
+                is AlertsEvent.OnRetry -> {
+                    refreshDetails(page = 0)
+                    state.copy(isLoading = true)
+                }
+                is AlertsEvent.OnError -> {
+                    state.copy(errorMessages = emptyList())
+                }
                 else -> {
                     state.copy()
                 }

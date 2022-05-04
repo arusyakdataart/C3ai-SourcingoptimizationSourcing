@@ -1,9 +1,12 @@
 package com.c3ai.sourcingoptimization.presentation.common.search
 
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.paging.PagingData
 import com.c3ai.sourcingoptimization.data.network.converters.C3SearchItemJsonDeserializer
 import com.c3ai.sourcingoptimization.domain.model.*
 import com.c3ai.sourcingoptimization.presentation.common.search.SearchDisplay.*
@@ -22,21 +25,20 @@ import java.lang.reflect.Type
  * @param initialResults results that can be displayed before doing a search
  * @param suggestions chip or cards that can be suggested to user when Search composable is focused
  * but query is empty
- * @param searchResults results of latest search
  *
  */
 @Composable
 fun rememberSaveableSearchState(
     initialResults: List<SearchItem> = emptyList(),
     suggestions: List<RecentSearchItem> = emptyList(),
-    searchResults: List<SearchItem> = emptyList(),
+    filters: List<String> = emptyList(),
     timeoutMillis: Long = 0,
 ): SearchState<SearchItem, RecentSearchItem> {
     return rememberSaveable(saver = StateSaver()) {
         SearchState(
             initialResults = initialResults,
             suggestions = suggestions,
-            searchResults = searchResults,
+            filters = filters,
         )
     }.also { state ->
         LaunchedEffect(key1 = Unit) {
@@ -53,35 +55,15 @@ fun rememberSaveableSearchState(
                     query
                 }
                 .debounce(timeoutMillis)
-                .mapLatest { query: TextFieldValue ->
+                .mapLatest {
                     state.searching = true
                     // This delay is for showing circular progress bar, it's optional
                     delay(300)
                 }
-                .collect { result ->
+                .collect {
                     state.searching = false
                 }
         }
-    }
-}
-
-/**
- * Creates a [FilterState] that is remembered across compositions and cache itself.
- *
- * @param filters filters for displaying.
- * @param selected selected filters by the user.
- *
- */
-@Composable
-fun rememberSaveableFilterState(
-    filters: List<String>,
-    selected: Set<Int> = emptySet(),
-): FilterState<String, Int> {
-    return rememberSaveable(saver = FiltersStateSaver()) {
-        FilterState(
-            filters = filters,
-            selected = selected,
-        )
     }
 }
 
@@ -91,20 +73,19 @@ fun rememberSaveableFilterState(
  * @param initialResults results that can be displayed before doing a search
  * @param suggestions chip or cards that can be suggested to user when Search composable is focused
  * but query is empty
- * @param searchResults results of latest search
  *
  */
 @Composable
-fun <R, S> rememberSearchState(
+fun <R : Any, S> rememberSearchState(
     initialResults: List<R> = emptyList(),
     suggestions: List<S> = emptyList(),
-    searchResults: List<R> = emptyList(),
+    filters: List<String> = emptyList(),
 ): SearchState<R, S> {
     return remember {
         SearchState(
             initialResults = initialResults,
             suggestions = suggestions,
-            searchResults = searchResults,
+            filters = filters
         )
     }
 }
@@ -127,17 +108,16 @@ fun <R, S> rememberSearchState(
  * @param initialResults results that can be displayed before doing a search
  * @param suggestions chip or cards that can be suggested to user when Search composable is focused
  * but query is empty
- * @param searchResults results of latest search
  * @param timeoutMillis timeout before user finishes typing. After this
  * timeout [SearchState.searching]
  * is set to true.
  *
  */
 @Composable
-fun <R, S> rememberSearchState(
+fun <R : Any, S> rememberSearchState(
     initialResults: List<R> = emptyList(),
     suggestions: List<S> = emptyList(),
-    searchResults: List<R> = emptyList(),
+    filters: List<String> = emptyList(),
     timeoutMillis: Long = 0,
 ): SearchState<R, S> {
 
@@ -145,7 +125,7 @@ fun <R, S> rememberSearchState(
         SearchState(
             initialResults = initialResults,
             suggestions = suggestions,
-            searchResults = searchResults,
+            filters = filters
         )
     }.also { state ->
         LaunchedEffect(key1 = Unit) {
@@ -162,12 +142,12 @@ fun <R, S> rememberSearchState(
                     query
                 }
                 .debounce(timeoutMillis)
-                .mapLatest { query: TextFieldValue ->
+                .mapLatest {
                     state.searching = true
                     // This delay is for showing circular progress bar, it's optional
                     delay(300)
                 }
-                .collect { result ->
+                .collect {
                     state.searching = false
                 }
         }
@@ -183,16 +163,19 @@ fun <R, S> rememberSearchState(
  * @param initialResults results that can be displayed before doing a search
  * @param suggestions chip or cards that can be suggested to user when Search composable is focused
  * but query is empty
- * @param searchResults results of latest search
  */
 @Parcelize
-class SearchState<R, S> internal constructor(
+class SearchState<R : Any, S> internal constructor(
     initialResults: List<R> = emptyList(),
     suggestions: List<S>,
-    searchResults: List<R>,
+    filters: List<String>,
+    selected: Set<Int> = emptySet(),
+    opened: Boolean = false,
     initialQuery: String = "",
-    opened: Boolean = false
+    val firstVisibleItemIndex: Int = 0,
+    val firstVisibleItemScrollOffset: Int = 0,
 ) {
+    var lazyListState: LazyListState? = null
     /**
      * Query [TextFieldValue] that contains text and query selection position.
      */
@@ -216,10 +199,22 @@ class SearchState<R, S> internal constructor(
     var suggestions by mutableStateOf(suggestions)
 
     /**
+     * filters that should be displayed.
+     */
+    var filters by mutableStateOf(filters)
+
+    /**
+     * selected filters by the user.
+     */
+    var selectedFilters by mutableStateOf(selected)
+
+    internal var searchResultsFlow: Flow<PagingData<R>>? by mutableStateOf(null)
+    /**
      * Results of a search action. If this list is empty [searchDisplay] is
      * [SearchDisplay.NoResults] state otherwise in [SearchDisplay.Results] state.
      */
-    var searchResults by mutableStateOf(searchResults)
+    val searchResults: Flow<PagingData<R>>?
+        get() = searchResultsFlow
 
     /**
      * Last query text, it might be used to prevent doing search when current query and previous
@@ -248,7 +243,7 @@ class SearchState<R, S> internal constructor(
             !opened && query.text.isEmpty() -> InitialResults
             opened && query.text.isEmpty() -> Suggestions
             searchInProgress -> SearchInProgress
-            !searchInProgress && searchResults.isEmpty() -> {
+            !searchInProgress && searchResults != null -> {
                 previousQueryText = query.text
                 NoResults
             }
@@ -271,29 +266,11 @@ class SearchState<R, S> internal constructor(
     fun sameAsPreviousQuery() = query.text == previousQueryText
 }
 
-/**
- *  A state object that can be hosted to control and observe filters changing.
- *
- * Create instance using [rememberSaveableFilterState].
- *
- * @param filters results that can be displayed before doing a search
- * @param selected chip or cards that can be suggested to user when Search composable is focused
- * but query is empty
- */
-@Parcelize
-class FilterState<F, S> internal constructor(
-    filters: List<F>,
-    selected: Set<S> = emptySet(),
-) {
-    /**
-     * filters that should be displayed.
-     */
-    var filters by mutableStateOf(filters)
+@Composable
+fun SearchState<SearchItem, RecentSearchItem>.rememberSaveableLazyListState(): LazyListState {
+    lazyListState = rememberLazyListState(firstVisibleItemIndex, firstVisibleItemScrollOffset)
+    return lazyListState as LazyListState
 
-    /**
-     * selected filters by the user.
-     */
-    var selected by mutableStateOf(selected)
 }
 
 /**
@@ -321,7 +298,7 @@ enum class SearchDisplay {
     InitialResults, Suggestions, SearchInProgress, Results, NoResults
 }
 
-private class SearchItemJsonSerializer : JsonSerializer<SearchItem> {
+private class C3SearchItemJsonSerializer : JsonSerializer<SearchItem> {
 
     override fun serialize(
         src: SearchItem,
@@ -342,23 +319,29 @@ private class SearchItemJsonSerializer : JsonSerializer<SearchItem> {
 
 private data class SearchStateSaveable(
     val suggestions: List<RecentSearchItem>,
-    val searchResults: List<SearchItem>,
+    val filters: List<String>,
+    val selected: List<Int>,
     val query: String,
     val opened: Boolean,
+    val firstVisibleItemIndex: Int,
+    val firstVisibleItemScrollOffset: Int,
 )
 
 private fun StateSaver(): Saver<SearchState<SearchItem, RecentSearchItem>, String> {
     val gson = GsonBuilder()
         .registerTypeAdapter(SearchItem::class.java, C3SearchItemJsonDeserializer())
-        .registerTypeAdapter(SearchItem::class.java, SearchItemJsonSerializer())
+        .registerTypeAdapter(SearchItem::class.java, C3SearchItemJsonSerializer())
         .create()
     return Saver(
         save = {
             val state = SearchStateSaveable(
                 suggestions = it.suggestions,
-                searchResults = it.searchResults,
+                filters = it.filters,
+                selected = it.selectedFilters.toList(),
                 query = it.query.text,
                 opened = it.opened,
+                firstVisibleItemIndex = it.lazyListState?.firstVisibleItemIndex ?: 0,
+                firstVisibleItemScrollOffset = it.lazyListState?.firstVisibleItemScrollOffset ?: 0,
             )
             val json = gson.toJson(state)
             json
@@ -367,35 +350,12 @@ private fun StateSaver(): Saver<SearchState<SearchItem, RecentSearchItem>, Strin
             val state = gson.fromJson(json, SearchStateSaveable::class.java)
             SearchState(
                 suggestions = state.suggestions,
-                searchResults = state.searchResults,
-                initialQuery = state.query,
-                opened = state.opened,
-            )
-        }
-    )
-}
-
-private data class FiltersStateSaveable(
-    val filters: List<String>,
-    val selected: List<Int>,
-)
-
-private fun FiltersStateSaver(): Saver<FilterState<String, Int>, String> {
-    val gson = GsonBuilder().create()
-    return Saver(
-        save = {
-            val state = FiltersStateSaveable(
-                filters = it.filters,
-                selected = it.selected.toList(),
-            )
-            val json = gson.toJson(state)
-            json
-        },
-        restore = { json ->
-            val state = gson.fromJson(json, FiltersStateSaveable::class.java)
-            FilterState(
                 filters = state.filters,
                 selected = state.selected.toSet(),
+                initialQuery = state.query,
+                opened = state.opened,
+                firstVisibleItemIndex = state.firstVisibleItemIndex,
+                firstVisibleItemScrollOffset = state.firstVisibleItemScrollOffset,
             )
         }
     )

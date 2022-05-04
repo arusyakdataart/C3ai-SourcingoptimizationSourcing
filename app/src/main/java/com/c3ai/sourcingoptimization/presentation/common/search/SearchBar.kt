@@ -7,7 +7,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -19,7 +18,6 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -35,58 +33,40 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.common.components.ListDivider
 import com.c3ai.sourcingoptimization.common.components.OutlinedChip
 import com.c3ai.sourcingoptimization.common.components.StaggeredGrid
-import com.c3ai.sourcingoptimization.data.C3Result
 import com.c3ai.sourcingoptimization.domain.model.RecentSearchItem
 import com.c3ai.sourcingoptimization.domain.model.SearchItem
 import com.c3ai.sourcingoptimization.presentation.search.RecentSearch
 import com.c3ai.sourcingoptimization.presentation.search.SearchCardSimple
-import kotlinx.coroutines.launch
 
 @ExperimentalAnimationApi
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SearchBar(
     modifier: Modifier = Modifier,
+    viewModel: SearchViewModel = hiltViewModel(),
     fixed: Boolean = false,
     onBackClick: () -> Unit = {},
     onStateChanged: (Boolean) -> Unit = {},
     onSearchResultClick: (SearchItem) -> Unit,
-    search: suspend (String, List<Int>?, offset: Int) -> C3Result<List<SearchItem>>,
-    filterState: FilterState<String, Int>? = null,
-    subContent: @Composable (() -> Unit)? = null,
+    subContent: @Composable ((SearchState<SearchItem, RecentSearchItem>) -> Unit)? = null,
 ) {
 
-    val scope = rememberCoroutineScope()
-    val state = rememberSaveableSearchState(
-        initialResults = emptyList<SearchItem>(),
-        suggestions = emptyList<RecentSearchItem>(),
-        searchResults = emptyList<SearchItem>(),
-    )
-    val listState = rememberLazyListState()
+    val state = viewModel.rememberState()
+    val listState = state.rememberSaveableLazyListState()
     val keyboardController = LocalSoftwareKeyboardController.current
+
 
     val onSearch: (String, List<Int>?) -> Unit = { query, filters ->
         state.apply {
             if (query.isNotEmpty()) {
                 keyboardController?.hide()
-                searchInProgress = true
-                scope.launch {
-                    val response =
-                        search(query, filters, 0)
-                    when (response) {
-                        is C3Result.Success -> {
-                            searchResults = response.data
-                        }
-                        is C3Result.Error -> {
-                        }
-                    }
-                    searchInProgress = false
-                }
-
+                viewModel.search()
                 state.suggestions = state.suggestions.toMutableList().apply {
                     find { recentItem ->
                         recentItem.input == query
@@ -99,7 +79,7 @@ fun SearchBar(
             }
         }
     }
-
+    val lazyItems = state.searchResults?.collectAsLazyPagingItems()
     Surface(
         color = Color.Transparent,
         elevation = 6.dp
@@ -116,7 +96,7 @@ fun SearchBar(
             ) {
                 SearchIconButton(selected = fixed || state.opened) {
                     state.query = TextFieldValue("")
-                    state.searchResults = emptyList()
+                    state.searchResultsFlow = null
                     state.opened = false
                     onStateChanged(false)
                     onBackClick()
@@ -125,7 +105,7 @@ fun SearchBar(
                     query = state.query,
                     onQueryChange = {
                         state.query = it
-                        if (it.text.isEmpty()) state.searchResults = emptyList()
+                        if (it.text.isEmpty()) state.searchResultsFlow = null
                     },
                     onSearchFocusChange = {
                         if (it) {
@@ -136,10 +116,10 @@ fun SearchBar(
                     onClearQuery = { state.query = TextFieldValue("") },
                     searching = state.searching,
                     modifier = modifier.weight(1f),
-                    onSearch = { onSearch(state.query.text, filterState?.selected?.toList()) },
+                    onSearch = { onSearch(state.query.text, state.selectedFilters.toList()) },
                 )
             }
-            subContent?.invoke()
+            subContent?.invoke(state)
             if (fixed || state.opened) {
                 val loaded = !state.searchInProgress && state.query.text.isNotEmpty()
                 LazyColumn(
@@ -159,16 +139,19 @@ fun SearchBar(
                         )
                     }
                     if (loaded) {
-                        items(state.searchResults) { item ->
-                            SearchCardSimple(item) { onSearchResultClick(it) }
-                            ListDivider()
+                        lazyItems?.let { items ->
+                            items(items.itemCount) { index ->
+                                val item = items[index]!!
+                                SearchCardSimple(item) { onSearchResultClick(it) }
+                                ListDivider()
+                            }
                         }
                     } else {
                         items(state.suggestions) { item ->
                             RecentSearch(item) {
                                 onSearch(it.input, it.filters)
                                 state.query = TextFieldValue(it.input)
-                                filterState?.selected = it.filters?.toSet() ?: emptySet()
+                                state.selectedFilters = it.filters?.toSet() ?: emptySet()
                             }
                             ListDivider()
                         }
@@ -298,16 +281,16 @@ private fun SearchHint(modifier: Modifier = Modifier) {
 @Composable
 fun FiltersGridLayout(
     modifier: Modifier = Modifier,
-    filterState: FilterState<String, Int>,
+    state: SearchState<SearchItem, RecentSearchItem>,
 ) {
     StaggeredGrid(modifier = modifier) {
-        filterState.filters.forEachIndexed { index, filter ->
+        state.filters.forEachIndexed { index, filter ->
             OutlinedChip(
                 modifier = Modifier.padding(4.dp),
                 text = filter,
-                selected = filterState.selected.contains(index),
+                selected = state.selectedFilters.contains(index),
                 onClick = {
-                    filterState.selected = filterState.selected.toMutableSet().apply {
+                    state.selectedFilters = state.selectedFilters.toMutableSet().apply {
                         val isRemoved = remove(index)
                         isRemoved || add(index)
                     }

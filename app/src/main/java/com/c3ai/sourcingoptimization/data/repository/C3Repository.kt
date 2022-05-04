@@ -2,6 +2,7 @@ package com.c3ai.sourcingoptimization.data.repository
 
 import com.c3ai.sourcingoptimization.data.C3Result
 import com.c3ai.sourcingoptimization.domain.model.*
+import com.c3ai.sourcingoptimization.utilities.BIG_PAGINATED_RESPONSE_LIMIT
 import com.c3ai.sourcingoptimization.utilities.PAGINATED_RESPONSE_LIMIT
 
 /**
@@ -12,7 +13,7 @@ interface C3Repository {
     suspend fun search(
         query: String,
         filters: List<Int>?,
-        limit: Int = PAGINATED_RESPONSE_LIMIT,
+        limit: Int = BIG_PAGINATED_RESPONSE_LIMIT,
         offset: Int = 0
     ): C3Result<List<SearchItem>>
 
@@ -61,6 +62,7 @@ interface C3Repository {
 
     suspend fun getItemDetailsSuppliers(
         itemId: String,
+        page: Int,
         limit: Int = PAGINATED_RESPONSE_LIMIT
     ): C3Result<List<C3Vendor>>
 
@@ -75,7 +77,7 @@ interface C3Repository {
         interval: String
     ): C3Result<ItemVendorRelationMetrics>
 
-    suspend fun getMarketPriceIndexes(): C3Result<List<MarketPriceIndex>>
+    suspend fun getMarketPriceIndexes(page: Int): C3Result<List<MarketPriceIndex>>
 
     suspend fun getItemMarketPriceIndexRelation(
         itemId: String,

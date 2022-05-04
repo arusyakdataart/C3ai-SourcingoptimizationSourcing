@@ -1,6 +1,5 @@
 package com.c3ai.sourcingoptimization.presentation.watchlist.index
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.data.C3Result
@@ -9,8 +8,10 @@ import com.c3ai.sourcingoptimization.domain.settings.C3AppSettingsProvider
 import com.c3ai.sourcingoptimization.domain.settings.SettingsState
 import com.c3ai.sourcingoptimization.domain.use_case.EditIndexUseCases
 import com.c3ai.sourcingoptimization.presentation.ViewModelState
+import com.c3ai.sourcingoptimization.presentation.ViewModelWithPagination
 import com.c3ai.sourcingoptimization.presentation.watchlist.suppliers.EditSuppliersEvent
 import com.c3ai.sourcingoptimization.utilities.ErrorMessage
+import com.c3ai.sourcingoptimization.utilities.PAGINATED_RESPONSE_LIMIT
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -92,7 +93,7 @@ private data class EditIndexViewModelState(
 class EditIndexViewModel @Inject constructor(
     settingsProvider: C3AppSettingsProvider,
     private val useCases: EditIndexUseCases
-) : ViewModel() {
+) : ViewModelWithPagination() {
 
     private val viewModelState = MutableStateFlow(
         EditIndexViewModelState(
@@ -111,26 +112,51 @@ class EditIndexViewModel @Inject constructor(
         )
 
     init {
-        refreshDetails()
+        refreshDetails(page = 0)
+    }
+
+    /**
+     * Update state by user event.
+     */
+    fun onEvent(event: EditIndexEvent) {
+        viewModelState.update { state ->
+            when (event) {
+                is EditIndexEvent.OnRetry -> {
+                    refreshDetails(page = 0)
+                    state.copy(isLoading = true)
+                }
+                is EditIndexEvent.OnError -> {
+                    state.copy(errorMessages = emptyList())
+                }
+                else -> state.copy()
+            }
+        }
     }
 
     /**
      * Refresh index data and update the UI state accordingly
      */
-    fun refreshDetails() {
-        viewModelState.update { it.copy(isLoading = true) }
+    override fun refreshDetails(sortOrder: String, page: Int) {
+        if (page == 0) {
+            viewModelState.update { it.copy(isLoading = true) }
+        }
 
         viewModelScope.launch {
-            val result = useCases.getIndexes()
-            viewModelState.update {
+            val result = useCases.getIndexes(page * PAGINATED_RESPONSE_LIMIT)
+            viewModelState.update { state ->
                 when (result) {
-                    is C3Result.Success -> it.copy(indexes = result.data, isLoading = false)
+                    is C3Result.Success -> {
+                        val indexes =
+                            if (state.indexes == null || page == 0) emptyList()
+                            else state.indexes.toMutableList().apply { addAll(result.data) }
+                        state.copy(indexes = indexes, isLoading = false)
+                    }
                     is C3Result.Error -> {
-                        val errorMessages = it.errorMessages + ErrorMessage(
+                        val errorMessages = state.errorMessages + ErrorMessage(
                             id = UUID.randomUUID().mostSignificantBits,
                             messageId = R.string.load_error
                         )
-                        it.copy(errorMessages = errorMessages, isLoading = false)
+                        state.copy(errorMessages = errorMessages, isLoading = false)
                     }
                 }
             }
@@ -138,9 +164,13 @@ class EditIndexViewModel @Inject constructor(
     }
 
     /**
-     * Update state by user event.
+     * Refresh index data and update the UI state accordingly
      */
-    fun onEvent(event: EditSuppliersEvent) {
+    override fun refreshDetails(sortOrder: String, page: Int, index: Int) {
+        refreshDetails(sortOrder, page)
+    }
 
+    override fun setSize() {
+        size = 1
     }
 }

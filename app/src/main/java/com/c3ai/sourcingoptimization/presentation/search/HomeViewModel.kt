@@ -17,10 +17,10 @@ import javax.inject.Inject
 /**
  * UI state for the Search route.
  *
- * This is derived from [SearchViewModelState], but split into two possible subclasses to more
+ * This is derived from [HomeViewModelState], but split into two possible subclasses to more
  * precisely represent the state available to render the UI.
  */
-sealed interface SearchUiState {
+sealed interface HomeUiState {
 
     val isLoading: Boolean
     val errorMessages: List<ErrorMessage>
@@ -29,10 +29,10 @@ sealed interface SearchUiState {
      * There are search results to render, as contained in [alerts].
      *
      */
-    data class SearchResults(
+    data class HasData(
         override val isLoading: Boolean,
         override val errorMessages: List<ErrorMessage>,
-    ) : SearchUiState
+    ) : HomeUiState
 
     /**
      * There are no alerts to render.
@@ -40,10 +40,10 @@ sealed interface SearchUiState {
      * This could either be because they are still loading or they failed to load, and we are
      * waiting to reload them.
      */
-    data class NoAlerts(
+    data class NoData(
         override val isLoading: Boolean,
         override val errorMessages: List<ErrorMessage>,
-    ) : SearchUiState
+    ) : HomeUiState
 
     /**
      * There are alerts to render, as contained in [alerts].
@@ -54,13 +54,13 @@ sealed interface SearchUiState {
         val selectedAlert: Alert?,
         override val isLoading: Boolean,
         override val errorMessages: List<ErrorMessage>,
-    ) : SearchUiState
+    ) : HomeUiState
 }
 
 /**
  * An internal representation of the Search route state, in a raw form
  */
-private data class SearchViewModelState(
+private data class HomeViewModelState(
     override val settings: SettingsState,
     val alerts: List<Alert>? = null,
     val isLoading: Boolean = false,
@@ -68,23 +68,23 @@ private data class SearchViewModelState(
 ) : ViewModelState() {
 
     /**
-     * Converts this [SearchViewModelState] into a more strongly typed [SearchUiState] for driving
+     * Converts this [HomeViewModelState] into a more strongly typed [HomeUiState] for driving
      * the ui.
      */
-    fun toUiState(): SearchUiState =
+    fun toUiState(): HomeUiState =
         if (settings.searchMode == SEARCH_MODE) {
-            SearchUiState.SearchResults(
+            HomeUiState.HasData(
                 isLoading = isLoading,
                 errorMessages = errorMessages,
             )
         } else {
             if (alerts == null) {
-                SearchUiState.NoAlerts(
+                HomeUiState.NoData(
                     isLoading = isLoading,
                     errorMessages = errorMessages,
                 )
             } else {
-                SearchUiState.HasAlerts(
+                HomeUiState.HasAlerts(
                     alerts = alerts,
                     selectedAlert = null,
                     isLoading = isLoading,
@@ -97,13 +97,13 @@ private data class SearchViewModelState(
 * ViewModel class which provides all necessary functionality for searching.
 * */
 @HiltViewModel
-class SearchViewModel @Inject constructor(
+class HomeViewModel @Inject constructor(
     settingsProvider: C3AppSettingsProvider,
     val useCases: SearchUseCases
 ) : ViewModel(), Observer<SettingsState> {
 
     private val viewModelState = MutableStateFlow(
-        SearchViewModelState(
+        HomeViewModelState(
             settings = settingsProvider.state,
             isLoading = true
         )

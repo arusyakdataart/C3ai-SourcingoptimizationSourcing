@@ -7,4 +7,6 @@ sealed class ItemDetailsEvent {
     data class UpdateSourcingAnalysis(val index: Int) : ItemDetailsEvent()
     data class OnSortChanged(val sortOption: String) : ItemDetailsEvent()
     data class OnSupplierContactSelected(val supplierId: String) : ItemDetailsEvent()
+    data class OnRetry(val retry: String) : ItemDetailsEvent()
+    data class OnError(val error: String) : ItemDetailsEvent()
 }

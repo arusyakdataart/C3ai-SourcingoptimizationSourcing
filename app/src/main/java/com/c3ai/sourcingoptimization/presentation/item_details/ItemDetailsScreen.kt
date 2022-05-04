@@ -57,6 +57,8 @@ fun ItemDetailsScreen(
     onSortChanged: (String) -> Unit = {},
     onAlertsClick: (String) -> Unit,
     onContactClick: (String) -> Unit,
+    onRetry: () -> Unit,
+    onError: () -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
     val bottomState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
@@ -93,7 +95,7 @@ fun ItemDetailsScreen(
             LoadingContent(
                 empty = when (uiState) {
                     is ItemDetailsUiState.NoItem -> uiState.isLoading
-                    else -> false
+                    is ItemDetailsUiState.HasItem -> false
                 },
                 emptyContent = { FullScreenLoading() },
                 loading = uiState.isLoading,
@@ -152,17 +154,17 @@ fun ItemDetailsScreen(
                                 }
                             }
                             is ItemDetailsUiState.NoItem -> {
-//                            if (uiState.errorMessages.isEmpty()) {
-//                                // if there are no posts, and no error, let the user refresh manually
-//                                PButton(
-//                                    modifier = Modifier.fillMaxWidth(),
-//                                    text = stringResource(id = R.string.tap_to_load_content),
-//                                    onClick = onRefreshDetails,
-//                                )
-//                            } else {
-//                                // there's currently an error showing, don't show any content
-//                                Box(contentModifier.fillMaxSize()) { /* empty screen */ }
-//                            }
+                                if (uiState.errorMessages.isEmpty()) {
+                                    // if there are no posts, and no error, let the user refresh manually
+                                    PButton(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        text = stringResource(id = R.string.tap_to_load_content),
+                                        onClick = onRefreshDetails,
+                                    )
+                                } else {
+                                    // there's currently an error showing, don't show any content
+                                    Box(contentModifier.fillMaxSize()) { /* empty screen */ }
+                                }
                             }
                         }
                     }
@@ -172,34 +174,36 @@ fun ItemDetailsScreen(
     }
 
     // Process one error message at a time and show them as Snackbars in the UI
-//    if (uiState.errorMessages.isNotEmpty()) {
-//        // Remember the errorMessage to display on the screen
-//        val errorMessage = remember(uiState) { uiState.errorMessages[0] }
-//
-//        // Get the text to show on the message from resources
-//        val errorMessageText: String = stringResource(errorMessage.messageId)
-//        val retryMessageText = stringResource(id = R.string.retry)
-//
-//        // If onRefreshPosts or onErrorDismiss change while the LaunchedEffect is running,
-//        // don't restart the effect and use the latest lambda values.
-//        val onRefreshPostsState by rememberUpdatedState({ })
-//        val onErrorDismissState by rememberUpdatedState({ })
-//
-//        // Effect running in a coroutine that displays the Snackbar on the screen
-//        // If there's a change to errorMessageText, retryMessageText or scaffoldState,
-//        // the previous effect will be cancelled and a new one will start with the new values
-//        LaunchedEffect(errorMessageText, retryMessageText, scaffoldState) {
-//            val snackbarResult = scaffoldState.snackbarHostState.showSnackbar(
-//                message = errorMessageText,
-//                actionLabel = retryMessageText
-//            )
-//            if (snackbarResult == SnackbarResult.ActionPerformed) {
-//                onRefreshPostsState()
-//            }
-//            // Once the message is displayed and dismissed, notify the ViewModel
-//            onErrorDismissState()
-//        }
-//    }
+    if (uiState.errorMessages.isNotEmpty()) {
+        // Remember the errorMessage to display on the screen
+        val errorMessage = remember(uiState) { uiState.errorMessages[0] }
+
+        // Get the text to show on the message from resources
+        val errorMessageText: String = stringResource(errorMessage.messageId)
+        val retryMessageText = stringResource(id = R.string.retry)
+
+        // If onRefreshPosts or onErrorDismiss change while the LaunchedEffect is running,
+        // don't restart the effect and use the latest lambda values.
+        val onRefreshPostsState by rememberUpdatedState({ })
+        val onErrorDismissState by rememberUpdatedState({ })
+
+        // Effect running in a coroutine that displays the Snackbar on the screen
+        // If there's a change to errorMessageText, retryMessageText or scaffoldState,
+        // the previous effect will be cancelled and a new one will start with the new values
+        LaunchedEffect(errorMessageText, retryMessageText, scaffoldState) {
+            val snackbarResult = scaffoldState.snackbarHostState.showSnackbar(
+                message = errorMessageText,
+                actionLabel = retryMessageText
+            )
+            if (snackbarResult == SnackbarResult.ActionPerformed) {
+                onRefreshPostsState()
+                onRetry()
+            }
+            // Once the message is displayed and dismissed, notify the ViewModel
+            onErrorDismissState()
+            onError()
+        }
+    }
 }
 
 /**
@@ -345,6 +349,8 @@ fun ItemDetailsPreview() {
             onSortChanged = {},
             onAlertsClick = {},
             onContactClick = {},
+            onRetry = {},
+            onError = {}
         )
     }
 }
@@ -374,6 +380,8 @@ fun ItemDetailsPOLinesTabPreview() {
             onSortChanged = {},
             onAlertsClick = {},
             onContactClick = {},
+            onRetry = {},
+            onError = {}
         )
     }
 }
