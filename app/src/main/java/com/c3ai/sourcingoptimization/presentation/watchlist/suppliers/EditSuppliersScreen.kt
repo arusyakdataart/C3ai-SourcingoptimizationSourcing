@@ -47,7 +47,7 @@ fun EditSuppliersScreen(
     scaffoldState: ScaffoldState,
     uiState: EditSuppliersUiState,
     itemId: String,
-    suppliers: List<String>,
+    suppliers: MutableList<String>,
     onRefreshDetails: () -> Unit,
     onSearchInputChanged: (String) -> Unit,
     onSupplierClick: (String) -> Unit,
@@ -89,6 +89,10 @@ fun EditSuppliersScreen(
                 when (uiState) {
                     is EditSuppliersUiState.HasData -> {
                         val listState = rememberLazyListState()
+                        if (suppliers.isEmpty()) {
+                            val size = if (uiState.suppliers.size >= 5) 5 else uiState.suppliers.size
+                            suppliers.addAll(uiState.suppliers.map { it.id }.subList(0, size))
+                        }
                         if (checkedSuppliers.isEmpty()) {
                             uiState.suppliers.forEach {
                                 if (suppliers.contains(it.id)) {
