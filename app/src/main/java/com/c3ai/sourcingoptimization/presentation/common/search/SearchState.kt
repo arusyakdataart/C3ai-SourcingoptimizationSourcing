@@ -1,12 +1,12 @@
 package com.c3ai.sourcingoptimization.presentation.common.search
 
+import android.util.Log
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.paging.PagingData
 import com.c3ai.sourcingoptimization.data.network.converters.C3SearchItemJsonDeserializer
 import com.c3ai.sourcingoptimization.domain.model.*
 import com.c3ai.sourcingoptimization.presentation.common.search.SearchDisplay.*
@@ -208,14 +208,6 @@ class SearchState<R : Any, S> internal constructor(
      */
     var selectedFilters by mutableStateOf(selected)
 
-    internal var searchResultsFlow: Flow<PagingData<R>>? by mutableStateOf(null)
-    /**
-     * Results of a search action. If this list is empty [searchDisplay] is
-     * [SearchDisplay.NoResults] state otherwise in [SearchDisplay.Results] state.
-     */
-    val searchResults: Flow<PagingData<R>>?
-        get() = searchResultsFlow
-
     /**
      * Last query text, it might be used to prevent doing search when current query and previous
      * query texts are same.
@@ -243,7 +235,7 @@ class SearchState<R : Any, S> internal constructor(
             !opened && query.text.isEmpty() -> InitialResults
             opened && query.text.isEmpty() -> Suggestions
             searchInProgress -> SearchInProgress
-            !searchInProgress && searchResults != null -> {
+            !searchInProgress -> {
                 previousQueryText = query.text
                 NoResults
             }
@@ -268,9 +260,9 @@ class SearchState<R : Any, S> internal constructor(
 
 @Composable
 fun SearchState<SearchItem, RecentSearchItem>.rememberSaveableLazyListState(): LazyListState {
+    Log.e("firstVisibleItemIndex", firstVisibleItemIndex.toString())
     lazyListState = rememberLazyListState(firstVisibleItemIndex, firstVisibleItemScrollOffset)
     return lazyListState as LazyListState
-
 }
 
 /**
@@ -334,6 +326,7 @@ private fun StateSaver(): Saver<SearchState<SearchItem, RecentSearchItem>, Strin
         .create()
     return Saver(
         save = {
+            Log.e("save.firstVisible", it.lazyListState?.firstVisibleItemIndex.toString())
             val state = SearchStateSaveable(
                 suggestions = it.suggestions,
                 filters = it.filters,
@@ -348,6 +341,7 @@ private fun StateSaver(): Saver<SearchState<SearchItem, RecentSearchItem>, Strin
         },
         restore = { json ->
             val state = gson.fromJson(json, SearchStateSaveable::class.java)
+            Log.e("restore.firstVisible", state.firstVisibleItemIndex.toString())
             SearchState(
                 suggestions = state.suggestions,
                 filters = state.filters,

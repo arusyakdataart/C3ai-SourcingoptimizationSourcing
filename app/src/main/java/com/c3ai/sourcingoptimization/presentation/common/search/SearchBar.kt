@@ -61,7 +61,6 @@ fun SearchBar(
     val listState = state.rememberSaveableLazyListState()
     val keyboardController = LocalSoftwareKeyboardController.current
 
-
     val onSearch: (String, List<Int>?) -> Unit = { query, filters ->
         state.apply {
             if (query.isNotEmpty()) {
@@ -79,7 +78,7 @@ fun SearchBar(
             }
         }
     }
-    val lazyItems = state.searchResults?.collectAsLazyPagingItems()
+    val lazyItems = viewModel.collectAsLazyPagingItems()
     Surface(
         color = Color.Transparent,
         elevation = 6.dp
@@ -95,9 +94,7 @@ fun SearchBar(
                     ),
             ) {
                 SearchIconButton(selected = fixed || state.opened) {
-                    state.query = TextFieldValue("")
-                    state.searchResultsFlow = null
-                    state.opened = false
+                    viewModel.close()
                     onStateChanged(false)
                     onBackClick()
                 }
@@ -105,7 +102,9 @@ fun SearchBar(
                     query = state.query,
                     onQueryChange = {
                         state.query = it
-                        if (it.text.isEmpty()) state.searchResultsFlow = null
+                        if (it.text.isEmpty()) {
+                            viewModel.close()
+                        }
                     },
                     onSearchFocusChange = {
                         if (it) {
