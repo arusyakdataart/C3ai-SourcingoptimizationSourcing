@@ -39,7 +39,7 @@ fun EditSuppliersRoute(
         scaffoldState = scaffoldState,
         uiState = uiState,
         itemId = itemId ?: "",
-        suppliers = suppliers ?: listOf(),
+        suppliers = suppliers?.toMutableList() ?: mutableListOf(),
         onRefreshDetails = { viewModel.refreshDetails(page = 0) },
         onSearchInputChanged = { viewModel.onEvent(EditSuppliersEvent.OnSearchInputChanged(it)) },
         onSupplierClick = { navController.navigateToSupplierDetails(it)},

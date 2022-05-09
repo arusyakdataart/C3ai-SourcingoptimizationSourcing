@@ -56,10 +56,10 @@ class SearchViewModel @Inject constructor(
     }
 
     fun search() {
+        searchResults = null
         searchResultsFlow = Pager(PagingConfig(BIG_PAGINATED_RESPONSE_LIMIT)) {
             pagingSource
         }.flow
-        searchResults = null
     }
 
     @Composable
@@ -70,10 +70,14 @@ class SearchViewModel @Inject constructor(
         return searchResults
     }
 
-    fun close() {
+    fun clear() {
         state?.query = TextFieldValue("")
-        state?.opened = false
         searchResultsFlow = null
         searchResults = null
+    }
+
+    fun close() {
+        clear()
+        state?.opened = false
     }
 }

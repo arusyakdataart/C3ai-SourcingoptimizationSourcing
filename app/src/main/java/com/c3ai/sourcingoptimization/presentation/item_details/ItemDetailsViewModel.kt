@@ -630,6 +630,7 @@ class ItemDetailsViewModel @Inject constructor(
                 is ItemDetailsEvent.OnDateRangeSelected -> {
                     var saStartDate: String = formatDate(date = getMonthBackDate(3))
                     val saEndDate: String = formatDate(date = getCurrentDate())
+                    state.selectedChartsCrosshairIndex = -1
                     when (event.selected) {
                         1 -> {
                             saStartDate = formatDate(date = getMonthBackDate(6))

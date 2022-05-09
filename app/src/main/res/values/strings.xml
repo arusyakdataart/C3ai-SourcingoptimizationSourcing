@@ -127,6 +127,7 @@
     <string name="alert_for_">Alert for %s</string>
     <string name="flagged">Flagged</string>
     <string name="search_results">Search results</string>
+    <string name="cd_filters">Filters</string>
     <array name="sort_po">
         <item>Total Cost</item>
         <item>Unit Price</item>

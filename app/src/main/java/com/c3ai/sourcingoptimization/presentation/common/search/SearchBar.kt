@@ -103,7 +103,7 @@ fun SearchBar(
                     onQueryChange = {
                         state.query = it
                         if (it.text.isEmpty()) {
-                            viewModel.close()
+                            viewModel.clear()
                         }
                     },
                     onSearchFocusChange = {

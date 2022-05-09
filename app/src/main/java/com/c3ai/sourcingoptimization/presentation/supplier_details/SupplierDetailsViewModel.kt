@@ -1,7 +1,6 @@
 package com.c3ai.sourcingoptimization.presentation.supplier_details
 
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.c3ai.sourcingoptimization.R
 import com.c3ai.sourcingoptimization.data.C3Result
@@ -115,6 +114,7 @@ private data class SupplierDetailsViewModelState(
 @HiltViewModel
 class SuppliersDetailsViewModel @Inject constructor(
     settingsProvider: C3AppSettingsProvider,
+    private val savedStateHandle: SavedStateHandle,
     private val useCases: SuppliersDetailsUseCases
 ) : ViewModelWithPagination() {
 
@@ -146,8 +146,10 @@ class SuppliersDetailsViewModel @Inject constructor(
             viewModelState.update { it.copy(isLoading = true) }
         }
 
+        val supplierId = savedStateHandle.get<String>("supplierId") ?: "supplier0"
+
         viewModelScope.launch {
-            val itemsResult = useCases.getSupplierDetails("supplier0")
+            val itemsResult = useCases.getSupplierDetails(supplierId)
             viewModelState.update {
                 when (itemsResult) {
                     is C3Result.Success -> it.copy(
@@ -188,9 +190,11 @@ class SuppliersDetailsViewModel @Inject constructor(
             viewModelState.update { it.copy(isLoading = true) }
         }
 
+        val supplierId = savedStateHandle.get<String>("supplierId") ?: "supplier0"
+
         viewModelScope.launch {
             val result =
-                useCases.getPOsForSupplier("supplier0", order, page * PAGINATED_RESPONSE_LIMIT)
+                useCases.getPOsForSupplier(supplierId, order, page * PAGINATED_RESPONSE_LIMIT)
             viewModelState.update {
                 when (result) {
                     is C3Result.Success -> it.copy(
@@ -223,9 +227,11 @@ class SuppliersDetailsViewModel @Inject constructor(
             viewModelState.update { it.copy(isLoading = true) }
         }
 
+        val supplierId = savedStateHandle.get<String>("supplierId") ?: "supplier0"
+
         viewModelScope.launch {
             val result =
-                useCases.getSuppliedItems("supplier0", order, page * PAGINATED_RESPONSE_LIMIT)
+                useCases.getSuppliedItems(supplierId, order, page * PAGINATED_RESPONSE_LIMIT)
             viewModelState.update {
                 when (result) {
                     is C3Result.Success -> it.copy(

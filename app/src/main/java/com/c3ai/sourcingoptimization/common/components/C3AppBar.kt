@@ -101,17 +101,19 @@ fun C3SearchAppBar(
             showLogo = showLogo,
             navigationIcon = navigationIcon,
             actions = {
-                actions()
                 AnimatedVisibility(
                     visible = !oppened,
                     enter = scaleIn(animationSpec = spring(stiffness = Spring.StiffnessLow)),
                     exit = scaleOut(animationSpec = spring(stiffness = Spring.StiffnessLow)),
                 ) {
-                    IconButton(onClick = { oppened = true }) {
-                        Icon(
-                            imageVector = Icons.Filled.Search,
-                            contentDescription = stringResource(R.string.cd_search)
-                        )
+                    Row {
+                        actions()
+                        IconButton(onClick = { oppened = true }) {
+                            Icon(
+                                imageVector = Icons.Filled.Search,
+                                contentDescription = stringResource(R.string.cd_search)
+                            )
+                        }
                     }
                 }
             },

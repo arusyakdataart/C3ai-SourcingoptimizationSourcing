@@ -6,10 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDownward
-import androidx.compose.material.icons.filled.ArrowUpward
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Sort
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -33,7 +30,7 @@ fun AlertsActions(
     Row {
         IconButton(onClick = { sortMenuExpanded = true }) {
             Icon(
-                imageVector = Icons.Filled.Sort,
+                imageVector = Icons.Default.Sort,
                 contentDescription = stringResource(R.string.cd_sort_menu)
             )
         }
@@ -93,8 +90,8 @@ fun AlertsActions(
             }
         ) {
             Icon(
-                imageVector = Icons.Filled.Settings,
-                contentDescription = stringResource(R.string.cd_settings_menu)
+                imageVector = Icons.Default.FilterAlt,
+                contentDescription = stringResource(R.string.cd_filters)
             )
         }
     }
